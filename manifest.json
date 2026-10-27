@@ -1,0 +1,10 @@
+{
+  "name": "Clown Game - Game of Clown",
+  "short_name": "Clown Game",
+  "description": "A Game for Everybody",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}

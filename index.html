@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clown Game - Game of Clown</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="./manifest.json">
 </head>
 <body>
     <div id="red-flash-overlay"></div>
@@ -88,5 +89,22 @@
 
     <script src="script.js"></script>
     <!-- If your fish array is defined in a separate file, load that file before script.js. -->
+
+
+    <script>
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+            navigator.serviceWorker.register("./service-worker.js")
+                .then(registration => {
+                    console.log("Offline support registered:", registration.scope);
+                })
+                .catch(error => {
+                    console.error("Offline support registration failed:", error);
+                });
+        });
+    }
+    </script>
+
+
 </body>
 </html>
