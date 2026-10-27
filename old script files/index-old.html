@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Clown Game - Game of Clown</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<audio id="background-music-1"></audio>
+<audio id="background-music-2"></audio>
+
+
+<body>
+
+    <div id="red-flash-overlay"></div>
+
+    <audio id="background-music-1"></audio>
+    <audio id="background-music-2"></audio>
+
+    <div id="background-fish-container"></div>
+
+    <!-- HOME SCREEN -->
+    <section id="home-screen" class="game-container">
+        <h1>Clown Game</h1>
+        <p>Game of Clown</p>
+        <button id="play-button">Play</button>
+        <button id="guide-button">Metas of Clown</button>
+    </section>
+
+    
+
+
+
+
+
+
+<div id="challenge-screen" hidden>
+
+    <!-- LEFT COLUMN: SPECIES SELECTION -->
+    <section id="clowns-panel">
+        <h2>Clowns</h2>
+
+        <div class="species-actions">
+            <button type="button" id="select-all-species">
+                    Select All
+            </button>
+
+            <button type="button" id="deselect-all-species">
+                    Deselect All
+            </button>
+        </div>
+
+        <div id="species-checkbox-list"></div>
+    </section>
+
+    <!-- RIGHT COLUMN: CHALLENGES -->
+    <section id="challenges-panel">
+        <h2>Modify your Clown Game!</h2>
+
+        <!-- Keep your existing challenge checkboxes here -->
+        <label>
+            <input type="checkbox" id="blink-checkbox">
+                Blink Mode, Clown Hide
+        </label>
+
+        <label>
+            <input type="checkbox" id="upside-checkbox">
+                Upside Down, Down le Clown
+        </label>
+
+        <label>
+            <input type="checkbox" id="reverse-checkbox">
+                Colour Morph, Morpho colour Clown
+        </label>
+    </section>
+
+
+    <div class="challenge-buttons">
+        <button type="button" id="start-game-button">Start Game</button>
+        <button type="button" class="back-button">Back</button>
+    </div>
+
+
+
+</div>
+
+
+    <!-- SPECIES GUIDE -->
+    <section id="guide-screen" class="game-container" hidden>
+        <h1>Metas of Clown</h1>
+        <p>Learn how to tell Clown apart</p>
+
+        <select id="guide-species-select"></select>
+
+        <div id="guide-content">
+            <p>Select a species of Clown</p>
+        </div>
+
+        <button class="back-button">Back</button>
+    </section>
+
+    <!-- EXISTING GAME -->
+    <main class="game-container" id="game-screen" hidden>
+
+
+        <h1>Clown Game - Game of Clown</h1>
+        <p class="instructions">Identify the Clown Game</p>
+
+        <div class="score-container">
+            <span>Score: <strong id="score">0</strong></span>
+            <span>Question: <strong id="question-number">1</strong></span>
+        </div>
+
+        <div class="image-container">
+            <img id="fish-image" src="" alt="Clownfish to identify">
+        </div>
+
+        <div class="guess-container">
+            <label for="species-select">What Clown?</label>
+            <select id="species-select"></select>
+            <button id="submit-button">Guess</button>
+        </div>
+
+        <div id="result" class="result"></div>
+        <button id="next-button" class="next-button">Next Clown</button>
+        <div id="streak">🔥 Streak: <span id="streak-count">0</span></div>
+
+        <button id="return-home-button">Back to Home</button>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
+
+<audio id="background-music" loop>
+    <source src="music/cggocmusic.mp3" type="audio/mpeg">
+</audio>

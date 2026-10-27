@@ -1,0 +1,7 @@
+# Windows and editor clutter
+Thumbs.db
+Desktop.ini
+.vscode/
+
+# Temporary operating-system files
+.DS_Store

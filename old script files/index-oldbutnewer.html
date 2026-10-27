@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clown Game - Game of Clown</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="red-flash-overlay"></div>
+    <audio id="background-music-1"></audio>
+    <audio id="background-music-2"></audio>
+    <div id="background-fish-container"></div>
+
+    <section id="home-screen" class="game-container">
+        <h1>Clown Game</h1>
+        <p>Game of Clown</p>
+        <button id="play-button">Play</button>
+        <button id="guide-button">Metas of Clown</button>
+        <button id="cluny-court-button">Cluny Court</button>
+    </section>
+
+    <div id="challenge-screen" class="game-container challenge-layout" hidden>
+        <section id="clowns-panel">
+            <h2>Clowns</h2>
+            <div class="species-actions">
+                <button type="button" id="select-all-species">Select All</button>
+                <button type="button" id="deselect-all-species">Deselect All</button>
+            </div>
+            <div id="species-checkbox-list"></div>
+        </section>
+        <section id="challenges-panel">
+            <h2>Modify your Clown Game!</h2>
+            <label><input type="checkbox" id="blink-checkbox"> Blink Mode, Clown Hide</label>
+            <label><input type="checkbox" id="upside-checkbox"> Upside Down, Down le Clown</label>
+            <label><input type="checkbox" id="reverse-checkbox"> Colour Morph, Morpho colour Clown</label>
+            <label><input type="checkbox" id="corrupt-checkbox"> Corrupt Clown — shuffle the image tiles</label>
+        </section>
+        <div class="challenge-buttons">
+            <button type="button" id="start-game-button">Start Game</button>
+            <button type="button" class="back-button">Back</button>
+        </div>
+    </div>
+
+    <section id="guide-screen" class="game-container" hidden>
+        <h1>Metas of Clown</h1><p>Learn how to tell Clown apart</p>
+        <select id="guide-species-select"></select>
+        <div id="guide-content"><p>Select a species of Clown</p></div>
+        <button class="back-button">Back</button>
+    </section>
+
+    <main class="game-container" id="game-screen" hidden>
+        <h1>Clown Game - Game of Clown</h1><p class="instructions">Identify the Clown Game</p>
+        <div class="score-container"><span>Score: <strong id="score">0</strong></span><span>Question: <strong id="question-number">1</strong></span></div>
+        <div class="image-container"><img id="fish-image" src="" alt="Clownfish to identify"></div>
+        <div class="guess-container"><label for="species-select">What Clown?</label><select id="species-select"></select><button id="submit-button">Guess</button></div>
+        <div id="result" class="result"></div><button id="next-button" class="next-button">Next Clown</button>
+        <div id="streak">🔥 Streak: <span id="streak-count">0</span></div>
+        <button id="return-home-button">Back to Home</button>
+    </main>
+
+    <section id="cluny-lobby" class="game-container cluny-lobby" hidden>
+        <h1>Cluny Court</h1>
+        <p>Choose your opponent, read their profile, then choose a duel.</p>
+        <div id="cluny-bot-grid" class="cluny-bot-grid"></div>
+        <div id="cluny-bot-info" class="cluny-bot-info"><p>Select a Cluny Court challenger.</p></div>
+        <div class="duel-mode-buttons">
+            <button type="button" data-duel-mode="classic" disabled>Classic</button>
+            <button type="button" data-duel-mode="battle" disabled>Battle</button>
+            <button type="button" data-duel-mode="avnj" disabled>AVNJ</button>
+        </div>
+        <button type="button" id="cluny-back-button" class="cluny-back-button">Back to Home</button>
+    </section>
+
+    <section id="duel-screen" class="game-container duel-screen" hidden>
+        <div class="duel-health-row">
+            <div class="health-card"><strong>You</strong><div class="health-track"><div id="duel-player-health" class="health-fill"></div></div><div id="duel-player-health-text"></div><div id="duel-player-hearts" class="hearts"></div></div>
+            <div class="health-card"><strong id="duel-opponent-name">Opponent</strong><div class="health-track"><div id="duel-bot-health" class="health-fill bot-fill"></div></div><div id="duel-bot-health-text"></div><div id="duel-bot-hearts" class="hearts"></div></div>
+        </div>
+        <h1>Cluny Court</h1><p id="duel-round-message">Get ready!</p>
+        <div id="duel-countdown" class="duel-countdown" hidden></div>
+        <div class="duel-image-container"><img id="duel-fish-image" alt="Clownfish to identify"></div>
+        <div class="guess-container duel-guess-container"><label for="duel-species-select">What Clown?</label><select id="duel-species-select"></select><button id="duel-submit-button" disabled>Lock In</button></div>
+        <div id="duel-timer" class="duel-timer"></div><div id="duel-reveal" class="duel-reveal"></div>
+        <button type="button" id="duel-exit-button">Leave Duel</button>
+        <div id="duel-reveal-screen" class="duel-reveal-screen" hidden></div>
+    </section>
+
+    <script src="script.js"></script>
+    <!-- If your fish array is defined in a separate file, load that file before script.js. -->
+</body>
+</html>

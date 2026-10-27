@@ -1,0 +1,400 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: linear-gradient(
+        180deg,
+        #0077b6,
+        #023e8a
+    );
+
+    color: white;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 800px;
+
+    background: rgba(255, 255, 255, 0.95);
+
+    color: #222;
+
+    border-radius: 20px;
+
+    padding: 30px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+    text-align: center;
+
+    position: relative;
+
+    z-index: 2;
+}
+
+h1 {
+    margin-top: 0;
+    margin-bottom: 5px;
+
+    font-size: 36px;
+
+    color: #023e8a;
+}
+
+.instructions {
+    margin-top: 5px;
+    color: #555;
+}
+
+.score-container {
+    display: flex;
+    justify-content: space-between;
+
+    margin: 25px 0 15px;
+
+    font-size: 18px;
+}
+
+.image-container {
+    width: 100%;
+
+    background: #eee;
+
+    border-radius: 15px;
+
+    overflow: hidden;
+
+    margin-bottom: 25px;
+}
+
+#fish-image {
+    display: block;
+
+    width: 100%;
+
+    max-height: 500px;
+
+    object-fit: contain;
+}
+
+.guess-container {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    align-items: center;
+}
+
+.guess-container select {
+    flex: 1;
+}
+
+.guess-container button {
+    flex: 0 0 auto;
+}
+
+.guess-container label {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+select {
+    width: 100%;
+
+    padding: 14px;
+
+    font-size: 16px;
+
+    border: 2px solid #0077b6;
+
+    border-radius: 10px;
+
+    background: white;
+
+    cursor: pointer;
+}
+
+button {
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 14px 20px;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+#submit-button {
+    background: #0077b6;
+    color: white;
+}
+
+#submit-button:hover {
+    background: #005f8f;
+}
+
+.next-button {
+    background: #00a896;
+    color: white;
+
+    margin-top: 15px;
+
+    display: none;
+
+    width: 100%;
+}
+
+.next-button:hover {
+    background: #008f7a;
+}
+
+.result {
+    margin-top: 20px;
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+    min-height: 30px;
+}
+
+.correct {
+    color: #008000;
+}
+
+.incorrect {
+    color: #d00000;
+}
+
+@media (max-width: 600px) {
+
+    .game-container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    .score-container {
+        font-size: 16px;
+    }
+}
+
+#streak {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+
+
+
+#background-fish-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    overflow: hidden;
+
+    pointer-events: none;
+
+    z-index: 1;
+}
+
+.background-fish {
+    position: absolute;
+
+    display: block;
+
+    width: 120px;
+    height: auto;
+
+    opacity: 0.40;
+
+    pointer-events: none;
+    user-select: none;
+}
+
+
+[hidden] {
+    display: none !important;
+}
+
+#home-screen,
+#challenge-screen,
+#guide-screen {
+    max-width: 700px;
+}
+
+#home-screen button,
+#challenge-screen button,
+#guide-screen button {
+    margin: 10px;
+    background: #0077b6;
+    color: white;
+}
+
+#challenge-screen label {
+    display: block;
+    margin-top: 18px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#challenge-screen input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+}
+
+.challenge-description {
+    margin: 5px 0;
+    color: #555;
+}
+
+#guide-content {
+    margin-top: 20px;
+}
+
+#guide-content img {
+    width: 100%;
+    max-height: 350px;
+    object-fit: contain;
+    border-radius: 12px;
+    margin: 10px 0;
+}
+
+#guide-content p {
+    line-height: 1.6;
+}
+
+#return-home-button {
+    margin-top: 20px;
+}
+
+
+
+#challenge-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(220px, 1fr);
+    gap: 24px;
+    text-align: left;
+    align-items: start;
+}
+
+#clowns-panel,
+#challenges-panel {
+    min-width: 0;
+}
+
+#clowns-panel h2,
+#challenges-panel h2 {
+    font-weight: 800;
+    margin-top: 0;
+}
+
+#species-checkbox-list {
+    max-height: 420px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.species-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 2px;
+    cursor: pointer;
+}
+
+.species-option input {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+}
+
+.species-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.species-actions button,
+.challenge-buttons button {
+    padding: 9px 14px;
+    cursor: pointer;
+}
+
+#challenges-panel label {
+    display: block;
+    margin: 14px 0;
+}
+
+.challenge-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+@media (max-width: 650px) {
+    #challenge-layout {
+        grid-template-columns: 1fr;
+    }
+
+    #species-checkbox-list {
+        max-height: 280px;
+    }
+}
+
+
+
+
+
+
+
+/* Transparent red overlay covering the entire screen */
+#red-flash-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 0, 0, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 99999;
+}
+
+/* One red flash */
+#red-flash-overlay.flash-active {
+    animation: redOverlayFlash 0.4s ease-out;
+}
+
+@keyframes redOverlayFlash {
+    0%   { opacity: 0; }
+    30%  { opacity: 1; }
+    100% { opacity: 0; }
+}
