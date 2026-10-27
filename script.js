@@ -6861,7 +6861,7 @@ const clunyBots = [
 },
 {
     name: "Feces",
-    image:"bot-images/feces.png",
+    image:"bot-images/Feces.png",
     accuracy: 48,
     speed: "faster",
     description: "A little cutie cup of Joy!.",
