@@ -5178,7 +5178,7 @@ let currentFishIndex = 0;
 // MUSIC SETTINGS
 // ================================
 
-const musicVolume = 0.5;
+const musicVolume = 0.35;
 
 // true = evolving tracks
 // false = one continuous looping track
@@ -5619,7 +5619,7 @@ const ambientSounds = [
     "breakfx/cggocbreak2.mp3"
 ];
 
-const ambientVolume = 0.016;
+const ambientVolume = 0.035;
 
 // Random interval between 2 and 4 minutes
 const ambientMinDelay = 180000; // 3 minutes normally at 180,000
@@ -6307,6 +6307,19 @@ let upsideDownMode = false;
 let reverseColoursMode = false;
 
 document.getElementById("play-button").onclick = () => {
+    // Challenge modifiers start unchecked whenever this screen is opened.
+    ["blink-checkbox", "upside-checkbox", "reverse-checkbox", "corrupt-checkbox"]
+        .forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox) checkbox.checked = false;
+        });
+
+    blinkMode = false;
+    upsideDownMode = false;
+    reverseColoursMode = false;
+    corruptClownEnabled = false;
+    removeCorruptTiles();
+
     homeScreen.hidden = true;
     challengeScreen.hidden = false;
     guideScreen.hidden = true;
@@ -6409,15 +6422,31 @@ document.getElementById("start-game-button").onclick = function () {
 const guideSelect = document.getElementById("guide-species-select");
 const guideContent = document.getElementById("guide-content");
 
-//[...new Set(fish.map(f => f.species))]
-    //.sort((a, b) => a.localeCompare(b))
-    //.forEach(name => {
-        //const option = document.createElement("option");
-        //option.value = name;
-        //option.textContent = name;
-        //guideSelect.appendChild(option);
-    //});
+// Populate the guide dropdown with all species in the fish database.
+// Species without a written guide entry remain selectable and show the
+// existing message explaining that guide information has not been added yet.
+function populateGuideSpeciesDropdown() {
+    if (!guideSelect || !Array.isArray(fish)) return;
 
+    const names = [...new Set(fish.map(item => item.species))]
+        .sort((a, b) => a.localeCompare(b));
+
+    guideSelect.replaceChildren();
+    names.forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        guideSelect.appendChild(option);
+    });
+
+    // Open on a species that already has guide content when possible.
+    const firstGuideSpecies = Object.keys(clownfishGuide)
+        .sort((a, b) => a.localeCompare(b))
+        .find(name => names.includes(name));
+    if (firstGuideSpecies) guideSelect.value = firstGuideSpecies;
+}
+
+populateGuideSpeciesDropdown();
 
 function updateSpeciesDropdown() {
     const dropdown = document.getElementById("species-select");
@@ -6747,7 +6776,7 @@ const clunyBots = [
     {name:"Grandma Rosie", image:"bot-images/rosie.png", accuracy:65, speed:"slower", description:"Grandma just wants to have fun! That doesn't mean she won't call upon the Lord to help her win!", trivia:"Grandma Rosie says the white bars say it all about a Clown."},
     {name:"Archangel", image:"bot-images/archa.png", accuracy:82, speed:"faster", description:"Archangel knows a thing or two about Clowns, and despite his size, he can overwhelm some of his opponents!.", trivia:"Archangel loves hanging with his Whale Shark friends, not so much Clowns."},
     {name:"David Attenborough", image:"bot-images/thegoat.png", accuracy:90, speed:"normal", description:"Sir David Attenborough is one of the world's most loved Ecologist. Beating him would be like beating evolution!", trivia:"He can swiftly find little details that easily separate similar species."},
-    {name:"Max Verstappen", image:"bot-images/maxv.png", accuracy:73, speed:"faster", description:"Max believes that the quicker his guess, the quicker his victory.", trivia:"Max wants every game to be a pole position."},
+    {name:"Max Verstappen", image:"bot-images/maxv.png", accuracy:73, speed:"faster", minGuessTime: 0.45, maxGuessTime: 1.5, description:"Max believes that the quicker his guess, the quicker his victory.", trivia:"Max wants every game to be a pole position."},
     {name:"ViperAte", image:"bot-images/viperate.png", accuracy:94, speed:"slower", description:"ViperAte goes by the name Joshua. He prefers to take his time with guesses, and make his best educated guess.", trivia:"ViperAte specialises in Skunk Clowns."},
     {name:"Le Clown", image:"bot-images/leclown.png", accuracy:95, speed:"normal", description:"Le Clown is one of the best players in the Clown world, and has taken home the Clown Game Title in 2026! This doesn't mean he won't guess a Fake on Latezonatus from time to time.", trivia:"Le Clown treats every round like a grand final."},
     {name:"Auntie Anna", image:"bot-images/anna.png", accuracy:60, speed:"normal", description:"A sturgeon who enjoys the occasional Clown Game.", trivia:"She is surprisingly good at Ocellaris and Percula."},
@@ -6763,7 +6792,7 @@ const clunyBots = [
         name: "Clark E.",
         image:"bot-images/coolacanth.png",
         accuracy: 88,
-        speed: "faster",
+        speed: "faster", minGuessTime: 0.45, maxGuessTime: 1.5,
         description: "Clark E. is an experienced player in Clown Game, and will not hesitate to put you in your place within the Cluny Court.",
         trivia: "Clark E. likes to put the pressure on by guessing quickly! Don't panic when he does this.",
         speciesAccuracy: {
@@ -6784,7 +6813,7 @@ const clunyBots = [
         name: "KJ Daddy",
         image:"bot-images/gay1gay2.png",
         accuracy: 12,
-        speed: "faster",
+        speed: "faster", minGuessTime: 0.45, maxGuessTime: 1.5,
         description: "Daddy knows just about nothing when it comes to Clowns, so if you can somehow lose to him, you should retire.",
         trivia: "He just wants to get his games over with."
     },
@@ -6890,10 +6919,10 @@ let duelTimeout = null;
 let duelBotTimeout = null;
 let duelRoundDeadline = null;
 let duelRoundNumber = 0;
-let duelPlayerHP = 7;
-let duelBotHP = 7;
-let duelPlayerMaxHP = 7;
-let duelBotMaxHP = 7;
+let duelPlayerHP = 5;
+let duelBotHP = 5;
+let duelPlayerMaxHP = 5;
+let duelBotMaxHP = 5;
 let duelPlayerMultiplierStacks = 0;
 let duelBotMultiplierStacks = 0;
 let duelAudio = null;
@@ -6917,7 +6946,7 @@ function playDuelBell() {
 
     const bell = new Audio("duelsmusic/bell-ring.mp3");
 
-    bell.volume = 0.11;
+    bell.volume = 0.12;
 
     bell.play().catch(error => {
         console.warn("Could not play duel bell:", error);
@@ -6931,7 +6960,7 @@ function playDuelBell() {
 
 function playDuelCountdownSound() {
     const sound = new Audio("duelsmusic/countdown.mp3");
-    sound.volume = 0.75;
+    sound.volume = 0.32;
 
     sound.play().catch(error => {
         console.warn("Could not play duel countdown sound:", error);
@@ -6941,7 +6970,7 @@ function playDuelCountdownSound() {
 
 function playDuelHealthLossSound() {
     const sound = new Audio("duelsmusic/losehealth.mp3");
-    sound.volume = 0.45;
+    sound.volume = 0.28;
 
     sound.play().catch(error => {
         console.warn("Could not play health-loss sound:", error);
@@ -7012,7 +7041,7 @@ function playClunyBotVoiceLine(bot, wasCorrect) {
         voiceLines[Math.floor(Math.random() * voiceLines.length)];
 
     const voice = new Audio(selectedVoiceLine);
-    voice.volume = 0.4;
+    voice.volume = 0.28;
 
     voice.play().catch(error => {
         console.warn("Could not play Cluny bot voice line:", error);
@@ -7042,7 +7071,7 @@ function playOhnepixelVoiceLine(playerCorrect, botCorrect) {
         voiceLines[Math.floor(Math.random() * voiceLines.length)];
 
     const voice = new Audio(filename);
-    voice.volume = 0.7;
+    voice.volume = 0.32;
 
     voice.play().catch(error => {
         console.warn("Could not play Ohnepixel voice line:", error);
@@ -7185,8 +7214,11 @@ async function restoreNormalMusic() {
 function startDuel(mode) {
     duelMode=mode; duelActive=true; window.duelActive=true; duelRoundActive=false; duelRoundNumber=0; duelPlayerMultiplierStacks=0; duelBotMultiplierStacks=0;
     document.getElementById("duel-opponent-name").textContent=selectedClunyBot.name;
-    duelPlayerMaxHP=mode==="classic"?7:(mode==="battle"?5000:6000);
-    duelBotMaxHP=duelPlayerMaxHP; duelPlayerHP=duelPlayerMaxHP; duelBotHP=duelBotMaxHP;
+    duelPlayerMaxHP = mode === "classic" ? 5 : (mode === "battle" ? 5000 : 6000);
+    duelBotMaxHP = duelPlayerMaxHP;
+    duelPlayerHP = duelPlayerMaxHP;
+    duelBotHP = duelBotMaxHP;
+    duelScreen.classList.toggle("duel-classic-mode", mode === "classic");
     duelPlayerAnswered=false; duelBotAnswered=false;
     clunyLobby.hidden=true; homeScreen.hidden=true; challengeScreen.hidden=true; guideScreen.hidden=true; gameScreen.hidden=true; duelScreen.hidden=false;
     duelImage.style.visibility="visible"; duelImage.style.display="block"; duelReveal.textContent=""; duelRoundMessage.textContent=`${selectedClunyBot.name} — ${mode.toUpperCase()}`;
@@ -7227,8 +7259,13 @@ function startDuelRound(skipCountdown = false) {
 
 function showDuelFish() {
     if(!duelActive)return;
-    const available=typeof shuffledFish!=="undefined"&&shuffledFish.length?shuffledFish:(typeof fish!=="undefined"?fish:[]);
-    if(!available.length){duelRoundMessage.textContent="No fish data found. Check that your fish database loads before script.js."; return;}
+    // Cluny Court always uses the full fish database, independent of the
+    // species selected for the regular single-player game.
+    const available = Array.isArray(fish) ? fish : [];
+    if (!available.length) {
+        duelRoundMessage.textContent = "No fish data found. Check that your fish database loads before script.js.";
+        return;
+    }
     duelCurrentFish=available[Math.floor(Math.random()*available.length)];
     duelImage.src=duelCurrentFish.image; duelImage.alt="Clownfish to identify"; duelImage.style.visibility="visible";
     if (duelSpeciesSelect.options.length) duelSpeciesSelect.selectedIndex = 0;
@@ -7246,13 +7283,20 @@ duelSubmitButton.style.pointerEvents = "auto";
     if(duelMode==="avnj") setTimeout(()=>{if(duelRoundActive)duelImage.style.visibility="hidden";},510);
     const accuracy=getBotAccuracy();
     duelBotCorrect=Math.random()*100<accuracy;
-   const speedBase = selectedClunyBot.speed === "faster"
-    ? 1.65
-    : (selectedClunyBot.speed === "slower" ? 1.35 : 1);
-
-// Add at least 1.2 seconds to every bot's reaction time.
-duelBotTime =
-    (0.7 + Math.random() * 3.6) * speedBase + 1.5;
+    if (
+        Number.isFinite(selectedClunyBot.minGuessTime) &&
+        Number.isFinite(selectedClunyBot.maxGuessTime)
+    ) {
+        // Custom reaction range for Max Verstappen, Clark E. and KJ Daddy.
+        duelBotTime = selectedClunyBot.minGuessTime +
+            Math.random() * (selectedClunyBot.maxGuessTime - selectedClunyBot.minGuessTime);
+    } else {
+        const speedBase = selectedClunyBot.speed === "faster"
+            ? 1.65
+            : (selectedClunyBot.speed === "slower" ? 1.35 : 1);
+        // Preserve the existing timing for the other bots.
+        duelBotTime = (0.7 + Math.random() * 3.6) * speedBase + 1.5;
+    }
     // The bot's decision is hidden; only its correctness is reported.
     duelBotTimeout=setTimeout(()=>{ if(duelRoundActive&&!duelBotAnswered){duelBotAnswered=true; onDuelBotAnswered();}},duelBotTime*1000);
     // Safety limit for a stalled round; the real 10-second deadline begins
@@ -7466,7 +7510,7 @@ function showFloatingDamage(target, text, healing=false) {
 }
 
 function showFloatingHealing(healthElement, amount) {
-    if (!healthElement) return;
+    if (!healthElement || !Number.isFinite(amount) || amount <= 0) return;
 
     const container = healthElement.parentElement;
     const healing = document.createElement("div");
@@ -7502,35 +7546,27 @@ function resolveDuelRound(timedOut=false) {
     duelReveal.textContent = `The Clown was: ${duelCurrentFish.species}`;
     duelReveal.textContent = `The Clown was: ${duelCurrentFish.species}`;
     duelRoundMessage.textContent=`You: ${playerCorrect?"CORRECT":"WRONG"} · ${selectedClunyBot.name}: ${botCorrect?"CORRECT":"WRONG"}`;
-    if (duelPlayerCorrect && duelBotCorrect) {
-    duelPlayerHP = Math.min(
-        duelPlayerMaxHP,
-        duelPlayerHP + 50
-    );
+    if (duelMode !== "classic" && duelPlayerCorrect && duelBotCorrect) {
+        // In non-Classic modes, both correct guesses restore up to 15 health.
+        // Display only the amount actually restored.
+        const playerHeal = Math.min(15, duelPlayerMaxHP - duelPlayerHP);
+        const botHeal = Math.min(15, duelBotMaxHP - duelBotHP);
+        duelPlayerHP += playerHeal;
+        duelBotHP += botHeal;
+        showFloatingHealing(duelPlayerHealth, playerHeal);
+        showFloatingHealing(duelBotHealth, botHeal);
 
-    duelBotHP = Math.min(
-        duelBotMaxHP,
-        duelBotHP + 50
-    );
+    } else if (duelMode !== "classic" && !duelPlayerCorrect && !duelBotCorrect) {
+        // In non-Classic modes, both wrong guesses restore up to 750 health.
+        const playerHeal = Math.min(750, duelPlayerMaxHP - duelPlayerHP);
+        const botHeal = Math.min(750, duelBotMaxHP - duelBotHP);
+        duelPlayerHP += playerHeal;
+        duelBotHP += botHeal;
+        showFloatingHealing(duelPlayerHealth, playerHeal);
+        showFloatingHealing(duelBotHealth, botHeal);
 
-    showFloatingHealing(duelPlayerHealth, 50);
-    showFloatingHealing(duelBotHealth, 50); 
-
-} else if (!duelPlayerCorrect && !duelBotCorrect) {
-    duelPlayerHP = Math.min(
-        duelPlayerMaxHP,
-        duelPlayerHP + 1200
-    );
-
-    duelBotHP = Math.min(
-        duelBotMaxHP,
-        duelBotHP + 1200
-    );
-
-    showFloatingHealing(duelPlayerHealth, 1200);
-    showFloatingHealing(duelBotHealth, 1200);
-
-    } else {
+    } else if (playerCorrect !== botCorrect) {
+        // Classic never heals: matching results cause no health change.
         const correctTime=playerCorrect?duelPlayerTime:duelBotTime;
         let damage=duelMode==="classic"?1:Math.max(100,Math.min(1500,1500-(2550/19.9)*(Math.max(0.1,correctTime)-0.1)));
         if(duelMode==="avnj") {

@@ -2,7 +2,7 @@
 // Generated from the project's CSV file list.
 // The first online visit downloads the listed game assets for offline use.
 
-const CACHE_NAME = "clown-game-offline-v1";
+const CACHE_NAME = "clown-game-offline-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -17,6 +17,7 @@ const ASSETS_TO_CACHE = [
   "manifest.json",
   "script.js",
   "style.css",
+  "cheese.png",
   "bot-images/anna.png",
   "bot-images/archa.png",
   "bot-images/aviva.png",
