@@ -6831,14 +6831,17 @@ const clunyBots = [
 
         sharedCorrectVoiceLines: [
         "duelsmusic/OhneYay1.mp3",
-        "duelsmusic/OhneYay2.mp3"
+        "duelsmusic/OhneYay2.mp3",
+        "duelsmusic/Ohnewin.mp3",
+        "duelsmusic/OhneYay5.mp3"
     ],
     sharedCorrectVoiceChance: 0.40,
 
     // Plays when Ohnepixel is correct but the player is wrong.
     botCorrectPlayerWrongVoiceLines: [
         "duelsmusic/OhneSmurf.mp3",
-        "duelsmusic/OhneYay3.mp3"
+        "duelsmusic/OhneYay3.mp3",
+        "duelsmusic/OhneWin2.mp3"
     ],
     botCorrectPlayerWrongVoiceChance: 1.00,
 
@@ -6847,6 +6850,7 @@ const clunyBots = [
         "duelsmusic/OhneVAS2.mp3",
         "duelsmusic/OhneVAS3.mp3",
         "duelsmusic/OhneVAS4.mp3",
+        "duelsmusic/OhneVAS6.mp3",
         "duelsmusic/OhneNein1.mp3",
         "duelsmusic/OhneYoWhy.mp3"
     ],
