@@ -5273,6 +5273,7 @@ let answered = false;
 
 
 let blinkMode = false;
+let hazelnutMode = false;
 const blinkDuration = 380;
 
 
@@ -5427,21 +5428,50 @@ function loadRandomFish() {
 
 
    newImage.onload = function() {
-    fishImage.src =
-        currentFish.image;
+    // Clown Hazelnut simulates a low-quality camera by reducing the
+    // image to a tiny resolution before displaying it enlarged.
+    if (hazelnutMode) {
+        const lowResCanvas = document.createElement("canvas");
+        const lowResWidth = 48;
+        const sourceWidth = newImage.naturalWidth || 1;
+        const sourceHeight = newImage.naturalHeight || 1;
+        lowResCanvas.width = lowResWidth;
+        lowResCanvas.height = Math.max(
+            1,
+            Math.round(lowResWidth * sourceHeight / sourceWidth)
+        );
 
-    fishImage.alt =
-        "Clown to identify";
+        const lowResContext = lowResCanvas.getContext("2d");
+        lowResContext.imageSmoothingEnabled = true;
+        lowResContext.drawImage(
+            newImage,
+            0,
+            0,
+            lowResCanvas.width,
+            lowResCanvas.height
+        );
 
-    fishImage.style.display =
-        "block";
+        fishImage.src = lowResCanvas.toDataURL("image/jpeg", 0.35);
+        fishImage.style.imageRendering = "pixelated";
+    } else {
+        fishImage.src = currentFish.image;
+        fishImage.style.imageRendering = "auto";
+    }
+
+    fishImage.alt = "Clown to identify";
+    fishImage.style.display = "block";
 
 
     fishImage.style.transform =
     `scaleX(${Math.random() < 0.47 ? -1 : 1}) scaleY(${upsideDownMode ? -1 : 1})`;
 
 
-    fishImage.style.filter = reverseColoursMode ? "invert(1)" : "none";
+    const imageFilters = [];
+    if (reverseColoursMode) imageFilters.push("invert(1)");
+    if (hazelnutMode) imageFilters.push("blur(1.3px)");
+    fishImage.style.filter = imageFilters.length
+        ? imageFilters.join(" ")
+        : "none";
 
 
         // 47% chance of flipping horizontally
@@ -6308,7 +6338,7 @@ let reverseColoursMode = false;
 
 document.getElementById("play-button").onclick = () => {
     // Challenge modifiers start unchecked whenever this screen is opened.
-    ["blink-checkbox", "upside-checkbox", "reverse-checkbox", "corrupt-checkbox"]
+    ["blink-checkbox", "upside-checkbox", "reverse-checkbox", "corrupt-checkbox", "hazelnut-checkbox"]
         .forEach(id => {
             const checkbox = document.getElementById(id);
             if (checkbox) checkbox.checked = false;
@@ -6318,6 +6348,7 @@ document.getElementById("play-button").onclick = () => {
     upsideDownMode = false;
     reverseColoursMode = false;
     corruptClownEnabled = false;
+    hazelnutMode = false;
     removeCorruptTiles();
 
     homeScreen.hidden = true;
@@ -6376,6 +6407,7 @@ document.getElementById("start-game-button").onclick = function () {
     blinkMode = document.getElementById("blink-checkbox").checked;
     upsideDownMode = document.getElementById("upside-checkbox").checked;
     reverseColoursMode = document.getElementById("reverse-checkbox").checked;
+    hazelnutMode = document.getElementById("hazelnut-checkbox").checked;
 
     // Prepare the selected fish
     shuffleFish();
