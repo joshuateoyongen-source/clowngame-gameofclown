@@ -36,11 +36,6 @@
             <label><input type="checkbox" id="upside-checkbox"> Upside Down, Down le Clown</label>
             <label><input type="checkbox" id="reverse-checkbox"> Colour Morph, Morpho colour Clown</label>
             <label><input type="checkbox" id="corrupt-checkbox"> Clown Corrupt — Clown Warp</label>
-            <label class="challenge-option">
-                <input type="checkbox" id="hazelnut-checkbox">
-                Clown Hazelnut
-                <small class="challenge-description">Clown eat Hazelnut</small>
-            </label>
         </section>
         <div class="challenge-buttons">
             <button type="button" id="start-game-button">Start Game</button>
@@ -81,7 +76,15 @@
     <section id="duel-screen" class="game-container duel-screen" hidden>
         <div class="duel-health-row">
             <div class="health-card"><strong>You</strong><div class="health-track"><div id="duel-player-health" class="health-fill"></div></div><div id="duel-player-health-text"></div><div id="duel-player-hearts" class="hearts"></div></div>
-            <div class="health-card"><strong id="duel-opponent-name">Opponent</strong><div class="health-track"><div id="duel-bot-health" class="health-fill bot-fill"></div></div><div id="duel-bot-health-text"></div><div id="duel-bot-hearts" class="hearts"></div></div>
+            <div class="health-card bot-health-card">
+                <div id="duel-bot-speech-bubble" class="duel-bot-speech-bubble" role="status" aria-live="polite" hidden></div>
+                <div class="duel-bot-header">
+                    <strong id="duel-opponent-name">Opponent</strong>
+                    <img id="duel-opponent-image" class="duel-opponent-image" alt="">
+                </div>
+                <div class="health-track bot-health-track"><div id="duel-bot-health" class="health-fill bot-fill"></div></div>
+                <div id="duel-bot-health-text"></div><div id="duel-bot-hearts" class="hearts"></div>
+            </div>
         </div>
         <h1>Cluny Court</h1><p id="duel-round-message">Get ready!</p>
         <div id="duel-countdown" class="duel-countdown" hidden></div>

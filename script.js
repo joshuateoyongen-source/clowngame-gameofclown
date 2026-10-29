@@ -5273,7 +5273,6 @@ let answered = false;
 
 
 let blinkMode = false;
-let hazelnutMode = false;
 const blinkDuration = 380;
 
 
@@ -5428,50 +5427,21 @@ function loadRandomFish() {
 
 
    newImage.onload = function() {
-    // Clown Hazelnut simulates a low-quality camera by reducing the
-    // image to a tiny resolution before displaying it enlarged.
-    if (hazelnutMode) {
-        const lowResCanvas = document.createElement("canvas");
-        const lowResWidth = 48;
-        const sourceWidth = newImage.naturalWidth || 1;
-        const sourceHeight = newImage.naturalHeight || 1;
-        lowResCanvas.width = lowResWidth;
-        lowResCanvas.height = Math.max(
-            1,
-            Math.round(lowResWidth * sourceHeight / sourceWidth)
-        );
+    fishImage.src =
+        currentFish.image;
 
-        const lowResContext = lowResCanvas.getContext("2d");
-        lowResContext.imageSmoothingEnabled = true;
-        lowResContext.drawImage(
-            newImage,
-            0,
-            0,
-            lowResCanvas.width,
-            lowResCanvas.height
-        );
+    fishImage.alt =
+        "Clown to identify";
 
-        fishImage.src = lowResCanvas.toDataURL("image/jpeg", 0.35);
-        fishImage.style.imageRendering = "pixelated";
-    } else {
-        fishImage.src = currentFish.image;
-        fishImage.style.imageRendering = "auto";
-    }
-
-    fishImage.alt = "Clown to identify";
-    fishImage.style.display = "block";
+    fishImage.style.display =
+        "block";
 
 
     fishImage.style.transform =
     `scaleX(${Math.random() < 0.47 ? -1 : 1}) scaleY(${upsideDownMode ? -1 : 1})`;
 
 
-    const imageFilters = [];
-    if (reverseColoursMode) imageFilters.push("invert(1)");
-    if (hazelnutMode) imageFilters.push("blur(1.3px)");
-    fishImage.style.filter = imageFilters.length
-        ? imageFilters.join(" ")
-        : "none";
+    fishImage.style.filter = reverseColoursMode ? "invert(1)" : "none";
 
 
         // 47% chance of flipping horizontally
@@ -6338,7 +6308,7 @@ let reverseColoursMode = false;
 
 document.getElementById("play-button").onclick = () => {
     // Challenge modifiers start unchecked whenever this screen is opened.
-    ["blink-checkbox", "upside-checkbox", "reverse-checkbox", "corrupt-checkbox", "hazelnut-checkbox"]
+    ["blink-checkbox", "upside-checkbox", "reverse-checkbox", "corrupt-checkbox"]
         .forEach(id => {
             const checkbox = document.getElementById(id);
             if (checkbox) checkbox.checked = false;
@@ -6348,7 +6318,6 @@ document.getElementById("play-button").onclick = () => {
     upsideDownMode = false;
     reverseColoursMode = false;
     corruptClownEnabled = false;
-    hazelnutMode = false;
     removeCorruptTiles();
 
     homeScreen.hidden = true;
@@ -6407,7 +6376,6 @@ document.getElementById("start-game-button").onclick = function () {
     blinkMode = document.getElementById("blink-checkbox").checked;
     upsideDownMode = document.getElementById("upside-checkbox").checked;
     reverseColoursMode = document.getElementById("reverse-checkbox").checked;
-    hazelnutMode = document.getElementById("hazelnut-checkbox").checked;
 
     // Prepare the selected fish
     shuffleFish();
@@ -6799,6 +6767,11 @@ const duelPlayerHealthText = document.getElementById("duel-player-health-text");
 const duelBotHealthText = document.getElementById("duel-bot-health-text");
 const duelPlayerHearts = document.getElementById("duel-player-hearts");
 const duelBotHearts = document.getElementById("duel-bot-hearts");
+const duelOpponentName = document.getElementById("duel-opponent-name");
+const duelOpponentImage = document.getElementById("duel-opponent-image");
+const duelBotSpeechBubble = document.getElementById("duel-bot-speech-bubble");
+let duelBotSpeechTimer = null;
+let duelBotSpeechSwapTimer = null;
 const duelExitButton = document.getElementById("duel-exit-button");
 const clunyCourtButton = document.getElementById("cluny-court-button");
 
@@ -6859,21 +6832,26 @@ const clunyBots = [
 
         sharedCorrectVoiceLines: [
         "duelsmusic/OhneYay1.mp3",
-        "duelsmusic/OhneYay2.mp3"
+        "duelsmusic/OhneYay2.mp3",
+        "duelsmusic/OhneYay5.mp3",
     ],
-    sharedCorrectVoiceChance: 0.40,
+    sharedCorrectVoiceChance: 0.58,
 
-    soloCorrectVoiceLines: [
+    // Plays when Ohnepixel is correct but the player is wrong.
+    botCorrectPlayerWrongVoiceLines: [
         "duelsmusic/OhneSmurf.mp3",
-        "duelsmusic/OhneYay3.mp3"
+        "duelsmusic/OhneYay3.mp3",
+        "duelsmusic/Ohnewin.mp3",
+        "duelsmusic/OhneWin2.mp3"
     ],
-    soloCorrectVoiceChance: 1.00,
+    botCorrectPlayerWrongVoiceChance: 1.00,
 
     wrongVoiceLines: [
         "duelsmusic/OhneVAS1.mp3",
         "duelsmusic/OhneVAS2.mp3",
         "duelsmusic/OhneVAS3.mp3",
         "duelsmusic/OhneVAS4.mp3",
+        "duelsmusic/OhneVAS6.mp3",
         "duelsmusic/OhneNein1.mp3",
         "duelsmusic/OhneYoWhy.mp3"
     ],
@@ -6931,6 +6909,147 @@ const clunyBots = [
 
 ];
 
+
+// EDIT CLUNYBOT SPEECH HERE. Add your own strings to a category's array.
+// Categories: start, winning, losing, bothCorrect, bothWrong,
+// botCorrectPlayerWrong, playerCorrectBotWrong, botWins, botLoses.
+// Ohnepixel is intentionally excluded; he uses audio voice lines instead.
+const clunyBotSpeechCategories = [
+    "start", "winning", "losing", "bothCorrect", "bothWrong",
+    "botCorrectPlayerWrong", "playerCorrectBotWrong", "botWins", "botLoses"
+];
+const clunyBotSpeechLines = Object.fromEntries(
+    clunyBots
+        .filter(bot => bot.name !== "Ohnepixel")
+        .map(bot => [bot.name, Object.fromEntries(clunyBotSpeechCategories.map(category => [category, []]))])
+);
+
+//Coco
+clunyBotSpeechLines["Coco the Crab"].start.push(
+    "Clown Game time!",
+    "Crabby Match",
+    "How about you crab at THESE apples!"
+);
+clunyBotSpeechLines["Coco the Crab"].winning.push(
+    "Haha you're quite bad",
+    "Crab winning",
+    "Lock in!",
+    "Looks like I'll crab this victory"
+);
+clunyBotSpeechLines["Coco the Crab"].losing.push(
+    "You're not bad",
+    "You're playing well for somebody who's not a Clown",
+    "Okay let me lock in!"
+);
+clunyBotSpeechLines["Coco the Crab"].botCorrectPlayerWrong.push(
+    "Got it right!",
+    "That was an easy one!",
+    "You are not good",
+    "Even an Urchin could've gotten THAT right...",
+    "Bad Guess",
+    "Feeling Crabby?"
+);
+clunyBotSpeechLines["Coco the Crab"].botWins.push(
+    "I'm Keeling it today!",
+    "Better luck next time!",
+    "I've seen Urchins play better"
+);
+clunyBotSpeechLines["Coco the Crab"].botLoses.push(
+    "Good game!",
+    "I'm shell shocked!",
+    "Okay, okay. Go fight Clown now. He's a pro.",
+    "You should consider signing up for the Clown Championships!",
+    "Not bad, not bad." 
+);
+
+
+//Ruffle
+clunyBotSpeechLines["Ruffles"].start.push(
+    "All right guys!",
+    "Welcome to the Cluny Arena!",
+    "Alright time for some non-meta Clown gameplay!",
+    "I'm going for Oracles; not sure about you.",
+    "Okay let's deal with this guy quick."
+);
+clunyBotSpeechLines["Ruffles"].winning.push(
+    "Okay nice shots so far",
+    "Good we're leading",
+    "We are in the lead!",
+    "Nice nice guys."
+);
+clunyBotSpeechLines["Ruffles"].losing.push(
+    "We are losing the lead!",
+    "Come on man can you please not use Outlaw",
+    "What a hacker!",
+    "I'm gonna steal all of your A-Coins after this.",
+    "We're not playing well today are we."
+);
+clunyBotSpeechLines["Ruffles"].botCorrectPlayerWrong.push(
+    "Smooth Operator!",
+    "Nice damage!",
+    "Next round we'll go to C",
+    "I guess I have time for another Crate",
+    "Oh no...",
+    "Bro lock in!"
+);
+clunyBotSpeechLines["Ruffles"].botWins.push(
+    "Okay nice!",
+    "Oh wow 16 Kills!",
+    "Okay see you next time!"
+);
+clunyBotSpeechLines["Ruffles"].botLoses.push(
+    "GG!",
+    "Please don't use gay mechs man",
+    "I GOT 9 ASSISTS ARE YOU KIDDING ME!!!",
+    "Let's go back to Mech Arena",
+    "Darn it I lost my A-Coins" 
+);
+
+//Grandma
+clunyBotSpeechLines["Grandma Rosie"].start.push(
+    "Trust in the Lord!",
+    "Hello!",
+    "The Lord is our saviour!",
+    "Good Luck!",
+    "The Lord is my Shepard, and I shall not!"
+);
+clunyBotSpeechLines["Grandma Rosie"].winning.push(
+    "If you're unsure about a Clown, just commit your worries to the Lord!",
+    "Come on!",
+    "Pa, I'm winning!"
+);
+clunyBotSpeechLines["Grandma Rosie"].losing.push(
+    "The Lord wants what is best for all of us!",
+    "We are the pearls of great price!",
+    "Ah Pai Ni ah!",
+    "Nice work so far!",
+    "You are playing quite well ah! Very good!"
+);
+clunyBotSpeechLines["Grandma Rosie"].botCorrectPlayerWrong.push(
+    "Sorry!",
+    "Luck guess lah!",
+    "Eh! I got it right!",
+);
+clunyBotSpeechLines["Grandma Rosie"].botWins.push(
+    "Because of the Lord, I have won this game!",
+    "Better luck next time dear!",
+    "The Lord is good!"
+);
+clunyBotSpeechLines["Grandma Rosie"].botLoses.push(
+    "The Lord wanted you to win!",
+    "Well done!",
+    "Wah I'm so proud of you lah!",
+    "Very good!",
+    "Even though you won, never forget; pride always comes before a fall!" 
+);
+
+
+
+
+
+// Example of how to add a line (uncomment and replace with your own text):
+// clunyBotSpeechLines["Coco the Crab"].start.push("Let's do this!");
+// clunyBotSpeechLines["Coco the Crab"].botCorrectPlayerWrong.push("I got that one!");
 
 let selectedClunyBot = null;
 let duelMode = "classic";
@@ -7080,36 +7199,92 @@ function playClunyBotVoiceLine(bot, wasCorrect) {
     });
 }
 function playOhnepixelVoiceLine(playerCorrect, botCorrect) {
-    if (!selectedClunyBot || selectedClunyBot.name !== "Ohnepixel") {
-        return;
-    }
+    if (!selectedClunyBot || selectedClunyBot.name !== "Ohnepixel") return;
 
-    let voiceLines;
-    let chance;
+    let voiceLines = [];
+    let chance = 0;
 
     if (botCorrect && playerCorrect) {
-        voiceLines = selectedClunyBot.sharedCorrectVoiceLines;
-        chance = selectedClunyBot.sharedCorrectVoiceChance;
+        // Both players got it right.
+        voiceLines = selectedClunyBot.sharedCorrectVoiceLines || [];
+        chance = selectedClunyBot.sharedCorrectVoiceChance ?? 0;
     } else if (botCorrect && !playerCorrect) {
-        voiceLines = selectedClunyBot.soloCorrectVoiceLines;
-        chance = selectedClunyBot.soloCorrectVoiceChance;
-    } else {
-        return;
+        // Ohnepixel got it right, but the player got it wrong.
+        voiceLines = selectedClunyBot.botCorrectPlayerWrongVoiceLines || [];
+        chance = selectedClunyBot.botCorrectPlayerWrongVoiceChance ?? 0;
+    } else if (!botCorrect) {
+        // Ohnepixel got it wrong, whether or not the player was correct.
+        voiceLines = selectedClunyBot.wrongVoiceLines || [];
+        chance = selectedClunyBot.wrongVoiceChance ?? 0;
     }
 
-    if (Math.random() >= chance) return;
-
-    const filename =
-        voiceLines[Math.floor(Math.random() * voiceLines.length)];
-
+    if (!voiceLines.length || Math.random() >= chance) return;
+    const filename = voiceLines[Math.floor(Math.random() * voiceLines.length)];
     const voice = new Audio(filename);
     voice.volume = 0.32;
-
-    voice.play().catch(error => {
-        console.warn("Could not play Ohnepixel voice line:", error);
-    });
+    voice.play().catch(error => console.warn("Could not play Ohnepixel voice line:", error));
 }
 
+function showClunyBotSpeechFromLines(message) {
+    if (!selectedClunyBot || selectedClunyBot.name === "Ohnepixel" || !duelBotSpeechBubble) return;
+    if (typeof message !== "string" || !message.trim()) return;
+
+    clearTimeout(duelBotSpeechTimer);
+    clearTimeout(duelBotSpeechSwapTimer);
+
+    const displayNewMessage = () => {
+        duelBotSpeechBubble.textContent = message;
+        duelBotSpeechBubble.hidden = false;
+        duelBotSpeechBubble.classList.remove("fading", "visible");
+        requestAnimationFrame(() => duelBotSpeechBubble.classList.add("visible"));
+        // The message stays visible for four seconds, then fades out.
+        duelBotSpeechTimer = setTimeout(() => {
+            duelBotSpeechBubble.classList.remove("visible");
+            duelBotSpeechBubble.classList.add("fading");
+            duelBotSpeechSwapTimer = setTimeout(() => {
+                duelBotSpeechBubble.hidden = true;
+                duelBotSpeechBubble.classList.remove("fading");
+                duelBotSpeechBubble.textContent = "";
+            }, 280);
+        }, 4000);
+    };
+
+    if (!duelBotSpeechBubble.hidden && duelBotSpeechBubble.textContent) {
+        // Fade out the old bubble before displaying the new one.
+        duelBotSpeechBubble.classList.remove("visible");
+        duelBotSpeechBubble.classList.add("fading");
+        duelBotSpeechSwapTimer = setTimeout(displayNewMessage, 250);
+    } else {
+        displayNewMessage();
+    }
+}
+
+function showClunyBotSpeech(category) {
+    if (!selectedClunyBot || selectedClunyBot.name === "Ohnepixel") return;
+    const lines = clunyBotSpeechLines[selectedClunyBot.name]?.[category];
+    if (!Array.isArray(lines) || !lines.length) return;
+    showClunyBotSpeechFromLines(lines[Math.floor(Math.random() * lines.length)]);
+}
+
+function showClunyBotRoundSpeech(playerCorrect, botCorrect) {
+    if (!selectedClunyBot || selectedClunyBot.name === "Ohnepixel") return;
+    const botLines = clunyBotSpeechLines[selectedClunyBot.name];
+    if (!botLines) return;
+
+    const category = playerCorrect && botCorrect ? "bothCorrect"
+        : !playerCorrect && !botCorrect ? "bothWrong"
+        : botCorrect && !playerCorrect ? "botCorrectPlayerWrong"
+        : "playerCorrectBotWrong";
+    const eligibleLines = [...(botLines[category] || [])];
+
+    // During each round, the bot may instead comment on whether it is ahead.
+    if (duelBotHP > duelPlayerHP) eligibleLines.push(...(botLines.winning || []));
+    else if (duelPlayerHP > duelBotHP) eligibleLines.push(...(botLines.losing || []));
+
+    if (eligibleLines.length) {
+        showClunyBotSpeechFromLines(eligibleLines[Math.floor(Math.random() * eligibleLines.length)]);
+    }
+}
 
 
 //Feces Cheese
@@ -7244,8 +7419,15 @@ async function restoreNormalMusic() {
 }
 
 function startDuel(mode) {
+    duelEnding = false;
+    clearTimeout(duelBotSpeechTimer);
+    clearTimeout(duelBotSpeechSwapTimer);
+    if (duelBotSpeechBubble) { duelBotSpeechBubble.hidden = true; duelBotSpeechBubble.textContent = ""; duelBotSpeechBubble.classList.remove("visible", "fading"); }
     duelMode=mode; duelActive=true; window.duelActive=true; duelRoundActive=false; duelRoundNumber=0; duelPlayerMultiplierStacks=0; duelBotMultiplierStacks=0;
-    document.getElementById("duel-opponent-name").textContent=selectedClunyBot.name;
+    duelOpponentName.textContent=selectedClunyBot.name;
+    duelOpponentImage.src = selectedClunyBot.image;
+    duelOpponentImage.alt = `${selectedClunyBot.name} portrait`;
+    duelOpponentImage.hidden = false;
     duelPlayerMaxHP = mode === "classic" ? 5 : (mode === "battle" ? 5000 : 6000);
     duelBotMaxHP = duelPlayerMaxHP;
     duelPlayerHP = duelPlayerMaxHP;
@@ -7255,7 +7437,9 @@ function startDuel(mode) {
     clunyLobby.hidden=true; homeScreen.hidden=true; challengeScreen.hidden=true; guideScreen.hidden=true; gameScreen.hidden=true; duelScreen.hidden=false;
     duelImage.style.visibility="visible"; duelImage.style.display="block"; duelReveal.textContent=""; duelRoundMessage.textContent=`${selectedClunyBot.name} — ${mode.toUpperCase()}`;
     duelSubmitButton.disabled=false; duelSpeciesSelect.disabled=false;
-    updateDuelHealth(true); startDuelMusic(); startDuelRound();
+    updateDuelHealth(true); startDuelMusic();
+    showClunyBotSpeech("start");
+    startDuelRound();
 }
 
 function updateDuelHealth(animate=false) {
@@ -7567,9 +7751,6 @@ function resolveDuelRound(timedOut=false) {
     if(!duelPlayerAnswered) {duelPlayerCorrect=false; duelPlayerTime=null;}
     const playerCorrect=duelPlayerAnswered&&duelPlayerCorrect; const botCorrect=duelBotCorrect;
     playOhnepixelVoiceLine(playerCorrect, botCorrect);
-    if (selectedClunyBot.name === "Ohnepixel") {
-    playClunyBotVoiceLine(selectedClunyBot, botCorrect);
-    }
     const revealScreen = document.getElementById("duel-reveal-screen");
     if (revealScreen) { revealScreen.hidden = true; revealScreen.classList.remove("visible", "final"); revealScreen.textContent = ""; }
     // Ding before revealing the clown's identity.
@@ -7615,8 +7796,10 @@ function resolveDuelRound(timedOut=false) {
     if(duelPlayerHP<=0||duelBotHP<=0) {
         const won=duelBotHP<=0&&duelPlayerHP>0; duelRoundMessage.textContent=won?"WINNER!":"LOSER...";
         duelReveal.textContent = `${won ? "WINNER!" : "LOSER..."} The Clown was: ${duelCurrentFish.species}`;
-        setTimeout(endDuelAndReturnHome, 2200); return;
+        showClunyBotSpeech(won ? "botLoses" : "botWins");
+        setTimeout(endDuelAndReturnHome, 4300); return;
     }
+    showClunyBotRoundSpeech(playerCorrect, botCorrect);
     duelSubmitButton.disabled=true; duelSpeciesSelect.disabled=true;
     setTimeout(() => {
         if (!duelActive) return;
@@ -7651,6 +7834,9 @@ async function endDuelAndReturnHome() {
     duelActive = false;
     window.duelActive = false;
     duelRoundActive = false;
+    clearTimeout(duelBotSpeechTimer);
+    clearTimeout(duelBotSpeechSwapTimer);
+    if (duelBotSpeechBubble) { duelBotSpeechBubble.hidden = true; duelBotSpeechBubble.textContent = ""; duelBotSpeechBubble.classList.remove("visible", "fading"); }
 
     clearTimeout(duelTimeout);
     clearTimeout(duelBotTimeout);

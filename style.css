@@ -57,6 +57,12 @@ button:disabled { opacity:.45; cursor:not-allowed; }
 .duel-health-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:18px; }
 .health-card { position:relative; text-align:left; padding:12px; background:#eef5f8; border-radius:12px; overflow:visible; }
 .health-card strong { display:block; margin-bottom:8px; }
+/* Keep the player's name area the same height as the bot's header. */
+.health-card:not(.bot-health-card) > strong:first-child {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
 .health-track { height:20px; border-radius:20px; background:#d5dce0; overflow:hidden; position:relative; }
 .health-fill { height:100%; width:100%; background:#16a765; border-radius:20px; transition:width .8s ease; }
 .health-fill.bot-fill { background: #2ecc71; }
@@ -226,15 +232,71 @@ button:disabled { opacity:.45; cursor:not-allowed; }
     }
 }
 
-/* Clown Hazelnut challenge description */
-#challenges-panel .challenge-option {
-    display: block;
-    margin: 10px 0;
+/* Cluny Court: the bot's health drains from right to left. */
+.bot-health-card { text-align: right; }
+.duel-bot-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+    min-height: 44px;
+    margin-bottom: 8px;
 }
-#challenges-panel .challenge-description {
+.duel-bot-header strong { display: inline-block; margin: 0; text-align: right; }
+.duel-opponent-image {
     display: block;
-    margin: 4px 0 0 26px;
-    color: #666;
-    font-size: 13px;
-    font-weight: normal;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #c8dce7;
+}
+.bot-health-track { display: flex; justify-content: flex-end; }
+.bot-health-track .bot-fill { margin-left: auto; }
+.bot-health-card #duel-bot-health-text,
+.bot-health-card #duel-bot-hearts { text-align: right; }
+
+/* Speech bubble sits above the Clunybot portrait. */
+.duel-bot-speech-bubble {
+    position: absolute;
+    width: fit-content;
+    max-width: min(100%, 360px);
+    right: 12px;
+    bottom: calc(100% + 8px);
+    margin: 0;
+    z-index: 20;
+    padding: 10px 13px;
+    border: 2px solid #b8d5e5;
+    border-radius: 14px;
+    background: #fff;
+    color: #17384b;
+    text-align: left;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 600;
+    box-shadow: 0 3px 9px rgba(0,0,0,.12);
+    opacity: 0;
+    transform: translateY(5px) scale(.98);
+    transition: opacity .25s ease, transform .25s ease;
+}
+.duel-bot-speech-bubble::after {
+    content: "";
+    position: absolute;
+    right: 17px;
+    bottom: -9px;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border-right: 2px solid #b8d5e5;
+    border-bottom: 2px solid #b8d5e5;
+    transform: rotate(45deg);
+}
+.duel-bot-speech-bubble.visible { opacity: 1; transform: translateY(0) scale(1); }
+.duel-bot-speech-bubble.fading { opacity: 0; transform: translateY(-3px) scale(.98); }
+@media(max-width:650px) {
+    .duel-opponent-image { width: 34px; height: 34px; flex-basis: 34px; }
+    .duel-bot-header { gap: 6px; }
+    .duel-bot-speech-bubble { max-width: 100%; font-size: 12px; }
 }
