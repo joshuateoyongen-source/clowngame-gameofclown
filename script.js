@@ -6826,7 +6826,7 @@ const clunyBots = [
         image:"bot-images/ohnepixel-1552739637.png",
         accuracy: 40,
         speed: "slower",
-        description: "A German influencer who enjoys taking his frustration out on a Clown Game.",
+        description: "A German Counter-Strike player who plays many different games! He is very bad at most of them.",
         trivia: "Ohnepixel does NOT like being doxxed.",
 
         sharedCorrectVoiceLines: [
@@ -6841,7 +6841,9 @@ const clunyBots = [
     botCorrectPlayerWrongVoiceLines: [
         "duelsmusic/OhneSmurf.mp3",
         "duelsmusic/OhneYay3.mp3",
-        "duelsmusic/OhneWin2.mp3"
+        "duelsmusic/OhneWin2.mp3",
+        "duelsmusic/OhneWin3.mp3",
+        "duelsmusic/OhneYay4.mp3"
     ],
     botCorrectPlayerWrongVoiceChance: 1.00,
 
@@ -6852,9 +6854,14 @@ const clunyBots = [
         "duelsmusic/OhneVAS4.mp3",
         "duelsmusic/OhneVAS6.mp3",
         "duelsmusic/OhneNein1.mp3",
-        "duelsmusic/OhneYoWhy.mp3"
+        "duelsmusic/OhneYoWhy.mp3",
+        "duelsmusic/OhneCrashout.mp3",
+        "duelsmusic/OhneCrashout2.mp3",
+        "duelsmusic/OhneCry.mp3",
+        "duelsmusic/OhneCry2.mp3",
+        "duelsmusic/OhneCry2.5.mp3"
     ],
-    wrongVoiceChance: 0.87
+    wrongVoiceChance: 0.92
     },
     {
         name: "Anemone",
@@ -6924,7 +6931,7 @@ const defaultClunyBotSpeechLines = {
     winning: ["I'm pulling ahead!", "This round is going my way."],
     losing: ["I need to make a comeback!", "You're ahead, but I'm not done yet."],
     bothCorrect: ["Nice, we both got it!", "Good eye!"],
-    bothWrong: ["That one fooled both of us.", "Well, that was a tricky one!"],
+    bothWrong: ["That one got both of us.", "What!? That was a tricky one!"],
     botCorrectPlayerWrong: ["Got it! Better luck next round.", "I spotted that one!"],
     playerCorrectBotWrong: ["Nice guess. You got me there.", "Well played!"],
     botWins: ["That's my match!", "Victory!"],
