@@ -464,7 +464,7 @@ const fish = [
         species: "Allardi"
     },
     {
-        image: "images/allardi4.JPG",
+        image: "images/allardi4.jpg",
         species: "Allardi"
     },
     {
@@ -1797,6 +1797,14 @@ const fish = [
     },
     {
         image: "images/clarkii59.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii60.JPG",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii61.webp",
         species: "Clarkii"
     },
     {
@@ -4932,10 +4940,6 @@ const fish = [
         species: "Sebae"
     },
     {
-        image: "images/sebae53.jpg",
-        species: "Sebae"
-    },
-    {
         image: "images/snyderi1.webp",
         species: "Snyderi"
     },
@@ -5417,9 +5421,10 @@ function loadRandomFish() {
     currentFishIndex++;
 
 
-    // Hide image while loading
-
-    fishImage.style.display = "none";
+    // Fade out the previous image while the next one loads.
+fishImage.style.display = "block";
+fishImage.style.visibility = "visible";
+fishImage.style.opacity = "0";
 
 
     // Preload the image
@@ -5460,6 +5465,12 @@ function loadRandomFish() {
 
     fishImage.alt = "Clown to identify";
     fishImage.style.display = "block";
+    // Fade in the newly loaded image.
+requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+        fishImage.style.opacity = "1";
+    });
+});
 
     fishImage.style.transform =
         `scaleX(${Math.random() < 0.47 ? -1 : 1}) scaleY(${upsideDownMode ? -1 : 1})`;
@@ -6752,6 +6763,47 @@ const duelScreen = document.getElementById("duel-screen");
 const clunyBotGrid = document.getElementById("cluny-bot-grid");
 const clunyBotInfo = document.getElementById("cluny-bot-info");
 const duelModeButtons = [...document.querySelectorAll("[data-duel-mode]")];
+
+// ==========================================
+// CLUNY COURT OPTIONAL CHALLENGES
+// ==========================================
+
+const clunyChallenges = {
+    upside: false,
+    morpho: false,
+    warp: false,
+    hazelnut: false
+};
+
+const clunyChallengePenalties = {
+    upside: 4,
+    morpho: 11,
+    warp: 8,
+    hazelnut: 17
+};
+
+// Connect the checkboxes to the challenge settings.
+const clunyChallengeCheckboxes = {
+    upside: document.getElementById("cluny-upside-checkbox"),
+    morpho: document.getElementById("cluny-morpho-checkbox"),
+    warp: document.getElementById("cluny-warp-checkbox"),
+    hazelnut: document.getElementById("cluny-hazelnut-checkbox")
+};
+
+Object.entries(clunyChallengeCheckboxes).forEach(([challenge, checkbox]) => {
+    checkbox.addEventListener("change", () => {
+        clunyChallenges[challenge] = checkbox.checked;
+    });
+});
+
+// Calculate the total accuracy deduction.
+function getClunyChallengePenalty() {
+    return Object.keys(clunyChallenges)
+        .filter(challenge => clunyChallenges[challenge])
+        .reduce((total, challenge) => {
+            return total + clunyChallengePenalties[challenge];
+        }, 0);
+}
 const duelImage = document.getElementById("duel-fish-image");
 const duelSpeciesSelect = document.getElementById("duel-species-select");
 window.duelSpeciesSelect = duelSpeciesSelect;
@@ -7482,7 +7534,18 @@ function startDuelRound(skipCountdown = false) {
     if(!duelActive)return;
     clearTimeout(duelTimeout); clearTimeout(duelBotTimeout); clearTimeout(duelRoundDeadline); clearInterval(duelTimerInterval);
     duelRoundNumber++; 
-    duelImage.style.visibility = "hidden";
+    // Fade out the previous round's image.
+duelImage.style.visibility = "visible";
+duelImage.style.opacity = "0";
+    
+
+const oldWarpLayer = duelImage
+    .closest(".duel-image-container")
+    ?.querySelector(".cluny-warp-layer");
+
+if (oldWarpLayer) {
+    oldWarpLayer.remove();
+}
     duelRoundActive=false; duelPlayerAnswered=false; duelBotAnswered=false; duelPlayerTime=null;
     duelSubmitButton.disabled=true; duelSpeciesSelect.disabled=true; duelReveal.textContent=""; duelTimer.textContent="";
     duelRoundMessage.textContent=`Round ${duelRoundNumber} — get ready!`;
@@ -7493,59 +7556,245 @@ function startDuelRound(skipCountdown = false) {
 }
 }
 
+// ==========================================
+// CLUNY COURT: CLOWN WARP
+// ==========================================
+
+function applyClunyWarp(challengeFilter) {
+    const container = duelImage.closest(".duel-image-container");
+
+    if (!container || !duelImage.src) return;
+
+    const oldLayer = container.querySelector(".cluny-warp-layer");
+    if (oldLayer) oldLayer.remove();
+
+    const layer = document.createElement("div");
+    layer.className = "cluny-warp-layer";
+    layer.style.filter = challengeFilter;
+
+    container.style.position = "relative";
+
+    Object.assign(layer.style, {
+        position: "absolute",
+        inset: "0",
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gridTemplateRows: "repeat(3, 1fr)",
+        zIndex: "5",
+        opacity: "0",
+        transition: "opacity 0.35s ease",
+        pointerEvents: "none"
+    });
+
+    const order = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+    for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+    }
+
+    order.forEach(sourceIndex => {
+        const row = Math.floor(sourceIndex / 3);
+        const col = sourceIndex % 3;
+
+        const tile = document.createElement("div");
+        tile.className = "cluny-warp-tile";
+        tile.style.backgroundImage = `url("${duelImage.src}")`;
+        tile.style.backgroundSize = "300% 300%";
+        tile.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+
+        layer.appendChild(tile);
+    });
+
+    container.appendChild(layer);
+
+    duelImage.style.opacity = "0";
+
+    requestAnimationFrame(() => {
+        layer.style.opacity = "1";
+    });
+}
+
+
 function showDuelFish() {
-    if(!duelActive)return;
-    // Cluny Court always uses the full fish database, independent of the
-    // species selected for the regular single-player game.
+    if (!duelActive) return;
+
     const available = Array.isArray(fish) ? fish : [];
+
     if (!available.length) {
-        duelRoundMessage.textContent = "No fish data found. Check that your fish database loads before script.js.";
+        duelRoundMessage.textContent = "No fish data found.";
         return;
     }
-    duelCurrentFish=available[Math.floor(Math.random()*available.length)];
-    duelImage.src=duelCurrentFish.image; duelImage.alt="Clownfish to identify"; duelImage.style.visibility="visible";
-    if (duelSpeciesSelect.options.length) duelSpeciesSelect.selectedIndex = 0;
-    duelRoundActive = true;
-    if (selectedClunyBot && selectedClunyBot.name === "Feces") {
-    startDuelCheeseEvent();
-}
-duelStartTime = performance.now();
 
-duelSubmitButton.disabled = false;
-duelSpeciesSelect.disabled = false;
-duelSpeciesSelect.style.pointerEvents = "auto";
-duelSubmitButton.style.pointerEvents = "auto";
-    duelRoundMessage.textContent="Identify the Clown!";
-    if(duelMode==="avnj") setTimeout(()=>{if(duelRoundActive)duelImage.style.visibility="hidden";},510);
-    const accuracy=getBotAccuracy();
-    duelBotCorrect=Math.random()*100<accuracy;
+    duelCurrentFish = available[
+        Math.floor(Math.random() * available.length)
+    ];
+
+    const container = duelImage.closest(".duel-image-container");
+
+    const oldLayer = container?.querySelector(".cluny-warp-layer");
+    if (oldLayer) oldLayer.remove();
+
+    // Reset the image.
+    duelImage.style.display = "block";
+    duelImage.style.visibility = "visible";
+    duelImage.style.opacity = "0";
+    duelImage.style.transform = "none";
+    duelImage.style.filter = "none";
+
+    duelImage.alt = "Clownfish to identify";
+
+    // Down the Clown.
+    if (clunyChallenges.upside) {
+        duelImage.style.transform = "rotate(180deg)";
+    }
+
+    // Build the Morpho and Hazelnut filters.
+    const challengeFilters = [];
+
+    if (clunyChallenges.morpho) {
+        challengeFilters.push("hue-rotate(180deg)");
+    }
+
+    if (clunyChallenges.hazelnut) {
+        challengeFilters.push("blur(3px)");
+    }
+
+    const challengeFilter = challengeFilters.join(" ");
+
+    // Load the image exactly once.
+    let imageLoaded = false;
+
+    function handleDuelImageLoaded() {
+        if (imageLoaded || !duelActive) return;
+
+        imageLoaded = true;
+
+        duelImage.style.filter = challengeFilter;
+        duelImage.style.visibility = "visible";
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (!duelActive) return;
+
+                if (clunyChallenges.warp) {
+                    applyClunyWarp(challengeFilter);
+                } else {
+                    duelImage.style.opacity = "1";
+                }
+            });
+        });
+    }
+
+    duelImage.onload = handleDuelImageLoaded;
+
+    duelImage.onerror = () => {
+        duelRoundMessage.textContent =
+            "The fish image could not be loaded. Please check the image file.";
+    };
+
+    // Start loading only after registering the handlers.
+    duelImage.src = duelCurrentFish.image;
+
+    // Handle images already loaded from the browser cache.
+    if (duelImage.complete && duelImage.naturalWidth > 0) {
+        handleDuelImageLoaded();
+    }
+
+    // Reset the species selector.
+    if (duelSpeciesSelect.options.length) {
+        duelSpeciesSelect.selectedIndex = 0;
+    }
+
+    duelRoundActive = true;
+
+    if (selectedClunyBot && selectedClunyBot.name === "Feces") {
+        startDuelCheeseEvent();
+    }
+
+    duelStartTime = performance.now();
+
+    duelSubmitButton.disabled = false;
+    duelSpeciesSelect.disabled = false;
+    duelSpeciesSelect.style.pointerEvents = "auto";
+    duelSubmitButton.style.pointerEvents = "auto";
+
+    duelRoundMessage.textContent = "Identify the Clown!";
+
+    // NMPZ: hide the image after the short viewing period.
+    if (duelMode === "avnj") {
+        setTimeout(() => {
+            if (duelRoundActive) {
+                duelImage.style.opacity = "0";
+
+                const warpLayer = container?.querySelector(".cluny-warp-layer");
+
+                if (warpLayer) {
+                    warpLayer.style.opacity = "0";
+                }
+            }
+        }, 510);
+    }
+
+    // Determine whether the bot guesses correctly.
+    const accuracy = getBotAccuracy();
+    duelBotCorrect = Math.random() * 100 < accuracy;
+
+    // Determine the bot's reaction time.
     if (
         Number.isFinite(selectedClunyBot.minGuessTime) &&
         Number.isFinite(selectedClunyBot.maxGuessTime)
     ) {
-        // Custom reaction range for Max Verstappen, Clark E. and KJ Daddy.
         duelBotTime = selectedClunyBot.minGuessTime +
-            Math.random() * (selectedClunyBot.maxGuessTime - selectedClunyBot.minGuessTime);
+            Math.random() * (
+                selectedClunyBot.maxGuessTime -
+                selectedClunyBot.minGuessTime
+            );
     } else {
         const speedBase = selectedClunyBot.speed === "faster"
             ? 1.65
             : (selectedClunyBot.speed === "slower" ? 1.35 : 1);
-        // Preserve the existing timing for the other bots.
+
         duelBotTime = (0.7 + Math.random() * 3.6) * speedBase + 1.5;
     }
-    // The bot's decision is hidden; only its correctness is reported.
-    duelBotTimeout=setTimeout(()=>{ if(duelRoundActive&&!duelBotAnswered){duelBotAnswered=true; onDuelBotAnswered();}},duelBotTime*1000);
-    // Safety limit for a stalled round; the real 10-second deadline begins
-    // when the bot has answered, as specified.
-    duelRoundDeadline=setTimeout(()=>resolveDuelRound(true),30000);
+
+    // The bot's decision.
+    duelBotTimeout = setTimeout(() => {
+        if (duelRoundActive && !duelBotAnswered) {
+            duelBotAnswered = true;
+            onDuelBotAnswered();
+        }
+    }, duelBotTime * 1000);
+
+    // Safety limit for a stalled round.
+    duelRoundDeadline = setTimeout(
+        () => resolveDuelRound(true),
+        30000
+    );
 }
 
+
 function getBotAccuracy() {
-    let accuracy=selectedClunyBot.accuracy;
-    const s=duelCurrentFish?.species;
-    if(selectedClunyBot.name==="Auntie Anna"&&(s==="Ocellaris"||s==="Percula"))accuracy=97;
-    if(selectedClunyBot.name==="ViperAte"&&["Akallopisos","Pacificus","Sandaracinos"].includes(s))accuracy=97;
-    return accuracy;
+    let accuracy = selectedClunyBot.accuracy;
+    const s = duelCurrentFish?.species;
+
+    if (
+        selectedClunyBot.name === "Auntie Anna" &&
+        (s === "Ocellaris" || s === "Percula")
+    ) {
+        accuracy = 97;
+    }
+
+    if (
+        selectedClunyBot.name === "ViperAte" &&
+        ["Akallopisos", "Pacificus", "Sandaracinos"].includes(s)
+    ) {
+        accuracy = 97;
+    }
+
+    accuracy -= getClunyChallengePenalty();
+
+    return Math.max(0, accuracy);
 }
 
 function onDuelBotAnswered() {
@@ -7829,7 +8078,8 @@ function resolveDuelRound(timedOut=false) {
         // Restore normal duel music volume as the countdown begins.
         fadeAudio(duelAudio, musicVolume, 800);
 
-        duelImage.style.visibility = "hidden";
+        duelImage.style.visibility = "visible";
+        duelImage.style.opacity = "0";
 
         countdownDuel(
             ["3", "2", "1", "CLOWN!"],
@@ -8024,3 +8274,4 @@ if (duelScreen) {
 
 // Build bot grid and fill duel dropdown once the HTML is ready (script is at body end).
 renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
+
