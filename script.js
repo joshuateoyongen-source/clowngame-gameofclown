@@ -100,6 +100,30 @@ const fish = [
         species: "a Fake"
     },
     {
+        image: "images/cg26.jpg",
+        species: "a Fake"
+    },
+    {
+        image: "images/cg27.jpg",
+        species: "a Fake"
+    },
+    {
+        image: "images/cg28.jpg",
+        species: "a Fake"
+    },
+    {
+        image: "images/cg29.jpg",
+        species: "a Fake"
+    },
+    {
+        image: "images/cg30.jpg",
+        species: "a Fake"
+    },
+    {
+        image: "images/cg31.jpg",
+        species: "a Fake"
+    },
+    {
         image: "images/akallopisos1.jpeg",
         species: "Akallopisos"
     },
@@ -464,7 +488,7 @@ const fish = [
         species: "Allardi"
     },
     {
-        image: "images/allardi4.jpg",
+        image: "images/allardi4.JPG",
         species: "Allardi"
     },
     {
@@ -613,6 +637,54 @@ const fish = [
     },
     {
         image: "images/allardi41.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi42.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi43.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi44.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi45.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi46.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi47.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi48.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi49.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi50.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi51.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi52.jpg",
+        species: "Allardi"
+    },
+    {
+        image: "images/allardi53.jpg",
         species: "Allardi"
     },
     {
@@ -1216,6 +1288,30 @@ const fish = [
         species: "Chagosensis"
     },
     {
+        image: "images/chagosensis20.jpg",
+        species: "Chagosensis"
+    },
+    {
+        image: "images/chagosensis21.jpg",
+        species: "Chagosensis"
+    },
+    {
+        image: "images/chagosensis22.jpg",
+        species: "Chagosensis"
+    },
+    {
+        image: "images/chagosensis23.jpg",
+        species: "Chagosensis"
+    },
+    {
+        image: "images/chagosensis24.jpg",
+        species: "Chagosensis"
+    },
+    {
+        image: "images/chagosensis25.jpg",
+        species: "Chagosensis"
+    },
+    {
         image: "images/arg1.webp",
         species: "Chrysargyrus"
     },
@@ -1305,6 +1401,30 @@ const fish = [
     },
     {
         image: "images/arg23.jpg",
+        species: "Chrysargyrus"
+    },
+    {
+        image: "images/arg24.jpg",
+        species: "Chrysargyrus"
+    },
+    {
+        image: "images/arg25.jpg",
+        species: "Chrysargyrus"
+    },
+    {
+        image: "images/arg26.jpg",
+        species: "Chrysargyrus"
+    },
+    {
+        image: "images/arg27.jpg",
+        species: "Chrysargyrus"
+    },
+    {
+        image: "images/arg28.jpg",
+        species: "Chrysargyrus"
+    },
+    {
+        image: "images/arg29.jpg",
         species: "Chrysargyrus"
     },
     {
@@ -1425,6 +1545,42 @@ const fish = [
     },
     {
         image: "images/chrysogaster30.jpg",
+        species: "Chrysogaster"
+    },
+    {
+        image: "images/chrysogaster31.jpg",
+        species: "Chrysogaster"
+    },
+    {
+        image: "images/chrysogaster32.jpg",
+        species: "Chrysogaster"
+    },
+    {
+        image: "images/chrysogaster33.jpg",
+        species: "Chrysogaster"
+    },
+    {
+        image: "images/chrysogaster34.jpg",
+        species: "Chrysogaster"
+    },
+    {
+        image: "images/chrysogaster35.jpg",
+        species: "Chrysogaster"
+    },
+    {
+        image: "images/chrysogaster36.jpg",
+        species: "Chrysogaster"
+    },
+    {
+        image: "images/chrysogaster37.jpg",
+        species: "Chrysogaster"
+    },
+    {
+        image: "images/chrysogaster38.jpg",
+        species: "Chrysogaster"
+    },
+    {
+        image: "images/chrysogaster39.jpg",
         species: "Chrysogaster"
     },
     {
@@ -1656,10 +1812,6 @@ const fish = [
         species: "Clarkii"
     },
     {
-        image: "images/clarkii24.jpg",
-        species: "Clarkii"
-    },
-    {
         image: "images/clarkii25.jpg",
         species: "Clarkii"
     },
@@ -1669,10 +1821,6 @@ const fish = [
     },
     {
         image: "images/clarkii27.jpg",
-        species: "Clarkii"
-    },
-    {
-        image: "images/clarkii28.jpg",
         species: "Clarkii"
     },
     {
@@ -1788,10 +1936,6 @@ const fish = [
         species: "Clarkii"
     },
     {
-        image: "images/clarkii57.jpg",
-        species: "Clarkii"
-    },
-    {
         image: "images/clarkii58.jpg",
         species: "Clarkii"
     },
@@ -1805,6 +1949,10 @@ const fish = [
     },
     {
         image: "images/clarkii61.webp",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii62.jpg",
         species: "Clarkii"
     },
     {
@@ -1921,6 +2069,46 @@ const fish = [
     },
     {
         image: "images/ef29.jpg",
+        species: "Ephippium"
+    },
+    {
+        image: "images/ef30.jpg",
+        species: "Ephippium"
+    },
+    {
+        image: "images/ef31.jpg",
+        species: "Ephippium"
+    },
+    {
+        image: "images/ef32.jpg",
+        species: "Ephippium"
+    },
+    {
+        image: "images/ef33.jpg",
+        species: "Ephippium"
+    },
+    {
+        image: "images/ef34.jpg",
+        species: "Ephippium"
+    },
+    {
+        image: "images/ef35.jpg",
+        species: "Ephippium"
+    },
+    {
+        image: "images/ef36.jpg",
+        species: "Ephippium"
+    },
+    {
+        image: "images/ef37.jpg",
+        species: "Ephippium"
+    },
+    {
+        image: "images/ef38.jpg",
+        species: "Ephippium"
+    },
+    {
+        image: "images/ef39.jpg",
         species: "Ephippium"
     },
     {
@@ -2105,6 +2293,30 @@ const fish = [
     },
     {
         image: "images/frenatus46.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus47.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus48.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus49.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus50.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus51.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus52.jpg",
         species: "Frenatus"
     },
     {
@@ -2577,6 +2789,58 @@ const fish = [
     },
     {
         image: "images/lat33.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat34.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat35.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat36.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat37.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat38.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat39.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat40.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat41.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat42.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat43.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat44.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat45.jpg",
+        species: "Latifaciatus"
+    },
+    {
+        image: "images/lat46.jpg",
         species: "Latifaciatus"
     },
     {
@@ -3081,6 +3345,38 @@ const fish = [
     },
     {
         image: "images/melan37.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan38.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan39.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan40.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan41.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan42.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan43.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan44.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan45.jpg",
         species: "Melanopus"
     },
     {
@@ -4000,6 +4296,26 @@ const fish = [
         species: "Percula"
     },
     {
+        image: "images/percula50.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula51.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula52.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula53.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula54.jpg",
+        species: "Percula"
+    },
+    {
         image: "images/perideraion1.JPG",
         species: "Perideraion"
     },
@@ -4736,7 +5052,7 @@ const fish = [
         species: "Sebae"
     },
     {
-        image: "images/sebae2.JPG",
+        image: "images/sebae2.jpg",
         species: "Sebae"
     },
     {
@@ -4749,10 +5065,6 @@ const fish = [
     },
     {
         image: "images/sebae5.jpg",
-        species: "Sebae"
-    },
-    {
-        image: "images/sebae6.webp",
         species: "Sebae"
     },
     {
@@ -5172,6 +5484,7 @@ const fish = [
         species: "Tricinctus"
     }
 ];
+
 
 let shuffledFish = [];
 let currentFishIndex = 0;
