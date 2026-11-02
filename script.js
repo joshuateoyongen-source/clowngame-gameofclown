@@ -7496,7 +7496,7 @@ function playDuelBell() {
 
 function playDuelCountdownSound() {
     const sound = new Audio("duelsmusic/countdown.mp3");
-    sound.volume = 0.17;
+    sound.volume = 0.08;
 
     sound.play().catch(error => {
         console.warn("Could not play duel countdown sound:", error);
