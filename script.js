@@ -6197,7 +6197,7 @@ const clownfishGuide = {
 
 
     "a Fake": {
-        image: "images/cg6.jpeg",
+        image: "images/cg6.JPEG",
 
         scientificName: "Coris Gaimard",
 
@@ -6221,7 +6221,7 @@ const clownfishGuide = {
     },
 
     "Sebae": {
-        image: "images/sebae20.JPG",
+        image: "images/sebae20.jpg",
 
         scientificName: "Amphiprion sebae",
 
