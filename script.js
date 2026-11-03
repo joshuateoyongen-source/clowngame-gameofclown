@@ -6196,7 +6196,7 @@ const clownfishGuide = {
 
 
 
-    "A Fake": {
+    "a Fake": {
         image: "images/cg6.jpeg",
 
         scientificName: "Coris Gaimard",
@@ -6218,11 +6218,60 @@ const clownfishGuide = {
 
         extraNotes:
             "Ohnepixel and Friends adore the Fake."
-    }
+    },
 
+    "Sebae": {
+        image: "images/sebae20.JPG",
 
+        scientificName: "Amphiprion sebae",
+
+        description:
+            "Sebae Clowns are one of the most widespread Clowns, ranging from the Arabian peninsula to the Chagos islands, and to Sumatra and Java.",
+
+        whitebars: "2 White Bars with a Saddle",
+
+        identificationTips: [
+            "Like the other Saddlebacks, Sebae has a saddle as its second White Bar.",
+            "Sebae has a yellow caudal fin, which is different from Polymnus' white and black one.",
+            "Sebae is limited to Haddoni anemones, which is useful for choosing NOT to guess Sebae.",
+            "Sebae has some coverage taken during different algae blooms. The water therefore appears a vivid green."
+        
+        
+        ],
+
+        similarSpecies:
+            "Polymnus",
+
+        extraNotes:
+            "Sebae love Haddoni very much!"
+    },
    
+    "Akallopisos": {
+        image: "images/akallopisos5.JPG",
 
+        scientificName: "Amphiprion akallopisos",
+
+        description:
+            "The most common of the Skunk Clowns, as in those with a white horizontal bar along the dorsal fins, Akallopisos Clowns inhabit the Eastern African coast, as well as Western Sumatra.",
+
+        whitebars: "Skunk Bar (Horizontal)",
+
+        identificationTips: [
+            "Akallopisos has a white caudal fin; within the skunks, this is also found in Pacificus.",
+            "Akallopisos is generally paler compared to both Pacificus and Sandarancinos, the two other Skunk Clowns.",
+            "Akallopisos can be found in both Magnifica and Mertensii Anemones, whilst Pacificus can only be found in the former.",
+            "Akallopisos sometimes has copyright that has a French website domain (.fr). This is unique to Akallopisos.",
+            "Akallopisos is generally more commonly found within white-coloured Anemones in its coverage compared to Pacificus."
+
+
+        ],
+
+        similarSpecies:
+            "Pacificus, Sandarancinos",
+
+        extraNotes:
+            "Keoki Stenders prefer Pacificus hehehe."
+    }
 
 
 
