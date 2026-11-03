@@ -8072,7 +8072,7 @@ function playDuelBell() {
 // ==========================================
 
 function playDuelCountdownSound() {
-    const sound = new Audio("duelsmusic/Countdowngoc.mp3");
+    const sound = new Audio("duelsmusic/Countdowngoc.m4a");
     sound.volume = 0.25;
 
     sound.play().catch(error => {
