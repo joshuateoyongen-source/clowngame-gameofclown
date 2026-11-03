@@ -308,6 +308,54 @@ const fish = [
         species: "Akallopisos"
     },
     {
+        image: "images/akallopisos47.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos48.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos49.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos50.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos51.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos52.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos53.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos54.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos55.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos56.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos57.jpg",
+        species: "Akallopisos"
+    },
+    {
+        image: "images/akallopisos58.jpg",
+        species: "Akallopisos"
+    },
+    {
         image: "images/akindynos1.jpg",
         species: "Akindynos"
     },
@@ -473,6 +521,10 @@ const fish = [
     },
     {
         image: "images/akindynos42.jpg",
+        species: "Akindynos"
+    },
+    {
+        image: "images/akindynos43.jpg",
         species: "Akindynos"
     },
     {
@@ -1025,6 +1077,42 @@ const fish = [
     },
     {
         image: "images/maroon48.jpg",
+        species: "Biaculeatus"
+    },
+    {
+        image: "images/maroon49.jpg",
+        species: "Biaculeatus"
+    },
+    {
+        image: "images/maroon50.jpg",
+        species: "Biaculeatus"
+    },
+    {
+        image: "images/maroon51.jpg",
+        species: "Biaculeatus"
+    },
+    {
+        image: "images/maroon52.jpg",
+        species: "Biaculeatus"
+    },
+    {
+        image: "images/maroon53.jpg",
+        species: "Biaculeatus"
+    },
+    {
+        image: "images/maroon54.jpg",
+        species: "Biaculeatus"
+    },
+    {
+        image: "images/maroon55.jpg",
+        species: "Biaculeatus"
+    },
+    {
+        image: "images/maroon56.jpg",
+        species: "Biaculeatus"
+    },
+    {
+        image: "images/maroon57.jpg",
         species: "Biaculeatus"
     },
     {
@@ -1624,10 +1712,6 @@ const fish = [
         species: "Chrysopterus"
     },
     {
-        image: "images/chrysopterus11.jpg",
-        species: "Chrysopterus"
-    },
-    {
         image: "images/chrysopterus12.jpg",
         species: "Chrysopterus"
     },
@@ -1717,6 +1801,42 @@ const fish = [
     },
     {
         image: "images/chrysopterus34.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus35.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus36.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus37.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus38.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus39.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus40.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus42.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus43.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus45.jpg",
         species: "Chrysopterus"
     },
     {
@@ -2112,6 +2232,10 @@ const fish = [
         species: "Ephippium"
     },
     {
+        image: "images/ef40.jpg",
+        species: "Ephippium"
+    },
+    {
         image: "images/frenatus1.JPEG",
         species: "Frenatus"
     },
@@ -2317,6 +2441,54 @@ const fish = [
     },
     {
         image: "images/frenatus52.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus53.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus54.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus55.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus56.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus57.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus58.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus59.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus60.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus61.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus62.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus63.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus64.jpg",
         species: "Frenatus"
     },
     {
@@ -2952,6 +3124,46 @@ const fish = [
         species: "Leucokranos"
     },
     {
+        image: "images/leucokranos28.jpg",
+        species: "Leucokranos"
+    },
+    {
+        image: "images/leucokranos29.jpg",
+        species: "Leucokranos"
+    },
+    {
+        image: "images/leucokranos30.jpg",
+        species: "Leucokranos"
+    },
+    {
+        image: "images/leucokranos31.jpg",
+        species: "Leucokranos"
+    },
+    {
+        image: "images/leucokranos32.jpg",
+        species: "Leucokranos"
+    },
+    {
+        image: "images/leucokranos33.jpg",
+        species: "Leucokranos"
+    },
+    {
+        image: "images/leucokranos34.jpg",
+        species: "Leucokranos"
+    },
+    {
+        image: "images/leucokranos35.jpg",
+        species: "Leucokranos"
+    },
+    {
+        image: "images/leucokranos36.jpg",
+        species: "Leucokranos"
+    },
+    {
+        image: "images/leucokranos37.jpg",
+        species: "Leucokranos"
+    },
+    {
         image: "images/maohiensis1.JPG",
         species: "Maohiensis"
     },
@@ -3085,6 +3297,34 @@ const fish = [
     },
     {
         image: "images/maohiensis34.jpg",
+        species: "Maohiensis"
+    },
+    {
+        image: "images/maohiensis35.jpg",
+        species: "Maohiensis"
+    },
+    {
+        image: "images/maohiensis36.jpg",
+        species: "Maohiensis"
+    },
+    {
+        image: "images/maohiensis37.jpg",
+        species: "Maohiensis"
+    },
+    {
+        image: "images/maohiensis38.jpg",
+        species: "Maohiensis"
+    },
+    {
+        image: "images/maohiensis39.jpg",
+        species: "Maohiensis"
+    },
+    {
+        image: "images/maohiensis40.jpg",
+        species: "Maohiensis"
+    },
+    {
+        image: "images/maohiensis41.jpg",
         species: "Maohiensis"
     },
     {
@@ -3377,6 +3617,54 @@ const fish = [
     },
     {
         image: "images/melan45.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan46.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan47.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan48.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan49.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan50.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan51.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan52.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan53.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan54.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan55.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan56.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan57.jpg",
         species: "Melanopus"
     },
     {
@@ -3841,6 +4129,62 @@ const fish = [
     },
     {
         image: "images/ocellaris61.png",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris62.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris63.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris64.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris65.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris66.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris67.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris68.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris69.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris70.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris71.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris72.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris73.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris74.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris75.jpg",
         species: "Ocellaris"
     },
     {
@@ -4313,6 +4657,38 @@ const fish = [
     },
     {
         image: "images/percula54.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula55.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula56.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula57.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula58.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula59.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula60.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula61.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula62.jpg",
         species: "Percula"
     },
     {
@@ -5048,6 +5424,30 @@ const fish = [
         species: "Sandarancinos"
     },
     {
+        image: "images/sandarancinos40.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos41.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos42.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos43.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos44.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos45.jpg",
+        species: "Sandarancinos"
+    },
+    {
         image: "images/sebae1.JPEG",
         species: "Sebae"
     },
@@ -5249,6 +5649,22 @@ const fish = [
     },
     {
         image: "images/sebae52.jpg",
+        species: "Sebae"
+    },
+    {
+        image: "images/sebae53.jpg",
+        species: "Sebae"
+    },
+    {
+        image: "images/sebae54.jpg",
+        species: "Sebae"
+    },
+    {
+        image: "images/sebae55.jpg",
+        species: "Sebae"
+    },
+    {
+        image: "images/sebae56.jpg",
         species: "Sebae"
     },
     {
@@ -5482,8 +5898,109 @@ const fish = [
     {
         image: "images/tricinctus31.jpg",
         species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus32.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus33.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus34.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus35.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus36.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus37.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus38.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus39.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus40.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus41.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus42.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus43.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus44.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus45.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus46.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus47.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus48.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus49.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus50.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus51.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus52.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus53.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus54.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus55.jpg",
+        species: "Tricinctus"
+    },
+    {
+        image: "images/tricinctus56.jpg",
+        species: "Tricinctus"
     }
 ];
+
 
 
 let shuffledFish = [];
@@ -7496,7 +8013,7 @@ function playDuelBell() {
 
 function playDuelCountdownSound() {
     const sound = new Audio("duelsmusic/countdown.mp3");
-    sound.volume = 0.08;
+    sound.volume = 0.32;
 
     sound.play().catch(error => {
         console.warn("Could not play duel countdown sound:", error);
