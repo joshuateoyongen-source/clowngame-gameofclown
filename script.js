@@ -6168,13 +6168,73 @@ const clownfishGuide = {
 
         extraNotes:
             "Perculas are less ragebaitable than Ocellarises are hehehe"
+    },
+
+
+
+    "Akindynos": {
+        image: "images/akindynos4.webp",
+
+        scientificName: "Amphiprion akindynos",
+
+        description:
+            "Akindynos Clowns, also known as the Barrier Reef Clowns, inhabit the Great Barrier Reef of Australia.",
+
+        whitebars: "2 White Bars",
+
+        identificationTips: [
+            "Akindynos Clowns have a large and noticeable white patch on their mouths, referred to as the 'Meth Mouth'. This can be found in other species, but is usually less prominent or less common",
+            "Akindynos Clowns have a bright white caudal fin, especially nearing the caudal peduncle."
+        ],
+
+        similarSpecies:
+            "Omanensis",
+
+        extraNotes:
+            "Akindynos clowns do not like methamphetamine, and they instead have meth mouths to add salt to their food as a part of their diet."
+    },
+
+
+
+    "A Fake": {
+        image: "images/cg6.jpeg",
+
+        scientificName: "Coris Gaimard",
+
+        description:
+            "Fakes are not actually Amphiprion clowns, and are instead juveniles of the species Coris Gaimard, or the African or Clown Coris fish, which resemble Clowns.",
+
+        whitebars: "5 to 6 White Circles",
+
+        identificationTips: [
+            "Fakes have circular bars, which are incomplete and do not extend all the way to the belly. This is unique to the Fake.",
+            "Fakes do not have a Clown body, and are shaped like wedges, or long and slender, especially in comparison to Clowns, which are rounder and fatter."
+        
+        
+        ],
+
+        similarSpecies:
+            "None",
+
+        extraNotes:
+            "Ohnepixel and Friends adore the Fake."
     }
 
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
 };
-
-
-
-
 
 
 
@@ -8012,8 +8072,8 @@ function playDuelBell() {
 // ==========================================
 
 function playDuelCountdownSound() {
-    const sound = new Audio("duelsmusic/countdown.mp3");
-    sound.volume = 0.32;
+    const sound = new Audio("duelsmusic/Countdowngoc.mp3");
+    sound.volume = 0.25;
 
     sound.play().catch(error => {
         console.warn("Could not play duel countdown sound:", error);
