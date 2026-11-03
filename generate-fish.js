@@ -11,8 +11,7 @@ const path = require("path");
 //Select "terminal"
 //Select "new terminal"
 //INSERT COPYPASTA TO GENERATE NEW SPECIES NAME into the new terminal
-//"node C:\Users\GAdmin\Desktop\Clown Game - Game of Clown\generate-fish.js" (with the quotation marks also)
-
+//"node generate-fish.js" (do not include the quotation marks "")
 
 const speciesMap = {
     akallopisos: "Akallopisos",
