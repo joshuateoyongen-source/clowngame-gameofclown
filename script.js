@@ -892,6 +892,22 @@ const fish = [
         species: "Barberi"
     },
     {
+        image: "images/barberi38.jpg",
+        species: "Barberi"
+    },
+    {
+        image: "images/barberi39.jpg",
+        species: "Barberi"
+    },
+    {
+        image: "images/barberi40.jpg",
+        species: "Barberi"
+    },
+    {
+        image: "images/barberi41.jpg",
+        species: "Barberi"
+    },
+    {
         image: "images/maroon1.JPG",
         species: "Biaculeatus"
     },
@@ -1841,6 +1857,30 @@ const fish = [
     },
     {
         image: "images/chrysopterus45.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus46.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus47.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus48.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus49.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus50.jpg",
+        species: "Chrysopterus"
+    },
+    {
+        image: "images/chrysopterus51.jpg",
         species: "Chrysopterus"
     },
     {
@@ -4192,6 +4232,14 @@ const fish = [
         species: "Ocellaris"
     },
     {
+        image: "images/ocellaris76.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris77.jpg",
+        species: "Ocellaris"
+    },
+    {
         image: "images/oman1.JPG",
         species: "Omanensis"
     },
@@ -4881,6 +4929,62 @@ const fish = [
     },
     {
         image: "images/perideraion48.png",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion49.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion50.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion51.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion52.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion53.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion54.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion55.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion56.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion57.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion58.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion59.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion60.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion61.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion62.jpg",
         species: "Perideraion"
     },
     {
@@ -6007,6 +6111,8 @@ const fish = [
 
 
 
+
+
 let shuffledFish = [];
 let currentFishIndex = 0;
 
@@ -6316,7 +6422,7 @@ const clownfishGuide = {
 
         identificationTips: [
             "Allardi has a black trunk, with yellow caudal, pelvic and anal fins almost always, and a white caudal fin, forming a recognisable goblet/cup shape.",
-            "Allardi has a black cap on its forehead, much like Clarkii and Barberi. Since the black cap is less noticeable within Chrysopterus, it can be useful for telling the two apart.",
+            "Allardi has a black cap on its forehead, much like Clarkii, Barberi and Chrysogaster. Since the black cap is less noticeable within Chrysopterus, it can be useful for telling the two apart.",
             "Allardi, being the Clown of Southern Africa, has some coverage taken with copyrights listing places within the region, such as Cape Town. This is unique to Allardi."
 
 
@@ -6374,8 +6480,79 @@ const clownfishGuide = {
 
         extraNotes:
             "Chagos Clown Chill in Chanemone"
-    }
+    },
 
+
+
+ "Barberi": {
+        image: "images/barberi1.JPG",
+
+        scientificName: "Amphiprion barberi",
+
+        description:
+            "Barberi Clowns are one of the Clowns of the Great Pacific, and resembles some of the tomato clowns.",
+
+        whitebars: "1 White Bar",
+
+        identificationTips: [
+            "Barberi will have a plain body, but its forehead will always have a dark gray patch on its head, nicknamed the 'black cap'. This, alongside the tomato (single) white bar is indicitive of Barberi.",
+
+
+        ],
+
+        similarSpecies:
+            "Frenatus, Rubrocinctus",
+
+        extraNotes:
+            "Uzie black beanie meta funnie."
+    },
+
+ "Chrysargyrus": {
+        image: "images/arg7.webp",
+
+        scientificName: "Amphiprion chrysargyrus (Clarkii Variant)",
+
+        description:
+            "Chrysargyrus Clowns are one of the regional variants of Clarkii, and these Clowns are found from the Philippines to Taiwan, up to the Ryukyu islands and down to Borneo.",
+
+        whitebars: "3 White Bars",
+
+        identificationTips: [
+            "Chrysargyrus' cuadal fin is very recognisable; it is white, but has yellow lines lining the top and bottom of that fin.",
+            "Chrysargyrus Clowns usually have a colour fade from their head to caudal peduncle from beige at its mouth to black nearer the rear. This colouration is similar to Tricinctus, and is much more common in Chrysargyrus than Clarkii or the other Clarkii variants."
+            
+        ],
+
+        similarSpecies:
+            "Clarkii, Japonicus, Tricinctus",
+
+        extraNotes:
+            "Special Tail call for CLOWN CELEBRATINO"
+    },
+
+ "Chrysogaster": {
+        image: "images/chrysogaster2.JPG",
+
+        scientificName: "Amphiprion chrysogaster",
+
+        description:
+            "Also known as the Mauritian Clowns, Chrysogaster Clowns live chill amish lifestyles within their Anemones.",
+
+        whitebars: "3 White Bars",
+
+        identificationTips: [
+            "Chrysogaster Clowns are mostly black in colour, from their black forehead to their caudal fin. The only part of their body that isn't black is the Clown's yellow belly.",
+            "Chrysogaster Clowns have a simple-looking black and white tail, unlike Fuscocaudatus' caudal fin which has pins and spikes within it."
+
+
+        ],
+
+        similarSpecies:
+            "Fuscocaudatus",
+
+        extraNotes:
+            "Chrys so chill."
+    },
 
 
 
