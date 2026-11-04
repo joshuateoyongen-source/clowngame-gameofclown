@@ -124,6 +124,10 @@ const fish = [
         species: "a Fake"
     },
     {
+        image: "images/cg32.jpg",
+        species: "a Fake"
+    },
+    {
         image: "images/akallopisos1.jpeg",
         species: "Akallopisos"
     },
@@ -6271,10 +6275,106 @@ const clownfishGuide = {
 
         extraNotes:
             "Keoki Stenders prefer Pacificus hehehe."
+    },
+
+    "Pacificus": {
+        image: "images/pacificus2.JPEG",
+
+        scientificName: "Amphiprion pacificus",
+
+        description:
+            "As their name suggests, Pacificus Clowns are one of the three skunks, only found within the Pacific.",
+
+        whitebars: "Skunk Bar (Horizontal)",
+
+        identificationTips: [
+            "Pacificus has a white caudal fin; within the skunks, this is also found in Akallopisos.",
+            "Compared to Akallopisos, Pacificus is generally more orange, but not as orange as Sandarancinos",
+            "In some of Pacificus' coverage, a Keoki Stenders trademark can be seen in large letters. This can be found in other clowns, but within the Skunks, it is only found in Pacificus.",
+            "Pacificus can only be found in Magnifica anemones; Akallopisos can be found in Magnifica and Mertensii anemones."
+
+
+        ],
+
+        similarSpecies:
+            "Akallopisos, Sandarancinos",
+
+        extraNotes:
+            "Keoki Stenders prefer Pacificus yay!"
+    },
+
+
+    "Allardi": {
+        image: "images/allardi3.JPG",
+
+        scientificName: "Amphiprion allardi",
+
+        description:
+            "Allardi Clowns, also known as the Clowns of Southern Africa, can be found from Mozambique's coast down to the Southern Cape.",
+
+        whitebars: "2 White Bars",
+
+        identificationTips: [
+            "Allardi has a black trunk, with yellow caudal, pelvic and anal fins almost always, and a white caudal fin, forming a recognisable goblet/cup shape.",
+            "Allardi has a black cap on its forehead, much like Clarkii and Barberi. Since the black cap is less noticeable within Chrysopterus, it can be useful for telling the two apart.",
+            "Allardi, being the Clown of Southern Africa, has some coverage taken with copyrights listing places within the region, such as Cape Town. This is unique to Allardi."
+
+
+        ],
+
+        similarSpecies:
+            "Clarkii, Chrysopterus",
+
+        extraNotes:
+            "Allardi want all hard e!"
+    },
+
+   "Biaculeatus": {
+        image: "images/maroon2.JPG",
+
+        scientificName: "Amphiprion biaculeatus",
+
+        description:
+            "Biaculeatus (Maroon) Clowns are big and fat Clowns that like to annoy other fish nearby. They are nonetheless popular in aquariums.",
+
+        whitebars: "3 White Bars",
+
+        identificationTips: [
+            "Maroon Clowns are much bigger than most other Clowns, and therefore they proportions are different. For instance, their eyes are smaller in relation to the rest of their body.",
+            "Maroon Clowns get their name from the dark-red, maroon colour of their bodies. This tone of red is highly indicitive of Biaculeatus.",
+            "Maroon Clowns will almost always have a red eye outline around their eyes, which appears in no other Clown.",
+            "Maroon Clowns will sometimes have a spine on their cheek that points towards the mouth. This spine is unique to Maroon Clowns."
+
+        ],
+
+        similarSpecies:
+            "Ocellaris, Percula",
+
+        extraNotes:
+            "Fat Fig"
+    },
+
+ "Chagosensis": {
+        image: "images/chagosensis3.JPEG",
+
+        scientificName: "Amphiprion chagosensis",
+
+        description:
+            "Chagos Clowns get their name from the Chagos archipelago that they are endemic to.",
+
+        whitebars: "2 White Bars",
+
+        identificationTips: [
+            "Chagos Clowns will have a plain body, either light gray or light yellow, and won't have black unlike most other Clowns. Bicinctus, on the other hand, will usually have black on its body.",
+
+        ],
+
+        similarSpecies:
+            "Bicinctus",
+
+        extraNotes:
+            "Chagos Clown Chill in Chanemone"
     }
-
-
-
 
 
 
