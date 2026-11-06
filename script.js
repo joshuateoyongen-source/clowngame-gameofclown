@@ -20,15 +20,17 @@ window.clownFirebase = {
 };
 
 // Sign in anonymously
-window.clownFirebase.auth.signInAnonymously()
+window.clownFirebaseReady = window.clownFirebase.auth.signInAnonymously()
     .then((userCredential) => {
         console.log(
             "Firebase anonymous sign-in successful!",
             userCredential.user.uid
         );
+        return userCredential.user;
     })
     .catch((error) => {
         console.error("Firebase authentication error:", error);
+        return null;
     });
 
 
@@ -9994,3 +9996,215 @@ if (duelScreen) {
 // Build bot grid and fill duel dropdown once the HTML is ready (script is at body end).
 renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
 
+
+
+
+// ==========================================
+// CLOWN CONVENTION — CREATE CONVENTION
+// ==========================================
+
+(() => {
+    const menuScreen = document.getElementById("convention-menu-screen");
+    const createScreen = document.getElementById("convention-create-screen");
+    const lobbyScreen = document.getElementById("convention-lobby-screen");
+    const createStatus = document.getElementById("convention-create-status");
+    const lobbyStatus = document.getElementById("convention-lobby-status");
+    const playerList = document.getElementById("convention-player-list");
+
+    if (!menuScreen || !createScreen || !lobbyScreen) return;
+
+    let activePartyCode = null;
+    let membersListener = null;
+
+    function showConventionScreen(screenToShow) {
+        [homeScreen, challengeScreen, guideScreen, gameScreen,
+         document.getElementById("cluny-lobby"), document.getElementById("duel-screen"),
+         menuScreen, createScreen, lobbyScreen].forEach(screen => {
+            if (screen) screen.hidden = screen !== screenToShow;
+        });
+    }
+
+    function selectedMode() {
+        return document.querySelector('input[name="convention-mode"]:checked')?.value || "duels";
+    }
+
+    function updateModeSettings() {
+        const pointParty = selectedMode() === "pointParty";
+        document.getElementById("point-party-settings").hidden = !pointParty;
+        document.getElementById("duels-settings").hidden = pointParty;
+    }
+
+    function makePartyCode() {
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const randomValues = new Uint8Array(4);
+        if (window.crypto?.getRandomValues) {
+            window.crypto.getRandomValues(randomValues);
+            return Array.from(randomValues, value => letters[value % letters.length]).join("");
+        }
+        return Array.from({ length: 4 }, () => letters[Math.floor(Math.random() * letters.length)]).join("");
+    }
+
+    function showPlayers(members) {
+        playerList.replaceChildren();
+        const entries = Object.values(members || {}).sort((a, b) => {
+            if (a.role === "host") return -1;
+            if (b.role === "host") return 1;
+            return (a.joinedAt || 0) - (b.joinedAt || 0);
+        });
+
+        if (!entries.length) {
+            const item = document.createElement("li");
+            item.textContent = "No players yet.";
+            playerList.appendChild(item);
+            return;
+        }
+
+        entries.forEach(member => {
+            const item = document.createElement("li");
+            item.textContent = `${member.name}${member.role === "host" ? " — Host" : ""}`;
+            playerList.appendChild(item);
+        });
+    }
+
+    function stopMembersListener() {
+        if (membersListener && activePartyCode && window.clownFirebase) {
+            window.clownFirebase.database.ref(`parties/${activePartyCode}/members`).off("value", membersListener);
+        }
+        membersListener = null;
+    }
+
+    async function createConvention() {
+        const button = document.getElementById("confirm-create-convention-button");
+        const name = document.getElementById("convention-host-name").value.trim();
+        const mode = selectedMode();
+
+        createStatus.textContent = "";
+        if (!name || name.length > 17) {
+            createStatus.textContent = "Please enter a display name between 1 and 17 characters.";
+            return;
+        }
+
+        let settings;
+        if (mode === "pointParty") {
+            const rounds = Number(document.getElementById("convention-rounds").value);
+            const roundTimeSeconds = Number(document.getElementById("convention-round-time").value);
+            if (!Number.isInteger(rounds) || rounds < 5 || rounds > 25) {
+                createStatus.textContent = "Choose between 5 and 25 rounds.";
+                return;
+            }
+            if (!Number.isInteger(roundTimeSeconds) || roundTimeSeconds < 10 || roundTimeSeconds > 45) {
+                createStatus.textContent = "Choose between 10 and 45 seconds per round.";
+                return;
+            }
+            settings = { maxPlayers: null, rounds, roundTimeSeconds, pointBoost: document.getElementById("convention-point-boost").checked };
+        } else {
+            settings = {
+                maxPlayers: 2,
+                challenges: {
+                    downTheClown: document.getElementById("convention-down-clown").checked,
+                    clownMorpho: document.getElementById("convention-morpho").checked,
+                    clownWarp: document.getElementById("convention-warp").checked,
+                    clownHazelnut: document.getElementById("convention-hazelnut").checked
+                }
+            };
+        }
+
+        button.disabled = true;
+        button.textContent = "Creating…";
+        createStatus.textContent = "Connecting to Firebase…";
+
+        try {
+            const user = await window.clownFirebaseReady;
+            if (!user) throw new Error("Firebase sign-in has not completed. Please refresh and try again.");
+
+            const database = window.clownFirebase.database;
+            const timestamp = Date.now();
+            const partyData = {
+                hostUid: user.uid,
+                mode,
+                status: "waiting",
+                createdAt: timestamp,
+                settings,
+                members: {
+                    [user.uid]: { name, role: "host", joinedAt: timestamp, score: 0 }
+                },
+                gameState: { phase: "lobby", roundNumber: 0, updatedAt: timestamp }
+            };
+
+            let createdCode = null;
+            let lastError = null;
+            for (let attempt = 0; attempt < 8; attempt++) {
+                const candidate = makePartyCode();
+                try {
+                    await database.ref(`parties/${candidate}`).set(partyData);
+                    createdCode = candidate;
+                    break;
+                } catch (error) {
+                    lastError = error;
+                    if (error.code !== "PERMISSION_DENIED" && error.code !== "PERMISSION_DENIED: Permission denied") throw error;
+                }
+            }
+
+            if (!createdCode) {
+                throw lastError || new Error("Could not create a unique party code. Please try again.");
+            }
+
+            stopMembersListener();
+            activePartyCode = createdCode;
+            document.getElementById("convention-code-display").textContent = createdCode;
+            document.getElementById("convention-lobby-mode").textContent = mode === "duels" ? "Party Duels · 2 players" : `Point Party · ${settings.rounds} rounds · ${settings.roundTimeSeconds}s per round`;
+            lobbyStatus.textContent = "Your Convention is ready. Waiting for friends to request to join…";
+            showPlayers(partyData.members);
+
+            membersListener = snapshot => showPlayers(snapshot.val() || {});
+            database.ref(`parties/${createdCode}/members`).on("value", membersListener, error => {
+                console.error("Convention member-list listener failed:", error);
+                lobbyStatus.textContent = "The lobby was created, but the live player list could not be updated.";
+            });
+
+            console.log("Clown Convention created successfully:", createdCode);
+            showConventionScreen(lobbyScreen);
+        } catch (error) {
+            console.error("Could not create Clown Convention:", error);
+            createStatus.textContent = error.code === "PERMISSION_DENIED"
+                ? "Firebase denied party creation. Check that the published database rules match our setup."
+                : `Could not create the Convention: ${error.message || error}`;
+        } finally {
+            button.disabled = false;
+            button.textContent = "Create Convention";
+        }
+    }
+
+    document.getElementById("clown-convention-button").addEventListener("click", () => {
+        showConventionScreen(menuScreen);
+    });
+
+    document.getElementById("create-convention-button").addEventListener("click", () => {
+        createStatus.textContent = "";
+        updateModeSettings();
+        showConventionScreen(createScreen);
+    });
+
+    document.getElementById("join-convention-button").addEventListener("click", () => {
+        // Join flow is implemented in the next development step.
+    });
+
+    document.querySelectorAll('input[name="convention-mode"]').forEach(radio => {
+        radio.addEventListener("change", updateModeSettings);
+    });
+
+    document.getElementById("confirm-create-convention-button").addEventListener("click", createConvention);
+
+    document.querySelectorAll(".convention-back-button").forEach(button => {
+        button.addEventListener("click", () => {
+            if (button.closest("#convention-create-screen")) showConventionScreen(menuScreen);
+            else showConventionScreen(homeScreen);
+        });
+    });
+
+    document.getElementById("leave-convention-button").addEventListener("click", () => {
+        stopMembersListener();
+        activePartyCode = null;
+        showConventionScreen(menuScreen);
+    });
+})();

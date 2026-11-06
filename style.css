@@ -380,3 +380,21 @@ button:disabled { opacity:.45; cursor:not-allowed; }
     min-width: 0;
     min-height: 0;
 }
+
+
+/* CLOWN CONVENTION */
+.convention-screen { max-width: 720px; }
+.convention-screen > button { margin: 8px; background: #0077b6; color: #fff; }
+.convention-field { display: block; margin: 18px auto; text-align: left; font-weight: 700; max-width: 520px; }
+.convention-field input[type="text"], .convention-field input[type="number"] { display: block; width: 100%; margin-top: 7px; padding: 12px; border: 2px solid #0077b6; border-radius: 9px; font: inherit; }
+.convention-mode-field { border: 1px solid #c8d8e0; border-radius: 12px; padding: 12px 18px; }
+.convention-mode-field label { display: inline-flex; align-items: center; gap: 7px; margin: 8px 14px 4px 0; }
+.convention-settings { max-width: 520px; margin: 16px auto; padding: 16px; background: #eef5f8; border-radius: 12px; text-align: left; }
+.convention-settings p { margin-top: 0; }
+.convention-checkbox { display: flex; align-items: center; gap: 9px; margin: 12px 0; cursor: pointer; }
+.convention-checkbox input { width: 18px; height: 18px; accent-color: #0077b6; }
+.convention-note { color: #687780; font-size: 14px; }
+.convention-status { min-height: 24px; color: #9b2226; font-weight: 700; }
+.convention-code { display: inline-block; margin: 10px auto 18px; padding: 10px 24px; border: 3px dashed #0077b6; border-radius: 14px; color: #023e8a; background: #eef8fc; font-size: clamp(38px, 8vw, 58px); font-weight: 900; letter-spacing: 9px; }
+.convention-player-list { max-width: 460px; margin: 12px auto; padding: 0; list-style: none; text-align: left; }
+.convention-player-list li { margin: 8px 0; padding: 12px 14px; background: #eef5f8; border-radius: 9px; font-weight: 700; }

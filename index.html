@@ -19,6 +19,60 @@
         <button id="play-button">Play</button>
         <button id="guide-button">Metas of Clown</button>
         <button id="cluny-court-button">Cluny Court</button>
+        <button id="clown-convention-button">Clown Convention</button>
+    </section>
+
+    <!-- CLOWN CONVENTION: menu and host creation flow -->
+    <section id="convention-menu-screen" class="game-container convention-screen" hidden>
+        <h1>Clown Convention</h1>
+        <p>Create a new Convention or join a friend's Convention.</p>
+        <button type="button" id="create-convention-button">Create Convention</button>
+        <button type="button" id="join-convention-button" disabled title="Joining will be added in the next step">Join Convention</button>
+        <p class="convention-note">Joining is coming next. For now, let's get party creation working.</p>
+        <button type="button" class="convention-back-button">Back to Home</button>
+    </section>
+
+    <section id="convention-create-screen" class="game-container convention-screen" hidden>
+        <h1>Create Convention</h1>
+        <p>Choose a game mode and set up your lobby.</p>
+        <label class="convention-field">Your display name
+            <input id="convention-host-name" type="text" maxlength="17" autocomplete="nickname" placeholder="Enter your name">
+        </label>
+        <fieldset class="convention-field convention-mode-field">
+            <legend>Game mode</legend>
+            <label><input type="radio" name="convention-mode" value="duels" checked> Party Duels</label>
+            <label><input type="radio" name="convention-mode" value="pointParty"> Point Party</label>
+        </fieldset>
+        <div id="point-party-settings" class="convention-settings" hidden>
+            <label class="convention-field">Number of rounds (5–25)
+                <input id="convention-rounds" type="number" min="5" max="25" value="10">
+            </label>
+            <label class="convention-field">Time per round (10–45 seconds)
+                <input id="convention-round-time" type="number" min="10" max="45" value="20">
+            </label>
+            <label class="convention-checkbox"><input id="convention-point-boost" type="checkbox"> Enable Point Boost</label>
+        </div>
+        <div id="duels-settings" class="convention-settings">
+            <p><strong>Party Duels</strong> supports exactly two human players. Choose any optional challenges:</p>
+            <label class="convention-checkbox"><input type="checkbox" id="convention-down-clown"> Down the Clown</label>
+            <label class="convention-checkbox"><input type="checkbox" id="convention-morpho"> Clown Morpho</label>
+            <label class="convention-checkbox"><input type="checkbox" id="convention-warp"> Clown Warp</label>
+            <label class="convention-checkbox"><input type="checkbox" id="convention-hazelnut"> Clown Hazelnut</label>
+        </div>
+        <p id="convention-create-status" class="convention-status" role="status" aria-live="polite"></p>
+        <button type="button" id="confirm-create-convention-button">Create Convention</button>
+        <button type="button" class="convention-back-button">Back</button>
+    </section>
+
+    <section id="convention-lobby-screen" class="game-container convention-screen" hidden>
+        <h1>Convention Lobby</h1>
+        <p>Share this four-letter code with your friends:</p>
+        <div id="convention-code-display" class="convention-code">----</div>
+        <p id="convention-lobby-mode"></p>
+        <h2>Players</h2>
+        <ul id="convention-player-list" class="convention-player-list"></ul>
+        <p id="convention-lobby-status" class="convention-status" role="status" aria-live="polite">Waiting for players…</p>
+        <button type="button" id="leave-convention-button">Leave Convention</button>
     </section>
 
     <div id="challenge-screen" class="game-container challenge-layout" hidden>
