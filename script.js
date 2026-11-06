@@ -5243,6 +5243,42 @@ const fish = [
         species: "Polymnus"
     },
     {
+        image: "images/polymnus56.jpg",
+        species: "Polymnus"
+    },
+    {
+        image: "images/polymnus57.jpg",
+        species: "Polymnus"
+    },
+    {
+        image: "images/polymnus58.jpg",
+        species: "Polymnus"
+    },
+    {
+        image: "images/polymnus59.jpg",
+        species: "Polymnus"
+    },
+    {
+        image: "images/polymnus60.jpg",
+        species: "Polymnus"
+    },
+    {
+        image: "images/polymnus61.jpg",
+        species: "Polymnus"
+    },
+    {
+        image: "images/polymnus62.jpg",
+        species: "Polymnus"
+    },
+    {
+        image: "images/polymnus63.jpg",
+        species: "Polymnus"
+    },
+    {
+        image: "images/polymnus64.jpg",
+        species: "Polymnus"
+    },
+    {
         image: "images/rubro1.JPG",
         species: "Rubrocinctus"
     },
@@ -6149,6 +6185,7 @@ const fish = [
 
 
 
+
 let shuffledFish = [];
 let currentFishIndex = 0;
 
@@ -7022,6 +7059,7 @@ const clownfishGuide = {
             "The caudal fin of Polymnus is black, with a translucent white lining around it, forming a unique-looking fin. Sebae's is yellow instead.",
             "Polymnus has a 2nd white bar that resembles a saddle, curving upwards and away from the Clown's head. This is also found in Sebae.",
             "Polymnus males and females differ greatly in colouration; the females are almost entirely black apart from their white bars, and are much bigger compared to the males, who still have black colouration but are much more orange.",
+            "Polymnus Clowns are usually seen with their carpet anemones on the seabed, surrounded by sand.",
             "Some of Polymnus' coverage was taken alongside the British Broadcasting Channel's wildlife team, hence a BBC copyright can be seen. This is unique to Polymnus."
         ],
 
@@ -7039,7 +7077,7 @@ const clownfishGuide = {
         scientificName: "Amphiprion rubrocinctus",
 
         description:
-            "Also known as the Australian Clown, Rubrocinctus Clowns are one of the tomatoes, and are found along the northern coast of Western Australia and the Northern Territory..",
+            "Also known as the Australian Clown, Rubrocinctus Clowns are one of the tomatoes, and are found along the northern coast of Western Australia and the Northern Territory.",
 
         whitebars: "1 White Bar (tomato)",
 
@@ -7057,11 +7095,103 @@ const clownfishGuide = {
             
     },
 
+           "Sandarancinos": {
+        image: "images/sandarancinos4.JPG",
 
+        scientificName: "Amphiprion sandarancinos",
 
+        description:
+            "Sandarancinos Clowns are one of the Skunk Clowns, found from Japan down to Western Australia, and from Sumatra to Papua New Guinea.",
 
+        whitebars: "1 Skunk Bar (horizontal)",
 
+        identificationTips: [
+           "Compared to the other Skunk Clowns, Sandarancinos is the only one of them that has an orange caudal fin. Similarly, the body of Sandarancinos is noticeably more orange than the other Skunk Clowns.",
+           "During the coverage capturing process, the Sandarancinos Clowns faced the cameras head-on, hence a large amount of the head-first coverage among the Clowns will belong to Sandarancinos."
 
+        ],
+
+        similarSpecies:
+            "Akallopisos, Pacificus",
+
+        extraNotes:
+            "Keoki Sanders"  
+            
+    },
+
+           "Snyderi": {
+        image: "images/snyderi14.jpg",
+
+        scientificName: "Amphiprion snyderi (Clarkii Variant)",
+
+        description:
+            "Snyderi Clowns are one of the Clarkii Variants, and are found around the bays of Japan, such as near Osaka and Hiroshima.",
+
+        whitebars: "3 White Bars",
+
+        identificationTips: [
+           "Compared to Clarkii and the other Clarkii Variants, Snyderi Clowns are almost completely black and white in appearance.",
+           "Snyderi's coverage will almost always appear as light-blue to dark-blue due to the conditions within Japanese waters at the time the coverage was taken. This is highly indicitive of Snyderi."
+
+        ],
+
+        similarSpecies:
+            "Clarkii, Japonicus",
+
+        extraNotes:
+            "Snyderi is often abbreviated to 'Sny'."  
+            
+    },
+
+          "Thiellei": {
+        image: "images/thi1.JPG",
+
+        scientificName: "Amphiprion thiellei (Hybrid)",
+
+        description:
+            "Thiellei Clowns are a naturally occuring hybrid between A. ocellaris and A. sandarancinos, or between A. ocellaris and A. leucokranos. They are found around Cebu island.",
+
+        whitebars: "1 White Bar (Leucokranos)",
+
+        identificationTips: [
+           "Alongside its white 'Leucokranos' bar, Thiellei Clowns also have a short dash at their caudal peduncle, and sometimes another white dash in between the two dorsal fins.",
+           "Because of the rarity of this species, the majority of the Thiellei coverage was taken within the Fish Farm 3 simulator, hence the Thiellei Clowns will appear as renders within a digital tank. This kind of coverage can also occasionally be found in other Clowns, but Leucokranos lacks this coverage."
+
+        ],
+
+        similarSpecies:
+            "Leucokranos",
+
+        extraNotes:
+            "Thiellei is the rarest Clown within Clown Game."  
+            
+    },
+
+          "Tricinctus": {
+        image: "images/tricinctus4.JPG",
+
+        scientificName: "Amphiprion tricinctus",
+
+        description:
+            "Tricinctus Clowns get their name from the fact that they, like many other Clowns, have three white bars. They inhabit the eastern Pacific reefs.",
+
+        whitebars: "3 White Bars",
+
+        identificationTips: [
+           "Similar to Akindynos, Tricinctus CLowns have a clear 'Meth Mouth' on their mouths that can help distinguish them from Clarkii, who will usually not have one as distinct.",
+           "Tricinctus Clowns usually have a recognisable 'fading' colouration, from beige at their mouths, gradually becoming darker towards the rear. This is also common in other Clowns such as Clarkii and Chrysargyrus.",
+           "Tricinctus Clowns sometimes appear fully black except for their three white bars, resembling an Ocellaris Darwin Variant but with thinner white bars, or resembling a Milli but with a black caudal fin instead.",
+           "Tricinctus Clowns ALWAYS have a black caudal fin"
+
+        ],
+
+        similarSpecies:
+            "Clarkii, Chrysargyrus",
+
+        extraNotes:
+            "Tricinctus and Bicinctus are NOT closely related other than being in the same genus."  
+            
+    },
 
 
 
