@@ -7415,6 +7415,8 @@ let musicStarted = false;
 
 let transitionStarted = false;
 
+let partyDuelsMusicFaded = false;
+
 
 // ==========================================
 // PRELOAD ALL MUSIC
@@ -8871,6 +8873,8 @@ let duelBotMaxHP = 5;
 let duelPlayerMultiplierStacks = 0;
 let duelBotMultiplierStacks = 0;
 let duelAudio = null;
+let partyDuelsAudio = null;
+let partyDuelsMusicActive = false;
 let duelPreviousMusicTrack = 0;
 
 
@@ -9209,6 +9213,95 @@ async function restoreNormalMusic() {
         activeAudio.pause(); activeAudio.currentTime=0; activeAudio.src=musicTracks[0]; activeAudio.loop=false; activeAudio.volume=0;
         currentTrack=0; transitionStarted=false; musicStarted=true;
         try { await activeAudio.play(); fadeAudio(activeAudio,musicVolume,700); } catch(e) {}
+    }
+}
+async function startPartyDuelsMusic() {
+    if (partyDuelsMusicActive) return;
+
+    partyDuelsMusicActive = true;
+
+    try {
+        if (!partyDuelsAudio) {
+            partyDuelsAudio = new Audio("duelsmusic/duel.mp3");
+            partyDuelsAudio.loop = true;
+        }
+
+        partyDuelsAudio.currentTime = 0;
+        partyDuelsAudio.volume = 0;
+
+        await partyDuelsAudio.play();
+
+        // Fade out evolving music.
+        if (activeAudio && !activeAudio.paused) {
+            fadeAudio(activeAudio, 0, 700);
+        }
+
+        // Fade in Party Duels music.
+        fadeAudio(partyDuelsAudio, musicVolume, 700);
+
+    } catch (error) {
+        partyDuelsMusicActive = false;
+        console.error("Could not start Party Duels music:", error);
+    }
+}
+
+
+async function stopPartyDuelsMusic() {
+    if (!partyDuelsMusicActive) return;
+
+    partyDuelsMusicActive = false;
+
+    // Fade out Party Duels music.
+    if (partyDuelsAudio) {
+        await fadeAudio(partyDuelsAudio, 0, 550);
+    }
+
+    // Restart evolving music from Track 1.
+    if (useEvolvingMusic && activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+        activeAudio.src = musicTracks[0];
+        activeAudio.loop = false;
+        activeAudio.volume = 0;
+
+        currentTrack = 0;
+        transitionStarted = false;
+        musicStarted = true;
+
+        try {
+            await activeAudio.play();
+            fadeAudio(activeAudio, musicVolume, 700);
+        } catch (error) {
+            console.error("Could not restore evolving music:", error);
+        }
+    }
+}
+// ==========================================
+// PARTY DUELS MUSIC CONTROL
+// ==========================================
+
+async function fadeOutMusicForPartyDuels() {
+    if (!useEvolvingMusic || !musicStarted || partyDuelsMusicFaded) return;
+
+    partyDuelsMusicFaded = true;
+
+    // Fade out the current evolving music.
+    await fadeAudio(activeAudio, 0, 700);
+}
+
+async function fadeInMusicAfterPartyDuels() {
+    if (!useEvolvingMusic || !partyDuelsMusicFaded) return;
+
+    partyDuelsMusicFaded = false;
+
+    // Resume the same track from where it was paused.
+    activeAudio.volume = 0;
+
+    try {
+        await activeAudio.play();
+        fadeAudio(activeAudio, musicVolume, 700);
+    } catch (error) {
+        console.error("Could not resume evolving music:", error);
     }
 }
 
@@ -10037,6 +10130,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     const lobbySettingsDetails = document.getElementById("convention-lobby-settings-details");
     const settingsEditor = document.getElementById("convention-settings-editor");
     const pointPartyStopButton = document.getElementById("point-party-stop-button");
+    const partyDuelsStopButton = document.getElementById("party-duels-stop");
 
     // A player's assigned colour is stored in Firebase as one of these keys.
     const conventionNameColours = {
@@ -10060,7 +10154,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     function showConventionScreen(screenToShow) {
         [homeScreen, challengeScreen, guideScreen, gameScreen,
          document.getElementById("cluny-lobby"), document.getElementById("duel-screen"),
-         menuScreen, createScreen, joinScreen, lobbyScreen, pointPartyScreen].forEach(screen => {
+         menuScreen, createScreen, joinScreen, lobbyScreen, pointPartyScreen, partyDuelsScreen].forEach(screen => {
             if (screen) screen.hidden = screen !== screenToShow;
         });
     }
@@ -10139,6 +10233,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     // POINT PARTY — SYNCHRONISED MULTIPLAYER GAME
     // ==========================================
     const pointPartyScreen = document.getElementById("point-party-screen");
+    const partyDuelsScreen = document.getElementById("party-duels-screen");
     const pointPartyImage = document.getElementById("point-party-image");
     const pointPartyWarpLayer = document.getElementById("point-party-warp-layer");
     const pointPartySelect = document.getElementById("point-party-species-select");
@@ -10171,10 +10266,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     // The existing species list is reused, so Point Party always offers the
     // same answers as the single-player game.
     if (pointPartySelect && Array.isArray(species)) {
-        const blankOption = document.createElement("option");
-        blankOption.value = "";
-        blankOption.textContent = "Select a species";
-        pointPartySelect.appendChild(blankOption);
+        pointPartySelect.replaceChildren();
         species.forEach(speciesName => {
             const option = document.createElement("option");
             option.value = speciesName;
@@ -10369,7 +10461,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         if (pointPartyRenderedRoundKey !== roundKey) {
             pointPartyRenderedRoundKey = roundKey;
             pointPartySubmissionPending = false;
-            pointPartySelect.value = "";
+            pointPartySelect.value = species[0] || "";
             pointPartySelect.disabled = false;
             pointPartySubmit.disabled = false;
             renderPointPartyImage(party, roundKey);
@@ -10437,6 +10529,10 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                 hazelnut: challenges.clownHazelnut === true,
                 tileOrder: challenges.clownWarp === true ? makePointPartyTileOrder() : []
             };
+            // A Convention can be restarted, so an old round number may already
+            // have guesses stored under it. Clear them before publishing the round.
+            await database.ref(`parties/${activePartyCode}/guesses/${roundNumber}`).remove();
+            pointPartyEndingRoundKey = null;
             await database.ref(`parties/${activePartyCode}/gameState`).set({
                 phase: "round",
                 roundNumber,
@@ -10503,8 +10599,9 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         const state = party.gameState || {};
         const roundNumber = Number(state.roundNumber) || 0;
         const timerKey = `${roundNumber}:${state.startedAt || 0}`;
-        const guessCount = Object.keys(party.guesses?.[roundNumber] || {}).length;
-        const playerCount = Object.keys(party.members || {}).length;
+        const memberUids = Object.keys(party.members || {});
+        const roundGuesses = party.guesses?.[roundNumber] || {};
+        const everyoneHasGuessed = memberUids.length > 0 && memberUids.every(uid => !!roundGuesses[uid]);
 
         if (pointPartyHostTimerKey !== timerKey) {
             if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
@@ -10513,7 +10610,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             pointPartyHostTimer = setTimeout(() => endPointPartyRound(roundNumber), delay + 250);
         }
 
-        if (playerCount > 0 && guessCount >= playerCount && pointPartyEndingRoundKey !== `${activePartyCode}:${roundNumber}`) {
+        if (everyoneHasGuessed && pointPartyEndingRoundKey !== `${activePartyCode}:${roundNumber}`) {
             if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
             pointPartyHostTimer = setTimeout(() => endPointPartyRound(roundNumber), 150);
         }
@@ -10657,7 +10754,9 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     });
 
     pointPartyStopButton.addEventListener("click", stopCurrentConventionGame);
+    partyDuelsStopButton.addEventListener("click", stopCurrentConventionGame);
     document.getElementById("point-party-leave-button").addEventListener("click", leaveActiveConvention);
+    document.getElementById("party-duels-leave").addEventListener("click", leaveActiveConvention);
 
     function stopPointPartyLiveListeners() {
         if (!window.clownFirebase || !activePartyCode) return;
@@ -10736,6 +10835,224 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         });
     }
 
+
+    // ==========================================
+    // PARTY DUELS — TWO-PLAYER NO MOVE BATTLE
+    // The host publishes each shared fish and resolves the round using the
+    // same Battle/No Move HP, healing and response-time damage formula as Cluny Court.
+    // ==========================================
+    const pd = {
+        image: document.getElementById("party-duels-image"),
+        warp: document.getElementById("party-duels-warp-layer"),
+        select: document.getElementById("party-duels-species-select"),
+        submit: document.getElementById("party-duels-submit"),
+        status: document.getElementById("party-duels-status"),
+        round: document.getElementById("party-duels-round"),
+        timer: document.getElementById("party-duels-timer"),
+        reveal: document.getElementById("party-duels-reveal"),
+        stop: partyDuelsStopButton
+    };
+    let pdRenderedKey = null;
+    let pdHostDeadline = null;
+    let pdBlinkTimer = null;
+    let pdClockInterval = null;
+    let pdSubmitPending = false;
+    let pdLastResolvedKey = null;
+    let pdStartingRound = false;
+    let pdHostTimerKey = null;
+    let pdLastSoundRound = null;
+    let pdLastDamageSoundRound = null;
+    if (pd.select && Array.isArray(species)) {
+        pd.select.replaceChildren();
+        species.forEach(name => { const option=document.createElement("option"); option.value=name; option.textContent=name; pd.select.appendChild(option); });
+    }
+    function pdName(uid, party) { return party.members?.[uid]?.name || "Player"; }
+    function pdPlayers(party) { return Object.keys(party.members || {}).sort((a,b) => (party.members[a].joinedAt||0)-(party.members[b].joinedAt||0)).slice(0,2); }
+    function pdTileOrder() { const a=[0,1,2,3,4,5,6,7,8]; for(let i=8;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+    function pdRenderHealth(party) {
+        const ids = pdPlayers(party); const hp = party.gameState?.hp || {};
+        const names = ["party-duels-player-one", "party-duels-player-two"];
+        ids.forEach((uid,i)=>{
+            const rawHp=Number(hp[uid]); const value=Math.max(0,Math.min(5000,Number.isFinite(rawHp)?rawHp:5000));
+            document.getElementById(`${names[i]}-name`).textContent=pdName(uid,party)+(uid===activeUserUid?" (You)":"");
+            document.getElementById(`${names[i]}-health`).style.width=`${value/50}%`;
+            document.getElementById(`${names[i]}-hp`).textContent=`${Math.ceil(value).toLocaleString()} / 5,000 HP`;
+        });
+    }
+    function pdRenderFish(state, challenges) {
+        const image=pd.image; const warp=pd.warp;
+        if (!image || !state.image) return;
+        const cs=state.challengeState||{};
+        image.style.transform=`rotate(${cs.upsideDown?180:0}deg)`;
+        image.style.filter=[cs.morpho?"hue-rotate(180deg)":"",cs.hazelnut?"blur(3px)":""].filter(Boolean).join(" ")||"none";
+        warp.hidden=!cs.warp; warp.replaceChildren();
+        warp.style.filter=image.style.filter;
+        warp.style.transform=image.style.transform;
+        image.style.opacity=cs.warp?"0":"1";
+        const finish=()=>{
+            if(!image.naturalWidth || !cs.warp) return;
+            (cs.tileOrder||pdTileOrder()).forEach(index=>{
+                const tile=document.createElement("div"); tile.className="party-duels-warp-tile";
+                const row=Math.floor(index/3), col=index%3;
+                tile.style.backgroundImage=`url("${image.src}")`; tile.style.backgroundSize="300% 300%"; tile.style.backgroundPosition=`${col*50}% ${row*50}%`;
+                warp.appendChild(tile);
+            });
+        };
+        image.onload=finish; image.src=state.image; if(image.complete) finish();
+        document.getElementById("party-duels-challenges").textContent=[
+            challenges.blink?"Blink Mode — Clown Hide":null,
+            challenges.downTheClown?"Down the Clown":null,
+            challenges.clownMorpho?"Clown Morpho":null,
+            challenges.clownWarp?"Clown Warp":null,
+            challenges.clownHazelnut?"Clown Hazelnut":null
+        ].filter(Boolean).join(" · ") || "No optional challenges";
+    }
+    function pdStopVisualTimers(){ if(pdHostDeadline)clearTimeout(pdHostDeadline); if(pdBlinkTimer)clearInterval(pdBlinkTimer); if(pdClockInterval)clearInterval(pdClockInterval); pdHostDeadline=null; pdBlinkTimer=null; pdClockInterval=null; }
+    async function pdStartRound(roundNumber) {
+        if(!activeIsHost||!activePartyCode) return;
+        const ref=window.clownFirebase.database.ref(`parties/${activePartyCode}`);
+        if(pdStartingRound) return;
+        pdStartingRound = true;
+        const snap=await ref.once("value"); const party=snap.val();
+        if(!party||party.status!=="playing"||party.mode!=="duels") { pdStartingRound=false; return; }
+        const players=pdPlayers(party); if(players.length!==2) { pdStartingRound=false; return; }
+        const chosen=fish[Math.floor(Math.random()*fish.length)]; if(!chosen) throw new Error("Fish database is empty.");
+        const c=party.settings?.challenges||{}; const now=pointPartyNow();
+        const challengeState={upsideDown:c.downTheClown===true,morpho:c.clownMorpho===true,warp:c.clownWarp===true,hazelnut:c.clownHazelnut===true,tileOrder:c.clownWarp?pdTileOrder():[]};
+        await ref.child("guesses").child(String(roundNumber)).remove();
+        await ref.child("gameState").set({phase:"round",roundNumber,image:chosen.image,startedAt:now,endsAt:now+30000,hp:party.gameState?.hp||Object.fromEntries(players.map(uid=>[uid,5000])),multipliers:party.gameState?.multipliers||Object.fromEntries(players.map(uid=>[uid,0])),challengeState,updatedAt:now});
+        pdStartingRound = false;
+    }
+    async function pdResolveRound(party, roundNumber) {
+        if(!activeIsHost||!activePartyCode) return;
+        const key=`${activePartyCode}:${roundNumber}`; if(pdLastResolvedKey===key)return; pdLastResolvedKey=key;
+        try {
+            const ref=window.clownFirebase.database.ref(`parties/${activePartyCode}`); const snap=await ref.once("value"); party=snap.val();
+            if(!party||party.status!=="playing"||party.gameState?.phase!=="round"||Number(party.gameState.roundNumber)!==Number(roundNumber))return;
+            const ids=pdPlayers(party), guesses=party.guesses?.[roundNumber]||{}, hp={...(party.gameState.hp||{})}, details={};
+            const answerFish=fish.find(entry=>entry.image===party.gameState.image);
+            if(!answerFish) throw new Error("The current fish image is missing from the fish database.");
+            const correctIds=ids.filter(uid=>guesses[uid]?.species===answerFish.species);
+            const bothCorrect=correctIds.length===2, bothWrong=correctIds.length===0;
+            if(bothCorrect||bothWrong){
+                const heal=bothCorrect?15:750;
+                ids.forEach(uid=>{hp[uid]=Math.min(5000,(Number(hp[uid])||5000)+heal);details[uid]={correct:bothCorrect,healing:Math.min(heal,5000-(Number(party.gameState.hp?.[uid])||5000)),damage:0};});
+            } else {
+                const winner=correctIds[0], loser=ids.find(uid=>uid!==winner);
+                const elapsed=Math.max(0,Number(guesses[winner]?.elapsedMs)||0)/1000;
+                const damage=Math.max(100,Math.min(1500,1500-(2550/19.9)*(Math.max(0.1,elapsed)-0.1)));
+                const rounded=Math.round(damage);
+                hp[loser]=Math.max(0,(Number(hp[loser])||5000)-rounded);
+                ids.forEach(uid=>details[uid]={correct:uid===winner,damage:uid===loser?rounded:0,healing:0});
+            }
+            const ended=ids.some(uid=>hp[uid]<=0); const nextPhase=ended?"finished":"roundResult";
+            await ref.child("gameState").update({phase:nextPhase,hp,answer:answerFish.species,roundResults:details,resultsEndsAt:pointPartyNow()+4200,updatedAt:pointPartyNow(),...(ended?{winner:ids.find(uid=>hp[uid]>0)||null}: {})});
+            if(ended) await ref.child("status").set("finished");
+        } catch(error){ console.error("Party Duels round resolution failed:",error); pdLastResolvedKey=null; }
+    }
+    function pdScheduleHost(party) {
+        if(!activeIsHost) return;
+        const state=party.gameState||{};
+        if(state.phase==="round"){
+            const round=Number(state.roundNumber), ids=pdPlayers(party), guesses=party.guesses?.[round]||{};
+            const key=`round:${round}:${state.startedAt}`;
+            if(ids.length===2&&ids.every(uid=>guesses[uid])){
+                if(pdHostDeadline) clearTimeout(pdHostDeadline);
+                pdHostDeadline=null; pdHostTimerKey=null;
+                pdResolveRound(party,round); return;
+            }
+            if(pdHostTimerKey!==key){
+                if(pdHostDeadline)clearTimeout(pdHostDeadline);
+                pdHostTimerKey=key;
+                pdHostDeadline=setTimeout(()=>{pdHostDeadline=null;pdHostTimerKey=null;pdResolveRound(currentPartyData,round);},Math.max(0,Number(state.endsAt)-pointPartyNow())+100);
+            }
+        } else if(state.phase==="roundResult"){
+            const key=`results:${state.roundNumber}:${state.resultsEndsAt}`;
+            if(pdHostTimerKey!==key){
+                if(pdHostDeadline)clearTimeout(pdHostDeadline);
+                pdHostTimerKey=key;
+                pdHostDeadline=setTimeout(()=>{pdHostDeadline=null;pdHostTimerKey=null;pdStartRound(Number(state.roundNumber)+1).catch(error=>{pdStartingRound=false;console.error(error);pd.status.textContent="The next duel round could not start.";});},Math.max(0,Number(state.resultsEndsAt)-pointPartyNow()));
+            }
+        }
+    }
+    async function pdSubmitGuess(){
+        if(!activePartyCode||!activeUserUid||pdSubmitPending||pd.select.disabled)return;
+        const party=currentPartyData, state=party?.gameState||{}; if(!party||party.mode!=="duels"||state.phase!=="round")return;
+        const chosen=pd.select.value; if(!chosen){pd.status.textContent="Choose a species first.";return;}
+        const elapsedMs=Math.max(0,Math.min(30000,pointPartyNow()-Number(state.startedAt)));
+        pdSubmitPending=true; pd.select.disabled=true; pd.submit.disabled=true; pd.status.textContent="Guess locked in — waiting for your opponent…";
+        try { await window.clownFirebase.database.ref(`parties/${activePartyCode}/guesses/${state.roundNumber}/${activeUserUid}`).set({species:chosen,elapsedMs,submittedAt:pointPartyNow()}); if (typeof playDuelBell === "function") playDuelBell(); }
+        catch(error){pdSubmitPending=false;pd.select.disabled=false;pd.submit.disabled=false;pd.status.textContent=`Could not submit guess: ${error.message||error}`;}
+    }
+    pd.submit.addEventListener("click",pdSubmitGuess);
+    document.addEventListener("keydown",event=>{if(event.code!=="Space"||partyDuelsScreen.hidden)return;event.preventDefault();event.stopImmediatePropagation();pdSubmitGuess();},true);
+    partyDuelsScreen.addEventListener("contextmenu",event=>{event.preventDefault();if(!partyDuelsScreen.hidden)pdSubmitGuess();});
+    function handlePartyDuelsState(party){
+        if(!party||party.mode!=="duels")return;
+        const state=party.gameState||{}; const challenges=party.settings?.challenges||{};
+        // Fade evolving music out while Party Duels is active.
+if (
+    party.status === "playing" &&
+    ["starting", "round", "roundResult"].includes(state.phase)
+) {
+    fadeOutMusicForPartyDuels();
+}
+
+// Restore evolving music when Party Duels ends or returns to the lobby.
+if (
+    party.status === "finished" ||
+    (party.status === "waiting" && state.phase === "lobby")
+) {
+    fadeInMusicAfterPartyDuels();
+}
+        if(party.status==="waiting"&&state.phase==="lobby"){
+            stopPartyDuelsMusic();
+            pdStopVisualTimers(); pdRenderedKey=null; pdSubmitPending=false; pdLastResolvedKey=null; pdStartingRound=false; pdHostTimerKey=null; pdLastSoundRound=null; pdLastDamageSoundRound=null; pd.select.disabled=false;pd.submit.disabled=false;pd.stop.hidden=true;
+            showConventionScreen(lobbyScreen); return;
+        }
+        if(party.status!=="playing"&&party.status!=="finished")return;
+        document.getElementById("party-duels-code").textContent=`Convention ${activePartyCode||"----"} · No Move`;
+        pd.stop.hidden=!activeIsHost;
+        pdRenderHealth(party);
+        if(state.phase==="starting"){
+            startPartyDuelsMusic();
+            showConventionScreen(partyDuelsScreen);
+            if(activeIsHost) pdStartRound(1).catch(e=>{pdStartingRound=false;console.error(e);pd.status.textContent="The host could not start the duel.";});
+            return;
+        }
+        if(state.phase==="round"){
+            startPartyDuelsMusic();
+            showConventionScreen(partyDuelsScreen);
+            const key=`${state.roundNumber}:${state.startedAt}`;
+            if(pdRenderedKey!==key){
+                pdRenderedKey=key;pdSubmitPending=false;pd.select.value=species[0]||"";pd.select.disabled=false;pd.submit.disabled=false;pd.reveal.textContent="";
+                pd.round.textContent=`Round ${state.roundNumber}`;pdRenderFish(state,challenges);pdStopVisualTimers();
+                pdClockInterval=setInterval(()=>{const left=Math.max(0,Number(state.endsAt)-pointPartyNow());pd.timer.textContent=`${(left/1000).toFixed(1)}s`;if(left<=0){pd.select.disabled=true;pd.submit.disabled=true;}},100);
+                if(challenges.blink){pdBlinkTimer=setInterval(()=>{const visible=(pointPartyNow()-Number(state.startedAt))%900<450;pd.image.style.visibility=visible?"visible":"hidden";pd.warp.style.visibility=visible?"visible":"hidden";},80);}else{pd.image.style.visibility="visible";pd.warp.style.visibility="visible";}
+            }
+            const myGuess=party.guesses?.[state.roundNumber]?.[activeUserUid];
+            if(myGuess){pd.select.disabled=true;pd.submit.disabled=true;pd.status.textContent="Your guess is locked in. Waiting for the other player…";}
+            else pd.status.textContent="Identify the clownfish! You have 30 seconds.";
+            pdScheduleHost(party); return;
+        }
+        if(state.phase==="roundResult"){
+            startPartyDuelsMusic();
+            pdStopVisualTimers();showConventionScreen(partyDuelsScreen);pdRenderHealth(party);
+            const ids=pdPlayers(party), results=state.roundResults||{};
+            if(pdLastDamageSoundRound!==Number(state.roundNumber)&&ids.some(uid=>(results[uid]?.damage||0)>0)){pdLastDamageSoundRound=Number(state.roundNumber);if(typeof playDuelHealthLossSound==="function")playDuelHealthLossSound();}
+            pd.reveal.textContent=`The Clown was: ${state.answer}. `+ids.map(uid=>`${pdName(uid,party)}: ${results[uid]?.correct?"Correct":"Incorrect"}${results[uid]?.damage?` · −${results[uid].damage.toLocaleString()} HP`:""}${results[uid]?.healing?` · +${results[uid].healing} HP`:""}`).join(" | ");
+            pd.status.textContent="Next round starting shortly…";
+            pdScheduleHost(party);
+            return;
+        }
+        if(state.phase==="finished"||party.status==="finished"){
+            stopPartyDuelsMusic();
+            pdStopVisualTimers();showConventionScreen(partyDuelsScreen);pdRenderHealth(party);
+            const winner=state.winner;pd.round.textContent="Duel finished";pd.status.textContent=winner?`${pdName(winner,party)} wins the No Move duel!`:"The duel has ended.";
+            pd.reveal.textContent=`Final answer: ${state.answer||"—"}`;pd.select.disabled=true;pd.submit.disabled=true;
+        }
+    }
+
     function renderConventionSettings(party) {
         if (!party) return;
         currentPartyData = party;
@@ -10756,6 +11073,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         if (party.mode === "duels") {
             lines.push("<strong>Game mode:</strong> Party Duels");
             lines.push("<strong>Players:</strong> 2 (one versus one)");
+            lines.push("<strong>Rules:</strong> No Move — 5,000 HP per player");
         } else {
             lines.push("<strong>Game mode:</strong> Point Party");
             lines.push(`<strong>Rounds:</strong> ${Number(settings.rounds) || "—"}`);
@@ -10779,6 +11097,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         renderSettingsEditor(party);
         updateStartButton(party);
         handlePointPartyState(party);
+        handlePartyDuelsState(party);
         if (party.status === "playing" || party.gameState?.phase === "starting") {
             lobbyStatus.textContent = "The host has started the Convention. The shared game-start signal has been received.";
             startGameButton.hidden = true;
@@ -10787,44 +11106,12 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         }
     }
 
-    function renderSettingsEditor(party) {
-        settingsEditor.hidden = !activeIsHost || !activePartyCode || party.status !== "waiting";
-        if (!activeIsHost || !party || settingsEditor.dataset.partyCode === activePartyCode) return;
-        settingsEditor.dataset.partyCode = activePartyCode;
-        const settings = party.settings || {};
-        const challenges = settings.challenges || {};
-        const pointParty = party.mode === "pointParty";
-        document.getElementById("lobby-point-party-editor").hidden = !pointParty;
-        document.getElementById("lobby-duels-editor").hidden = pointParty;
-        if (pointParty) {
-            document.getElementById("lobby-convention-rounds").value = Number(settings.rounds) || 10;
-            document.getElementById("lobby-convention-round-time").value = Number(settings.roundTimeSeconds) || 20;
-            document.getElementById("lobby-convention-point-boost").checked = settings.pointBoost === true;
-            document.getElementById("lobby-point-blink").checked = challenges.blink === true;
-            document.getElementById("lobby-point-down-clown").checked = challenges.downTheClown === true;
-            document.getElementById("lobby-point-morpho").checked = challenges.clownMorpho === true;
-            document.getElementById("lobby-point-warp").checked = challenges.clownWarp === true;
-            document.getElementById("lobby-point-hazelnut").checked = challenges.clownHazelnut === true;
-        } else {
-            document.getElementById("lobby-duels-down-clown").checked = challenges.downTheClown === true;
-            document.getElementById("lobby-duels-morpho").checked = challenges.clownMorpho === true;
-            document.getElementById("lobby-duels-warp").checked = challenges.clownWarp === true;
-            document.getElementById("lobby-duels-hazelnut").checked = challenges.clownHazelnut === true;
-        }
-    }
-
-    async function saveConventionSettings() {
-        if (!activeIsHost || !activePartyCode || !currentPartyData || currentPartyData.status !== "waiting") return;
-        const status = document.getElementById("convention-settings-save-status");
-        const button = document.getElementById("save-convention-settings-button");
-        let settings;
-        if (currentPartyData.mode === "pointParty") {
-            const rounds = Number(document.getElementById("lobby-convention-rounds").value);
-            const roundTimeSeconds = Number(document.getElementById("lobby-convention-round-time").value);
-            if (!Number.isInteger(rounds) || rounds < 5 || rounds > 25) { status.textContent = "Choose between 5 and 25 rounds."; return; }
-            if (!Number.isInteger(roundTimeSeconds) || roundTimeSeconds < 10 || roundTimeSeconds > 45) { status.textContent = "Choose between 10 and 45 seconds per round."; return; }
-            settings = {
-                maxPlayers: null, rounds, roundTimeSeconds,
+    function readConventionEditorSettings() {
+        if (currentPartyData?.mode === "pointParty") {
+            return {
+                maxPlayers: null,
+                rounds: Number(document.getElementById("lobby-convention-rounds").value),
+                roundTimeSeconds: Number(document.getElementById("lobby-convention-round-time").value),
                 pointBoost: document.getElementById("lobby-convention-point-boost").checked,
                 challenges: {
                     blink: document.getElementById("lobby-point-blink").checked,
@@ -10834,36 +11121,135 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                     clownHazelnut: document.getElementById("lobby-point-hazelnut").checked
                 }
             };
-        } else {
-            settings = {
-                maxPlayers: 2,
-                challenges: {
-                    downTheClown: document.getElementById("lobby-duels-down-clown").checked,
-                    clownMorpho: document.getElementById("lobby-duels-morpho").checked,
-                    clownWarp: document.getElementById("lobby-duels-warp").checked,
-                    clownHazelnut: document.getElementById("lobby-duels-hazelnut").checked
-                }
-            };
+        }
+        return {
+            maxPlayers: 2,
+            challenges: {
+                blink: document.getElementById("lobby-duels-blink").checked,
+                downTheClown: document.getElementById("lobby-duels-down-clown").checked,
+                clownMorpho: document.getElementById("lobby-duels-morpho").checked,
+                clownWarp: document.getElementById("lobby-duels-warp").checked,
+                clownHazelnut: document.getElementById("lobby-duels-hazelnut").checked
+            }
+        };
+    }
+
+    function normalizedConventionSettings(settings, mode) {
+        const c = settings?.challenges || {};
+        if (mode === "pointParty") return {
+            maxPlayers: null,
+            rounds: Number(settings?.rounds) || 10,
+            roundTimeSeconds: Number(settings?.roundTimeSeconds) || 20,
+            pointBoost: settings?.pointBoost === true,
+            challenges: {
+                blink: c.blink === true, downTheClown: c.downTheClown === true,
+                clownMorpho: c.clownMorpho === true, clownWarp: c.clownWarp === true,
+                clownHazelnut: c.clownHazelnut === true
+            }
+        };
+        return {
+            maxPlayers: 2,
+            challenges: {
+                blink: c.blink === true, downTheClown: c.downTheClown === true,
+                clownMorpho: c.clownMorpho === true, clownWarp: c.clownWarp === true,
+                clownHazelnut: c.clownHazelnut === true
+            }
+        };
+    }
+
+    function updateConventionSettingsSaveButton() {
+        const button = document.getElementById("save-convention-settings-button");
+        if (!button || !currentPartyData || !activeIsHost || currentPartyData.status !== "waiting") {
+            if (button) button.hidden = true;
+            return;
+        }
+        const edited = JSON.stringify(readConventionEditorSettings()) !==
+            JSON.stringify(normalizedConventionSettings(currentPartyData.settings, currentPartyData.mode));
+        button.hidden = !edited;
+        if (!edited) document.getElementById("convention-settings-save-status").textContent = "";
+    }
+
+    function renderSettingsEditor(party) {
+        settingsEditor.hidden = !activeIsHost || !activePartyCode || party.status !== "waiting";
+        const button = document.getElementById("save-convention-settings-button");
+        if (!activeIsHost || !party) {
+            if (button) button.hidden = true;
+            return;
+        }
+        const isNewParty = settingsEditor.dataset.partyCode !== activePartyCode;
+        const alreadyEdited = !isNewParty && button && !button.hidden;
+        const pointParty = party.mode === "pointParty";
+        document.getElementById("lobby-point-party-editor").hidden = !pointParty;
+        document.getElementById("lobby-duels-editor").hidden = pointParty;
+        currentPartyData = party;
+
+        // Keep in-progress edits intact, but refresh the editor from Firebase
+        // whenever no local edits are pending (including updates from another device).
+        if (!alreadyEdited) {
+            settingsEditor.dataset.partyCode = activePartyCode;
+            const settings = party.settings || {};
+            const challenges = settings.challenges || {};
+            if (pointParty) {
+                document.getElementById("lobby-convention-rounds").value = Number(settings.rounds) || 10;
+                document.getElementById("lobby-convention-round-time").value = Number(settings.roundTimeSeconds) || 20;
+                document.getElementById("lobby-convention-point-boost").checked = settings.pointBoost === true;
+                document.getElementById("lobby-point-blink").checked = challenges.blink === true;
+                document.getElementById("lobby-point-down-clown").checked = challenges.downTheClown === true;
+                document.getElementById("lobby-point-morpho").checked = challenges.clownMorpho === true;
+                document.getElementById("lobby-point-warp").checked = challenges.clownWarp === true;
+                document.getElementById("lobby-point-hazelnut").checked = challenges.clownHazelnut === true;
+            } else {
+                document.getElementById("lobby-duels-blink").checked = challenges.blink === true;
+                document.getElementById("lobby-duels-down-clown").checked = challenges.downTheClown === true;
+                document.getElementById("lobby-duels-morpho").checked = challenges.clownMorpho === true;
+                document.getElementById("lobby-duels-warp").checked = challenges.clownWarp === true;
+                document.getElementById("lobby-duels-hazelnut").checked = challenges.clownHazelnut === true;
+            }
+        }
+        updateConventionSettingsSaveButton();
+    }
+
+    async function saveConventionSettings() {
+        if (!activeIsHost || !activePartyCode || !currentPartyData || currentPartyData.status !== "waiting") return;
+        const status = document.getElementById("convention-settings-save-status");
+        const button = document.getElementById("save-convention-settings-button");
+        const settings = readConventionEditorSettings();
+        if (currentPartyData.mode === "pointParty") {
+            if (!Number.isInteger(settings.rounds) || settings.rounds < 5 || settings.rounds > 25) { status.textContent = "Choose between 5 and 25 rounds."; return; }
+            if (!Number.isInteger(settings.roundTimeSeconds) || settings.roundTimeSeconds < 10 || settings.roundTimeSeconds > 45) { status.textContent = "Choose between 10 and 45 seconds per round."; return; }
         }
         button.disabled = true;
         status.textContent = "Saving settings…";
         try {
             await window.clownFirebase.database.ref(`parties/${activePartyCode}/settings`).set(settings);
+            currentPartyData.settings = settings;
             status.textContent = "Convention settings saved.";
+            button.hidden = true;
         } catch (error) {
             console.error("Could not save Convention settings:", error);
             status.textContent = error.code === "PERMISSION_DENIED" ? "Firebase denied this settings update. Make sure the host settings rule is published." : `Could not save settings: ${error.message || error}`;
-        } finally { button.disabled = false; }
+        } finally { button.disabled = false; updateConventionSettingsSaveButton(); }
     }
 
+    [
+        "lobby-convention-rounds", "lobby-convention-round-time", "lobby-convention-point-boost",
+        "lobby-point-blink", "lobby-point-down-clown", "lobby-point-morpho", "lobby-point-warp", "lobby-point-hazelnut",
+        "lobby-duels-blink", "lobby-duels-down-clown", "lobby-duels-morpho", "lobby-duels-warp", "lobby-duels-hazelnut"
+    ].forEach(id => {
+        const control = document.getElementById(id);
+        if (control) control.addEventListener("input", updateConventionSettingsSaveButton);
+        if (control) control.addEventListener("change", updateConventionSettingsSaveButton);
+    });
     document.getElementById("save-convention-settings-button").addEventListener("click", saveConventionSettings);
 
     async function stopCurrentConventionGame() {
         if (!activeIsHost || !activePartyCode || !currentPartyData) return;
-        const button = pointPartyStopButton;
+        const button = currentPartyData.mode === "duels" ? partyDuelsStopButton : pointPartyStopButton;
         button.disabled = true;
         button.textContent = "Stopping…";
         clearPointPartyTimers();
+        pdStopVisualTimers();
+        if (pdHostDeadline) { clearTimeout(pdHostDeadline); pdHostDeadline = null; }
         try {
             const database = window.clownFirebase.database;
             await database.ref(`parties/${activePartyCode}/status`).set("waiting");
@@ -10876,13 +11262,14 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                 phase: "lobby", roundNumber: 0, updatedAt: pointPartyNow(), stoppedBy: activeUserUid
             });
             pointPartyStopButton.hidden = true;
+            partyDuelsStopButton.hidden = true;
             button.disabled = false;
             button.textContent = "Stop Game and Return to Lobby";
             showConventionScreen(lobbyScreen);
             lobbyStatus.textContent = "The game has stopped. The Convention is back on standby.";
         } catch (error) {
             console.error("Could not stop Convention game:", error);
-            pointPartyStatus.textContent = `Could not stop the game: ${error.message || error}`;
+            (currentPartyData.mode === "duels" ? pd.status : pointPartyStatus).textContent = `Could not stop the game: ${error.message || error}`;
             button.disabled = false;
             button.textContent = "Stop Game and Return to Lobby";
         }
@@ -10908,6 +11295,10 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             return;
         }
         stopPartyListeners();
+        pdStopVisualTimers();
+        pdLastResolvedKey = null;
+        pdStartingRound = false;
+        pdHostTimerKey = null;
         activePartyCode = null;
         activeUserUid = null;
         activeIsHost = false;
@@ -10917,6 +11308,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         pointPartySubmissionPending = false;
         startGameButton.hidden = true;
         pointPartyStopButton.hidden = true;
+        partyDuelsStopButton.hidden = true;
         settingsEditor.hidden = true;
         requestsSection.hidden = true;
         showConventionScreen(menuScreen);
@@ -11169,6 +11561,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             settings = {
                 maxPlayers: 2,
                 challenges: {
+                    blink: document.getElementById("convention-duels-blink").checked,
                     downTheClown: document.getElementById("convention-down-clown").checked,
                     clownMorpho: document.getElementById("convention-morpho").checked,
                     clownWarp: document.getElementById("convention-warp").checked,
@@ -11304,13 +11697,10 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         try {
             const database = window.clownFirebase.database;
             const now = Date.now();
-            await database.ref(`parties/${activePartyCode}/gameState`).update({
-                phase: "starting",
-                roundNumber: 0,
-                startedAt: now,
-                startedBy: activeUserUid,
-                updatedAt: now
-            });
+            const initialGameState = currentPartyData.mode === "duels"
+                ? { phase: "starting", roundNumber: 0, startedAt: now, startedBy: activeUserUid, hp: Object.fromEntries(Object.keys(members).map(uid => [uid, 5000])), multipliers: Object.fromEntries(Object.keys(members).map(uid => [uid, 0])), updatedAt: now }
+                : { phase: "starting", roundNumber: 0, startedAt: now, startedBy: activeUserUid, updatedAt: now };
+            await database.ref(`parties/${activePartyCode}/gameState`).update(initialGameState);
             await database.ref(`parties/${activePartyCode}/status`).set("playing");
         } catch (error) {
             console.error("Could not start Clown Convention:", error);

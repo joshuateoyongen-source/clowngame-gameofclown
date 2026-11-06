@@ -74,7 +74,8 @@
             </div>
         </div>
         <div id="duels-settings" class="convention-settings">
-            <p><strong>Party Duels</strong> supports exactly two human players. Choose any optional challenges:</p>
+            <p><strong>Party Duels</strong> supports exactly two human players and follows Cluny Court's No Move rules: 5,000 HP per player, with the fish visible throughout each 30-second round. Choose any optional challenges:</p>
+            <label class="convention-checkbox"><input type="checkbox" id="convention-duels-blink"> Blink Mode — Clown Hide</label>
             <label class="convention-checkbox"><input type="checkbox" id="convention-down-clown"> Down the Clown</label>
             <label class="convention-checkbox"><input type="checkbox" id="convention-morpho"> Clown Morpho</label>
             <label class="convention-checkbox"><input type="checkbox" id="convention-warp"> Clown Warp</label>
@@ -116,6 +117,23 @@
         <button type="button" id="point-party-leave-button">Leave Convention</button>
     </section>
 
+    <section id="party-duels-screen" class="game-container convention-screen party-duels-screen" hidden>
+        <h1>Clown Convention — Party Duels</h1>
+        <p id="party-duels-code" class="convention-note"></p>
+        <div class="point-party-roundline"><strong id="party-duels-round">Round 1</strong><strong id="party-duels-timer">30.0s</strong></div>
+        <div class="party-duels-health-grid">
+            <div><strong id="party-duels-player-one-name">Player 1</strong><div class="party-duels-health-track"><div id="party-duels-player-one-health" class="party-duels-health-fill"></div></div><small id="party-duels-player-one-hp">5000 / 5000 HP</small></div>
+            <div><strong id="party-duels-player-two-name">Player 2</strong><div class="party-duels-health-track"><div id="party-duels-player-two-health" class="party-duels-health-fill"></div></div><small id="party-duels-player-two-hp">5000 / 5000 HP</small></div>
+        </div>
+        <p id="party-duels-challenges" class="convention-note"></p>
+        <div class="party-duels-image-container"><img id="party-duels-image" alt="Clownfish to identify"><div id="party-duels-warp-layer" hidden></div></div>
+        <div class="guess-container" id="party-duels-guess-area"><label for="party-duels-species-select">What Clown?</label><select id="party-duels-species-select"></select><button type="button" id="party-duels-submit">Lock In</button></div>
+        <p id="party-duels-status" class="convention-status" role="status" aria-live="polite"></p>
+        <p id="party-duels-reveal" class="convention-note"></p>
+        <button type="button" id="party-duels-stop" class="host-game-control" hidden>Stop Game and Return to Lobby</button>
+        <button type="button" id="party-duels-leave">Leave Convention</button>
+    </section>
+
     <section id="convention-lobby-screen" class="game-container convention-screen" hidden>
         <h1>Convention Lobby</h1>
         <p>Share this four-letter code with your friends:</p>
@@ -143,13 +161,14 @@
             </div>
             <div id="lobby-duels-editor">
                 <p><strong>Party Duels Challenges</strong></p>
+                <label class="convention-checkbox"><input type="checkbox" id="lobby-duels-blink"> Blink Mode — Clown Hide</label>
                 <label class="convention-checkbox"><input type="checkbox" id="lobby-duels-down-clown"> Down the Clown</label>
                 <label class="convention-checkbox"><input type="checkbox" id="lobby-duels-morpho"> Clown Morpho</label>
                 <label class="convention-checkbox"><input type="checkbox" id="lobby-duels-warp"> Clown Warp</label>
                 <label class="convention-checkbox"><input type="checkbox" id="lobby-duels-hazelnut"> Clown Hazelnut</label>
             </div>
             <p id="convention-settings-save-status" class="convention-status" role="status" aria-live="polite"></p>
-            <button type="button" id="save-convention-settings-button">Save Settings</button>
+            <button type="button" id="save-convention-settings-button" hidden>Save Settings</button>
         </section>
         <h2>Players</h2>
         <ul id="convention-player-list" class="convention-player-list"></ul>

@@ -524,3 +524,16 @@ button:disabled { opacity:.45; cursor:not-allowed; }
 #convention-settings-editor .convention-field { display:block; margin:10px auto; }
 #convention-settings-editor input[type="number"] { display:block; width:100%; max-width:220px; margin:5px auto; padding:8px; }
 .host-game-control { margin-top:12px; background:#a83232; }
+
+
+/* Clown Convention — No Move Party Duels */
+.party-duels-screen { max-width: 900px; }
+.party-duels-health-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:14px 0; }
+.party-duels-health-track { height:18px; background:#ddd; border:1px solid #555; border-radius:12px; overflow:hidden; margin:6px 0 3px; }
+.party-duels-health-fill { height:100%; width:100%; background:#28a745; transition:width .35s ease; }
+.party-duels-image-container { position:relative; width:min(100%,560px); margin:12px auto; min-height:180px; display:flex; justify-content:center; align-items:center; }
+#party-duels-image { display:block; width:100%; max-height:420px; object-fit:contain; transition:opacity .15s ease; }
+#party-duels-warp-layer { position:absolute; inset:0; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); pointer-events:none; }
+#party-duels-warp-layer[hidden] { display:none; }
+.party-duels-warp-tile { background-repeat:no-repeat; }
+@media(max-width:600px){.party-duels-health-grid{gap:10px;font-size:.9rem}.party-duels-image-container{min-height:130px}}
