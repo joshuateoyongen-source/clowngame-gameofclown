@@ -10025,6 +10025,11 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     let approvalListener = null;
     let ownRequestListener = null;
     let partyDetailsListener = null;
+    let pointPartyGameStateListener = null;
+    let pointPartyStatusListener = null;
+    let pointPartyGuessesListener = null;
+    let pointPartyGuessesListenerRound = null;
+    let pointPartyLiveListenersActive = false;
     let currentPartyData = null;
 
     const startGameButton = document.getElementById("start-convention-game-button");
@@ -10052,7 +10057,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     function showConventionScreen(screenToShow) {
         [homeScreen, challengeScreen, guideScreen, gameScreen,
          document.getElementById("cluny-lobby"), document.getElementById("duel-screen"),
-         menuScreen, createScreen, joinScreen, lobbyScreen].forEach(screen => {
+         menuScreen, createScreen, joinScreen, lobbyScreen, pointPartyScreen].forEach(screen => {
             if (screen) screen.hidden = screen !== screenToShow;
         });
     }
@@ -10111,6 +10116,8 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     }
 
     function stopPartyListeners() {
+        clearPointPartyTimers();
+        stopPointPartyLiveListeners();
         if (!window.clownFirebase) return;
         const database = window.clownFirebase.database;
         if (membersListener && activePartyCode) database.ref(`parties/${activePartyCode}/members`).off("value", membersListener);
@@ -10123,6 +10130,589 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         approvalListener = null;
         ownRequestListener = null;
         partyDetailsListener = null;
+    }
+
+    // ==========================================
+    // POINT PARTY — SYNCHRONISED MULTIPLAYER GAME
+    // ==========================================
+    const pointPartyScreen = document.getElementById("point-party-screen");
+    const pointPartyImage = document.getElementById("point-party-image");
+    const pointPartyWarpLayer = document.getElementById("point-party-warp-layer");
+    const pointPartySelect = document.getElementById("point-party-species-select");
+    const pointPartySubmit = document.getElementById("point-party-submit-button");
+    const pointPartyStatus = document.getElementById("point-party-status");
+    const pointPartyTimerDisplay = document.getElementById("point-party-timer");
+    const pointPartyRoundDisplay = document.getElementById("point-party-round");
+    const pointPartyResults = document.getElementById("point-party-results");
+    const pointPartyLeaderboard = document.getElementById("point-party-leaderboard-list");
+    const pointPartyGuessArea = document.getElementById("point-party-guess-area");
+
+    let pointPartyTimerInterval = null;
+    let pointPartyHostTimer = null;
+    let pointPartyResultsTimer = null;
+    let pointPartyHostTimerKey = null;
+    let pointPartyResultsTimerKey = null;
+    let pointPartyRenderedRoundKey = null;
+    let pointPartyStartingRound = false;
+    let pointPartyEndingRoundKey = null;
+    let pointPartySubmissionPending = false;
+    let pointPartyServerTimeOffset = 0;
+    window.clownFirebase.database.ref(".info/serverTimeOffset").on("value", snapshot => {
+        pointPartyServerTimeOffset = Number(snapshot.val()) || 0;
+    });
+
+    function pointPartyNow() {
+        return Date.now() + pointPartyServerTimeOffset;
+    }
+
+    // The existing species list is reused, so Point Party always offers the
+    // same answers as the single-player game.
+    if (pointPartySelect && Array.isArray(species)) {
+        const blankOption = document.createElement("option");
+        blankOption.value = "";
+        blankOption.textContent = "Select a species";
+        pointPartySelect.appendChild(blankOption);
+        species.forEach(speciesName => {
+            const option = document.createElement("option");
+            option.value = speciesName;
+            option.textContent = speciesName;
+            pointPartySelect.appendChild(option);
+        });
+    }
+
+    function clearPointPartyTimers() {
+        if (pointPartyTimerInterval) clearInterval(pointPartyTimerInterval);
+        if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
+        if (pointPartyResultsTimer) clearTimeout(pointPartyResultsTimer);
+        pointPartyTimerInterval = null;
+        pointPartyHostTimer = null;
+        pointPartyResultsTimer = null;
+        pointPartyHostTimerKey = null;
+        pointPartyResultsTimerKey = null;
+    }
+
+    function makePointPartyTileOrder() {
+        const order = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [order[i], order[j]] = [order[j], order[i]];
+        }
+        return order;
+    }
+
+    function calculatePointPartyBaseScore(elapsedMs) {
+        const seconds = Math.max(0, elapsedMs) / 1000;
+        const curve = [
+            [2, 100], [2.5, 90], [3, 80], [4, 70], [5, 60],
+            [6, 50], [7, 35], [8, 20], [9, 10], [10, 5]
+        ];
+        if (seconds <= curve[0][0]) return 100;
+        if (seconds >= 10) return 5;
+        for (let i = 1; i < curve.length; i++) {
+            const [upperTime, upperScore] = curve[i];
+            const [lowerTime, lowerScore] = curve[i - 1];
+            if (seconds <= upperTime) {
+                const fraction = (seconds - lowerTime) / (upperTime - lowerTime);
+                return Math.floor(lowerScore + (upperScore - lowerScore) * fraction);
+            }
+        }
+        return 5;
+    }
+
+    function pointPartyMultiplier(settings, roundNumber) {
+        return settings.pointBoost ? 1 + (0.1 * Math.max(0, roundNumber - 1)) : 1;
+    }
+
+    function renderPointPartyLeaderboard(party) {
+        pointPartyLeaderboard.replaceChildren();
+        const members = party.members || {};
+        const ranked = Object.entries(members).sort((a, b) => {
+            const scoreDifference = (Number(b[1].score) || 0) - (Number(a[1].score) || 0);
+            if (scoreDifference) return scoreDifference;
+            return (a[1].joinedAt || 0) - (b[1].joinedAt || 0);
+        });
+        ranked.forEach(([uid, member], index) => {
+            const item = document.createElement("li");
+            const name = document.createElement("span");
+            name.textContent = `${index + 1}. ${member.name || "Unnamed player"}`;
+            const colourMap = {
+                red: "#e53935", maroon: "#800000", orange: "#e87500",
+                green: "#2e8b57", darkGreen: "#006400", darkYellow: "#a87900",
+                blue: "#1565c0", violet: "#8a2be2", purple: "#800080", pink: "#d81b60"
+            };
+            name.style.color = colourMap[member.nameColour] || "#263238";
+            const score = document.createElement("strong");
+            score.textContent = `${Number(member.score) || 0} pts`;
+            item.append(name, score);
+            if (uid === activeUserUid) item.style.border = "2px solid #0077b6";
+            pointPartyLeaderboard.appendChild(item);
+        });
+    }
+
+    function renderPointPartyRoundResults(party, isFinal = false) {
+        const state = party.gameState || {};
+        const members = party.members || {};
+        const roundScores = state.roundScores || {};
+        pointPartyResults.hidden = false;
+        pointPartyGuessArea.hidden = true;
+        pointPartyResults.querySelector("h2").textContent = isFinal ? "Final Results" : `Round ${state.roundNumber} Results`;
+        document.getElementById("point-party-answer").textContent = state.answer
+            ? `The correct species was ${state.answer}.`
+            : "The Convention has finished.";
+
+        const scoreList = document.getElementById("point-party-round-scores");
+        scoreList.replaceChildren();
+        if (!isFinal) {
+            const ranked = Object.entries(members).sort((a, b) =>
+                (Number(roundScores[b[0]]?.points) || 0) - (Number(roundScores[a[0]]?.points) || 0)
+            );
+            ranked.forEach(([uid, member]) => {
+                const row = document.createElement("p");
+                const details = roundScores[uid] || { points: 0, correct: false };
+                row.textContent = `${member.name || "Player"}: ${details.correct ? "Correct" : "No points"} — ${Number(details.points) || 0} points`;
+                scoreList.appendChild(row);
+            });
+        }
+        pointPartyStatus.textContent = isFinal
+            ? "All rounds are complete. Here are the final standings!"
+            : "Round complete! The next round will begin shortly.";
+        renderPointPartyLeaderboard(party);
+    }
+
+    function renderPointPartyImage(party, roundKey) {
+        const state = party.gameState || {};
+        const challengeState = state.challengeState || {};
+        const challenges = party.settings?.challenges || {};
+        const transform = `scaleX(${challengeState.flipX ? -1 : 1}) scaleY(${challengeState.upsideDown ? -1 : 1})`;
+        const filter = challengeState.morpho ? "invert(1)" : "none";
+        pointPartyImage.style.transform = transform;
+        pointPartyImage.style.filter = filter;
+        pointPartyImage.style.imageRendering = challengeState.hazelnut ? "pixelated" : "auto";
+        pointPartyImage.style.visibility = "visible";
+        pointPartyWarpLayer.hidden = !challengeState.warp;
+        pointPartyWarpLayer.replaceChildren();
+
+        let imageProcessed = false;
+        const finishImageLoad = () => {
+            if (imageProcessed || !pointPartyImage.naturalWidth) return;
+            imageProcessed = true;
+            let displaySource = pointPartyImage.src;
+            if (challengeState.hazelnut && pointPartyImage.naturalWidth) {
+                try {
+                    const canvas = document.createElement("canvas");
+                    const width = 48;
+                    const height = Math.max(1, Math.round(width * pointPartyImage.naturalHeight / pointPartyImage.naturalWidth));
+                    canvas.width = width;
+                    canvas.height = height;
+                    const context = canvas.getContext("2d");
+                    context.imageSmoothingEnabled = true;
+                    context.drawImage(pointPartyImage, 0, 0, width, height);
+                    displaySource = canvas.toDataURL("image/jpeg", 0.4);
+                    pointPartyImage.onload = null;
+                    pointPartyImage.src = displaySource;
+                } catch (error) {
+                    console.warn("Point Party pixelation could not be applied:", error);
+                }
+            }
+            if (challengeState.warp) {
+                const order = Array.isArray(challengeState.tileOrder) ? challengeState.tileOrder : makePointPartyTileOrder();
+                order.forEach(sourceIndex => {
+                    const tile = document.createElement("div");
+                    tile.className = "point-party-warp-tile";
+                    const sourceRow = Math.floor(sourceIndex / 3);
+                    const sourceCol = sourceIndex % 3;
+                    tile.style.backgroundImage = `url("${displaySource}")`;
+                    tile.style.backgroundSize = "300% 300%";
+                    tile.style.backgroundPosition = `${sourceCol * 50}% ${sourceRow * 50}%`;
+                    pointPartyWarpLayer.appendChild(tile);
+                });
+                pointPartyWarpLayer.style.transform = transform;
+                pointPartyWarpLayer.style.filter = filter;
+                pointPartyImage.style.opacity = "0";
+            } else {
+                pointPartyImage.style.opacity = "1";
+            }
+        };
+        pointPartyImage.onload = finishImageLoad;
+        pointPartyImage.onerror = () => {
+            pointPartyStatus.textContent = "This fish image could not be loaded. Please tell the host.";
+            console.error("Point Party could not load image:", state.image);
+        };
+        pointPartyImage.src = state.image || "";
+        // Reusing the same fish URL may not trigger another load event in every browser.
+        if (pointPartyImage.complete && pointPartyImage.naturalWidth) finishImageLoad();
+        document.getElementById("point-party-challenges").textContent = [
+            challenges.blink ? "Blink Mode" : null,
+            challenges.downTheClown ? "Down the Clown" : null,
+            challenges.clownMorpho ? "Clown Morpho" : null,
+            challenges.clownWarp ? "Clown Warp" : null,
+            challenges.clownHazelnut ? "Clown Hazelnut" : null
+        ].filter(Boolean).join(" · ") || "No optional challenges this game";
+    }
+
+    function updatePointPartyRoundUI(party) {
+        const state = party.gameState || {};
+        const roundNumber = Number(state.roundNumber) || 1;
+        const roundKey = `${roundNumber}:${state.startedAt || 0}`;
+        const myGuess = party.guesses?.[roundNumber]?.[activeUserUid];
+        const totalPlayers = Object.keys(party.members || {}).length;
+        const submittedCount = Object.keys(party.guesses?.[roundNumber] || {}).length;
+
+        pointPartyRoundDisplay.textContent = `Round ${roundNumber} of ${Number(party.settings?.rounds) || 0}`;
+        pointPartyResults.hidden = true;
+        pointPartyGuessArea.hidden = false;
+        renderPointPartyLeaderboard(party);
+
+        if (pointPartyRenderedRoundKey !== roundKey) {
+            pointPartyRenderedRoundKey = roundKey;
+            pointPartySubmissionPending = false;
+            pointPartySelect.value = "";
+            pointPartySelect.disabled = false;
+            pointPartySubmit.disabled = false;
+            renderPointPartyImage(party, roundKey);
+            if (pointPartyTimerInterval) clearInterval(pointPartyTimerInterval);
+            pointPartyTimerInterval = setInterval(() => {
+                const remaining = Math.max(0, Number(state.endsAt) - pointPartyNow());
+                pointPartyTimerDisplay.textContent = `${(remaining / 1000).toFixed(1)}s`;
+                if (party.settings?.challenges?.blink) {
+                    const visible = (pointPartyNow() - Number(state.startedAt)) % 900 < 450;
+                    pointPartyImage.style.visibility = visible ? "visible" : "hidden";
+                    pointPartyWarpLayer.style.visibility = visible ? "visible" : "hidden";
+                } else {
+                    pointPartyImage.style.visibility = "visible";
+                    pointPartyWarpLayer.style.visibility = "visible";
+                }
+                if (remaining <= 0) {
+                    pointPartySelect.disabled = true;
+                    pointPartySubmit.disabled = true;
+                }
+            }, 100);
+        }
+
+        const remaining = Math.max(0, Number(state.endsAt) - pointPartyNow());
+        pointPartyTimerDisplay.textContent = `${(remaining / 1000).toFixed(1)}s`;
+        if (myGuess) {
+            pointPartySelect.disabled = true;
+            pointPartySubmit.disabled = true;
+            pointPartyStatus.textContent = `Your guess is locked in. ${submittedCount} of ${totalPlayers} players have answered.`;
+        } else if (remaining <= 0) {
+            pointPartySelect.disabled = true;
+            pointPartySubmit.disabled = true;
+            pointPartyStatus.textContent = `Time is up. ${submittedCount} of ${totalPlayers} players submitted a guess.`;
+        } else {
+            pointPartyStatus.textContent = `${submittedCount} of ${totalPlayers} players have answered.`;
+        }
+    }
+
+    async function startPointPartyRound(party, requestedRoundNumber) {
+        if (!activeIsHost || !activePartyCode || pointPartyStartingRound) return;
+        pointPartyStartingRound = true;
+        try {
+            const database = window.clownFirebase.database;
+            const snapshot = await database.ref(`parties/${activePartyCode}`).once("value");
+            const freshParty = snapshot.val();
+            if (!freshParty || freshParty.status !== "playing") return;
+            const roundNumber = requestedRoundNumber || ((Number(freshParty.gameState?.roundNumber) || 0) + 1);
+            const totalRounds = Number(freshParty.settings?.rounds) || 10;
+            if (roundNumber > totalRounds) {
+                await database.ref(`parties/${activePartyCode}/gameState`).update({
+                    phase: "finished", finishedAt: pointPartyNow(), updatedAt: pointPartyNow()
+                });
+                await database.ref(`parties/${activePartyCode}/status`).set("finished");
+                return;
+            }
+            const selectedFish = fish[Math.floor(Math.random() * fish.length)];
+            if (!selectedFish) throw new Error("The fish database is empty.");
+            const challenges = freshParty.settings?.challenges || {};
+            const now = pointPartyNow();
+            const durationMs = (Number(freshParty.settings?.roundTimeSeconds) || 20) * 1000;
+            const challengeState = {
+                flipX: Math.random() < 0.5,
+                upsideDown: challenges.downTheClown === true,
+                morpho: challenges.clownMorpho === true,
+                warp: challenges.clownWarp === true,
+                hazelnut: challenges.clownHazelnut === true,
+                tileOrder: challenges.clownWarp === true ? makePointPartyTileOrder() : []
+            };
+            await database.ref(`parties/${activePartyCode}/gameState`).set({
+                phase: "round",
+                roundNumber,
+                image: selectedFish.image,
+                startedAt: now,
+                endsAt: now + durationMs,
+                challengeState,
+                updatedAt: now
+            });
+        } catch (error) {
+            console.error("Could not start the next Point Party round:", error);
+            pointPartyStatus.textContent = "The host could not start the next round. Please check the connection.";
+        } finally {
+            pointPartyStartingRound = false;
+        }
+    }
+
+    async function endPointPartyRound(roundNumber) {
+        if (!activeIsHost || !activePartyCode) return;
+        const endingKey = `${activePartyCode}:${roundNumber}`;
+        if (pointPartyEndingRoundKey === endingKey) return;
+        pointPartyEndingRoundKey = endingKey;
+        try {
+            const database = window.clownFirebase.database;
+            const snapshot = await database.ref(`parties/${activePartyCode}`).once("value");
+            const party = snapshot.val();
+            if (!party || party.status !== "playing" || party.gameState?.phase !== "round" || Number(party.gameState.roundNumber) !== Number(roundNumber)) return;
+            const answerFish = fish.find(entry => entry.image === party.gameState.image);
+            if (!answerFish) throw new Error(`The fish database does not contain ${party.gameState.image}`);
+
+            const members = party.members || {};
+            const guesses = party.guesses?.[roundNumber] || {};
+            const multiplier = pointPartyMultiplier(party.settings || {}, roundNumber);
+            const roundScores = {};
+            const memberScoreUpdates = {};
+            Object.entries(members).forEach(([uid, member]) => {
+                const guess = guesses[uid];
+                const correct = !!guess && guess.species === answerFish.species;
+                const elapsedMs = guess ? Math.max(0, Number(guess.elapsedMs) || 0) : null;
+                const basePoints = correct ? calculatePointPartyBaseScore(elapsedMs) : 0;
+                const points = correct ? Math.floor(basePoints * multiplier) : 0;
+                roundScores[uid] = { correct, elapsedMs, basePoints, multiplier, points };
+                memberScoreUpdates[`${uid}/score`] = (Number(member.score) || 0) + points;
+            });
+
+            await database.ref(`parties/${activePartyCode}/members`).update(memberScoreUpdates);
+            const resultsEndsAt = pointPartyNow() + 6500;
+            await database.ref(`parties/${activePartyCode}/gameState`).update({
+                phase: "results",
+                answer: answerFish.species,
+                roundScores,
+                resultsEndsAt,
+                updatedAt: pointPartyNow()
+            });
+        } catch (error) {
+            console.error("Could not finish Point Party round:", error);
+            pointPartyStatus.textContent = "The host could not calculate this round's results. Please check the connection.";
+            pointPartyEndingRoundKey = null;
+        }
+    }
+
+    function schedulePointPartyHostRoundEnd(party) {
+        if (!activeIsHost) return;
+        const state = party.gameState || {};
+        const roundNumber = Number(state.roundNumber) || 0;
+        const timerKey = `${roundNumber}:${state.startedAt || 0}`;
+        const guessCount = Object.keys(party.guesses?.[roundNumber] || {}).length;
+        const playerCount = Object.keys(party.members || {}).length;
+
+        if (pointPartyHostTimerKey !== timerKey) {
+            if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
+            pointPartyHostTimerKey = timerKey;
+            const delay = Math.max(0, Number(state.endsAt) - pointPartyNow());
+            pointPartyHostTimer = setTimeout(() => endPointPartyRound(roundNumber), delay + 250);
+        }
+
+        if (playerCount > 0 && guessCount >= playerCount && pointPartyEndingRoundKey !== `${activePartyCode}:${roundNumber}`) {
+            if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
+            pointPartyHostTimer = setTimeout(() => endPointPartyRound(roundNumber), 150);
+        }
+    }
+
+    function schedulePointPartyNextRound(party) {
+        if (!activeIsHost) return;
+        const state = party.gameState || {};
+        const timerKey = `${state.roundNumber}:${state.resultsEndsAt || 0}`;
+        if (pointPartyResultsTimerKey === timerKey) return;
+        if (pointPartyResultsTimer) clearTimeout(pointPartyResultsTimer);
+        pointPartyResultsTimerKey = timerKey;
+        const delay = Math.max(0, Number(state.resultsEndsAt) - pointPartyNow());
+        pointPartyResultsTimer = setTimeout(() => {
+            const totalRounds = Number(party.settings?.rounds) || 10;
+            if (Number(state.roundNumber) >= totalRounds) {
+                const database = window.clownFirebase.database;
+                database.ref(`parties/${activePartyCode}/gameState`).update({
+                    phase: "finished", finishedAt: pointPartyNow(), updatedAt: pointPartyNow()
+                }).then(() => database.ref(`parties/${activePartyCode}/status`).set("finished"))
+                  .catch(error => console.error("Could not finish Point Party:", error));
+            } else {
+                startPointPartyRound(party, Number(state.roundNumber) + 1);
+            }
+        }, delay);
+    }
+
+    function handlePointPartyState(party) {
+        if (!party || party.mode !== "pointParty" || party.status !== "playing" && party.status !== "finished") return;
+        const state = party.gameState || {};
+        document.getElementById("point-party-code").textContent = `Convention ${activePartyCode || "----"}`;
+        if (party.status === "playing" && !pointPartyLiveListenersActive) {
+            startPointPartyLiveListeners(activePartyCode);
+        }
+
+        if (party.status === "playing" && state.phase === "starting") {
+            if (activeIsHost) startPointPartyRound(party, 1);
+            else lobbyStatus.textContent = "The host is preparing the first Point Party round…";
+            return;
+        }
+
+        if (state.phase === "round" && party.status === "playing") {
+            showConventionScreen(pointPartyScreen);
+            updatePointPartyRoundUI(party);
+            schedulePointPartyHostRoundEnd(party);
+            return;
+        }
+
+        if (state.phase === "results" && party.status === "playing") {
+            if (pointPartyTimerInterval) clearInterval(pointPartyTimerInterval);
+            pointPartyTimerInterval = null;
+            showConventionScreen(pointPartyScreen);
+            pointPartyRoundDisplay.textContent = `Round ${state.roundNumber} complete`;
+            pointPartyTimerDisplay.textContent = "✓";
+            renderPointPartyRoundResults(party, false);
+            schedulePointPartyNextRound(party);
+            return;
+        }
+
+        if (state.phase === "finished" || party.status === "finished") {
+            if (pointPartyTimerInterval) clearInterval(pointPartyTimerInterval);
+            pointPartyTimerInterval = null;
+            showConventionScreen(pointPartyScreen);
+            pointPartyRoundDisplay.textContent = "Game complete";
+            pointPartyTimerDisplay.textContent = "🏆";
+            renderPointPartyRoundResults(party, true);
+        }
+    }
+
+    async function submitPointPartyGuess() {
+        if (!activePartyCode || !activeUserUid || pointPartySubmissionPending) return;
+        const party = currentPartyData;
+        const state = party?.gameState || {};
+        if (!party || state.phase !== "round") return;
+        const selectedSpecies = pointPartySelect.value;
+        if (!selectedSpecies) {
+            pointPartyStatus.textContent = "Please select a clownfish species first.";
+            return;
+        }
+        const elapsedMs = Math.max(0, Math.min(
+            Number(party.settings?.roundTimeSeconds || 20) * 1000,
+            pointPartyNow() - Number(state.startedAt)
+        ));
+        if (pointPartyNow() >= Number(state.endsAt)) {
+            pointPartyStatus.textContent = "Time is up — this round is closing.";
+            pointPartySelect.disabled = true;
+            pointPartySubmit.disabled = true;
+            return;
+        }
+
+        pointPartySubmissionPending = true;
+        pointPartySelect.disabled = true;
+        pointPartySubmit.disabled = true;
+        pointPartyStatus.textContent = "Submitting your guess…";
+        try {
+            await window.clownFirebase.database.ref(`parties/${activePartyCode}/guesses/${state.roundNumber}/${activeUserUid}`).set({
+                species: selectedSpecies,
+                elapsedMs,
+                submittedAt: pointPartyNow()
+            });
+            pointPartyStatus.textContent = "Guess locked in! Waiting for the other players…";
+        } catch (error) {
+            console.error("Could not submit Point Party guess:", error);
+            pointPartyStatus.textContent = error.code === "PERMISSION_DENIED"
+                ? "Your guess was not accepted. The round may have ended or you may already have submitted."
+                : `Could not submit your guess: ${error.message || error}`;
+            pointPartySubmissionPending = false;
+            pointPartySelect.disabled = false;
+            pointPartySubmit.disabled = false;
+        }
+    }
+
+    pointPartySubmit.addEventListener("click", submitPointPartyGuess);
+    document.getElementById("point-party-leave-button").addEventListener("click", () => {
+        stopPartyListeners();
+        activePartyCode = null;
+        activeUserUid = null;
+        activeIsHost = false;
+        currentPartyData = null;
+        pointPartyRenderedRoundKey = null;
+        pointPartyEndingRoundKey = null;
+        pointPartySubmissionPending = false;
+        startGameButton.hidden = true;
+        requestsSection.hidden = true;
+        showConventionScreen(menuScreen);
+    });
+
+    function stopPointPartyLiveListeners() {
+        if (!window.clownFirebase || !activePartyCode) return;
+        const database = window.clownFirebase.database;
+        if (pointPartyGameStateListener) database.ref(`parties/${activePartyCode}/gameState`).off("value", pointPartyGameStateListener);
+        if (pointPartyStatusListener) database.ref(`parties/${activePartyCode}/status`).off("value", pointPartyStatusListener);
+        if (pointPartyGuessesListener && pointPartyGuessesListenerRound !== null) {
+            database.ref(`parties/${activePartyCode}/guesses/${pointPartyGuessesListenerRound}`).off("value", pointPartyGuessesListener);
+        }
+        pointPartyGameStateListener = null;
+        pointPartyStatusListener = null;
+        pointPartyGuessesListener = null;
+        pointPartyGuessesListenerRound = null;
+        pointPartyLiveListenersActive = false;
+    }
+
+    function listenToPointPartyRoundGuesses(roundNumber) {
+        if (!activePartyCode || !window.clownFirebase || !Number(roundNumber)) return;
+        if (pointPartyGuessesListener && pointPartyGuessesListenerRound === Number(roundNumber)) return;
+        const database = window.clownFirebase.database;
+        if (pointPartyGuessesListener && pointPartyGuessesListenerRound !== null) {
+            database.ref(`parties/${activePartyCode}/guesses/${pointPartyGuessesListenerRound}`).off("value", pointPartyGuessesListener);
+        }
+        pointPartyGuessesListenerRound = Number(roundNumber);
+        pointPartyGuessesListener = snapshot => {
+            if (!currentPartyData) return;
+            if (!currentPartyData.guesses) currentPartyData.guesses = {};
+            currentPartyData.guesses[roundNumber] = snapshot.val() || {};
+            handlePointPartyState(currentPartyData);
+        };
+        database.ref(`parties/${activePartyCode}/guesses/${roundNumber}`).on("value", pointPartyGuessesListener, error => {
+            console.error("Point Party guess listener failed:", error);
+            pointPartyStatus.textContent = "Could not synchronise submitted guesses. Check your connection.";
+        });
+    }
+
+    function startPointPartyLiveListeners(code) {
+        if (pointPartyLiveListenersActive || !window.clownFirebase) return;
+        pointPartyLiveListenersActive = true;
+        const database = window.clownFirebase.database;
+
+        // Once the game starts, stop listening to the entire party record.
+        // The live game only needs its state, status, members and current-round guesses.
+        if (partyDetailsListener) {
+            database.ref(`parties/${code}`).off("value", partyDetailsListener);
+            partyDetailsListener = null;
+        }
+
+        pointPartyGameStateListener = snapshot => {
+            if (!currentPartyData) return;
+            currentPartyData.gameState = snapshot.val() || {};
+            const phase = currentPartyData.gameState.phase;
+            if (phase === "round" || phase === "results") {
+                listenToPointPartyRoundGuesses(currentPartyData.gameState.roundNumber);
+            } else if (phase === "finished" && pointPartyGuessesListener) {
+                if (pointPartyGuessesListenerRound !== null) {
+                    database.ref(`parties/${code}/guesses/${pointPartyGuessesListenerRound}`).off("value", pointPartyGuessesListener);
+                }
+                pointPartyGuessesListener = null;
+                pointPartyGuessesListenerRound = null;
+            }
+            handlePointPartyState(currentPartyData);
+        };
+        pointPartyStatusListener = snapshot => {
+            if (!currentPartyData) return;
+            currentPartyData.status = snapshot.val() || "waiting";
+            handlePointPartyState(currentPartyData);
+        };
+        database.ref(`parties/${code}/gameState`).on("value", pointPartyGameStateListener, error => {
+            console.error("Point Party game-state listener failed:", error);
+            pointPartyStatus.textContent = "The game state could not be synchronised. Check your connection.";
+        });
+        database.ref(`parties/${code}/status`).on("value", pointPartyStatusListener, error => {
+            console.error("Point Party status listener failed:", error);
+            pointPartyStatus.textContent = "The game status could not be synchronised. Check your connection.";
+        });
     }
 
     function renderConventionSettings(party) {
@@ -10166,6 +10756,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         document.getElementById("convention-lobby-mode").textContent =
             party.mode === "duels" ? "Party Duels" : "Point Party";
         updateStartButton(party);
+        handlePointPartyState(party);
         if (party.status === "playing" || party.gameState?.phase === "starting") {
             lobbyStatus.textContent = "The host has started the Convention. The shared game-start signal has been received.";
             startGameButton.hidden = true;
@@ -10213,6 +10804,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             if (currentPartyData) {
                 currentPartyData.members = members;
                 updateStartButton(currentPartyData);
+                if (pointPartyLiveListenersActive) handlePointPartyState(currentPartyData);
             }
         };
         database.ref(`parties/${code}/members`).on("value", membersListener, error => {

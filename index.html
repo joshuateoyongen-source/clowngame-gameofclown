@@ -85,6 +85,36 @@
         <button type="button" class="convention-back-button">Back</button>
     </section>
 
+    <section id="point-party-screen" class="game-container convention-screen point-party-screen" hidden>
+        <h1>Clown Convention — Point Party</h1>
+        <p id="point-party-code" class="convention-note"></p>
+        <div class="point-party-roundline">
+            <strong id="point-party-round">Round 1</strong>
+            <strong id="point-party-timer">--</strong>
+        </div>
+        <p id="point-party-challenges" class="convention-note"></p>
+        <div class="point-party-image-container">
+            <img id="point-party-image" alt="Clownfish to identify">
+            <div id="point-party-warp-layer" class="point-party-warp-layer" hidden></div>
+        </div>
+        <div id="point-party-guess-area" class="guess-container">
+            <label for="point-party-species-select">What Clown?</label>
+            <select id="point-party-species-select"></select>
+            <button type="button" id="point-party-submit-button">Lock In</button>
+        </div>
+        <p id="point-party-status" class="convention-status" role="status" aria-live="polite"></p>
+        <section id="point-party-results" class="point-party-results" hidden>
+            <h2 id="point-party-results-heading">Round Results</h2>
+            <p id="point-party-answer"></p>
+            <div id="point-party-round-scores"></div>
+        </section>
+        <section class="point-party-leaderboard">
+            <h2>Leaderboard</h2>
+            <ol id="point-party-leaderboard-list" class="convention-player-list"></ol>
+        </section>
+        <button type="button" id="point-party-leave-button">Leave Convention</button>
+    </section>
+
     <section id="convention-lobby-screen" class="game-container convention-screen" hidden>
         <h1>Convention Lobby</h1>
         <p>Share this four-letter code with your friends:</p>

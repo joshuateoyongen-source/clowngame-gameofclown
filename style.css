@@ -417,3 +417,101 @@ button:disabled { opacity:.45; cursor:not-allowed; }
 .convention-request-actions { display: flex; gap: 8px; }
 .convention-request-actions button { margin: 0; padding: 7px 12px; }
 #convention-join-code { text-transform: uppercase; letter-spacing: 5px; font-weight: 800; }
+
+/* CLOWN CONVENTION — POINT PARTY */
+.point-party-screen { max-width: 820px; }
+.point-party-roundline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 620px;
+    margin: 14px auto;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: #eef5f8;
+    color: #023e8a;
+    font-size: clamp(18px, 4vw, 25px);
+}
+#point-party-timer { font-variant-numeric: tabular-nums; }
+.point-party-image-container {
+    position: relative;
+    width: min(100%, 620px);
+    min-height: 220px;
+    margin: 18px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 14px;
+    background: #f4f7f8;
+}
+#point-party-image {
+    display: block;
+    width: 100%;
+    max-height: 440px;
+    object-fit: contain;
+    transition: none;
+}
+.point-party-warp-layer {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    overflow: hidden;
+}
+.point-party-warp-tile {
+    min-width: 0;
+    min-height: 0;
+    background-repeat: no-repeat;
+    border: 1px solid rgba(255,255,255,.72);
+}
+#point-party-guess-area {
+    max-width: 520px;
+    margin: 18px auto;
+}
+#point-party-species-select {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px;
+    border: 2px solid #0077b6;
+    border-radius: 9px;
+    font: inherit;
+}
+#point-party-submit-button,
+#point-party-leave-button {
+    margin: 8px;
+    background: #0077b6;
+    color: #fff;
+}
+.point-party-results,
+.point-party-leaderboard {
+    max-width: 620px;
+    margin: 20px auto;
+    padding: 16px;
+    border-radius: 12px;
+    background: #eef5f8;
+    text-align: left;
+}
+.point-party-results h2,
+.point-party-leaderboard h2 { margin-top: 0; }
+#point-party-round-scores p {
+    margin: 7px 0;
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: #fff;
+}
+#point-party-leaderboard-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+#point-party-leaderboard-list li strong { white-space: nowrap; }
+@media (max-width: 600px) {
+    .point-party-image-container { min-height: 180px; }
+    #point-party-image { max-height: 330px; }
+    .point-party-roundline { margin-left: 4px; margin-right: 4px; }
+}
