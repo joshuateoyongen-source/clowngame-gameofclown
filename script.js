@@ -2399,6 +2399,10 @@ const fish = [
         species: "Epigrammata"
     },
     {
+        image: "images/epi10.jpg",
+        species: "Epigrammata"
+    },
+    {
         image: "images/epi11.jpg",
         species: "Epigrammata"
     },
