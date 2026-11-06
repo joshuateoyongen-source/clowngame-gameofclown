@@ -10024,6 +10024,11 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     let requestsListener = null;
     let approvalListener = null;
     let ownRequestListener = null;
+    let partyDetailsListener = null;
+    let currentPartyData = null;
+
+    const startGameButton = document.getElementById("start-convention-game-button");
+    const lobbySettingsDetails = document.getElementById("convention-lobby-settings-details");
 
     // A player's assigned colour is stored in Firebase as one of these keys.
     const conventionNameColours = {
@@ -10112,16 +10117,104 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         if (requestsListener && activePartyCode) database.ref(`joinRequests/${activePartyCode}`).off("value", requestsListener);
         if (approvalListener && activePartyCode && activeUserUid) database.ref(`parties/${activePartyCode}/members/${activeUserUid}`).off("value", approvalListener);
         if (ownRequestListener && activePartyCode && activeUserUid) database.ref(`joinRequests/${activePartyCode}/${activeUserUid}`).off("value", ownRequestListener);
+        if (partyDetailsListener && activePartyCode) database.ref(`parties/${activePartyCode}`).off("value", partyDetailsListener);
         membersListener = null;
         requestsListener = null;
         approvalListener = null;
         ownRequestListener = null;
+        partyDetailsListener = null;
+    }
+
+    function renderConventionSettings(party) {
+        if (!party) return;
+        currentPartyData = party;
+        const settings = party.settings || {};
+        const challenges = settings.challenges || {};
+        const challengeNames = {
+            blink: "Blink Mode — Clown Hide",
+            downTheClown: "Down the Clown",
+            clownMorpho: "Clown Morpho",
+            clownWarp: "Clown Warp",
+            clownHazelnut: "Clown Hazelnut"
+        };
+        const enabledChallenges = Object.entries(challenges)
+            .filter(([, enabled]) => enabled === true)
+            .map(([key]) => challengeNames[key] || key);
+
+        const lines = [];
+        if (party.mode === "duels") {
+            lines.push("<strong>Game mode:</strong> Party Duels");
+            lines.push("<strong>Players:</strong> 2 (one versus one)");
+        } else {
+            lines.push("<strong>Game mode:</strong> Point Party");
+            lines.push(`<strong>Rounds:</strong> ${Number(settings.rounds) || "—"}`);
+            lines.push(`<strong>Time per round:</strong> ${Number(settings.roundTimeSeconds) || "—"} seconds`);
+            lines.push(`<strong>Point Boost:</strong> ${settings.pointBoost ? "Enabled" : "Disabled"}`);
+        }
+
+        const challengesText = enabledChallenges.length
+            ? enabledChallenges.join(", ")
+            : "None";
+        lines.push(`<strong>Optional challenges:</strong> ${challengesText}`);
+        lobbySettingsDetails.replaceChildren();
+        lines.forEach(line => {
+            const p = document.createElement("p");
+            p.innerHTML = line;
+            lobbySettingsDetails.appendChild(p);
+        });
+
+        document.getElementById("convention-lobby-mode").textContent =
+            party.mode === "duels" ? "Party Duels" : "Point Party";
+        updateStartButton(party);
+        if (party.status === "playing" || party.gameState?.phase === "starting") {
+            lobbyStatus.textContent = "The host has started the Convention. The shared game-start signal has been received.";
+            startGameButton.hidden = true;
+        } else if (party.status === "finished") {
+            lobbyStatus.textContent = "This Convention has finished.";
+        }
+    }
+
+    function updateStartButton(party = currentPartyData) {
+        if (!startGameButton) return;
+        startGameButton.hidden = !activeIsHost || !activePartyCode;
+        if (!activeIsHost || !party) return;
+        const count = Object.keys(party.members || {}).length;
+        const enoughPlayers = count >= 2;
+        const correctDuelsCount = party.mode !== "duels" || count === 2;
+        const waiting = party.status === "waiting";
+        startGameButton.disabled = !(waiting && enoughPlayers && correctDuelsCount);
+        startGameButton.textContent = party.status === "playing" ? "Game Started" : "Start Game";
+    }
+
+    function startPartyDetailsListener(code) {
+        const database = window.clownFirebase.database;
+        if (partyDetailsListener) database.ref(`parties/${code}`).off("value", partyDetailsListener);
+        partyDetailsListener = snapshot => {
+            const party = snapshot.val();
+            if (!party) {
+                lobbyStatus.textContent = "This Convention no longer exists.";
+                startGameButton.hidden = true;
+                return;
+            }
+            renderConventionSettings(party);
+        };
+        database.ref(`parties/${code}`).on("value", partyDetailsListener, error => {
+            console.error("Convention details listener failed:", error);
+            lobbyStatus.textContent = "Could not load the Convention settings.";
+        });
     }
 
     function startMembersListener(code) {
         const database = window.clownFirebase.database;
         if (membersListener) database.ref(`parties/${code}/members`).off("value", membersListener);
-        membersListener = snapshot => showPlayers(snapshot.val() || {});
+        membersListener = snapshot => {
+            const members = snapshot.val() || {};
+            showPlayers(members);
+            if (currentPartyData) {
+                currentPartyData.members = members;
+                updateStartButton(currentPartyData);
+            }
+        };
         database.ref(`parties/${code}/members`).on("value", membersListener, error => {
             console.error("Convention member-list listener failed:", error);
             lobbyStatus.textContent = "The live player list could not be updated.";
@@ -10222,11 +10315,13 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         activePartyCode = code;
         activeIsHost = false;
         activeUserUid = window.clownFirebase.auth.currentUser.uid;
+        currentPartyData = null;
         document.getElementById("convention-code-display").textContent = code;
-        document.getElementById("convention-lobby-mode").textContent = "You have joined this Convention.";
-        lobbyStatus.textContent = `Welcome, ${member.name}!`;
+        lobbyStatus.textContent = `Welcome, ${member.name}! Loading Convention settings…`;
         requestsSection.hidden = true;
+        startGameButton.hidden = true;
         startMembersListener(code);
+        startPartyDetailsListener(code);
         showConventionScreen(lobbyScreen);
     }
 
@@ -10397,12 +10492,13 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             activePartyCode = createdCode;
             activeUserUid = user.uid;
             activeIsHost = true;
+            currentPartyData = partyData;
             document.getElementById("convention-code-display").textContent = createdCode;
-            document.getElementById("convention-lobby-mode").textContent = mode === "duels" ? "Party Duels · 2 players" : `Point Party · ${settings.rounds} rounds · ${settings.roundTimeSeconds}s per round`;
             lobbyStatus.textContent = "Your Convention is ready. Waiting for friends to request to join…";
             showPlayers(partyData.members);
 
             startMembersListener(createdCode);
+            startPartyDetailsListener(createdCode);
             watchHostRequests(createdCode);
 
             console.log("Clown Convention created successfully:", createdCode);
@@ -10454,11 +10550,51 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         });
     });
 
+    startGameButton.addEventListener("click", async () => {
+        if (!activePartyCode || !activeIsHost || !currentPartyData) return;
+        const members = currentPartyData.members || {};
+        const playerCount = Object.keys(members).length;
+        if (playerCount < 2) {
+            lobbyStatus.textContent = "At least two players must join before the game can start.";
+            return;
+        }
+        if (currentPartyData.mode === "duels" && playerCount !== 2) {
+            lobbyStatus.textContent = "Party Duels requires exactly two players.";
+            return;
+        }
+        if (currentPartyData.status !== "waiting") return;
+
+        startGameButton.disabled = true;
+        startGameButton.textContent = "Starting…";
+        lobbyStatus.textContent = "Sending the start signal to everyone…";
+        try {
+            const database = window.clownFirebase.database;
+            const now = Date.now();
+            await database.ref(`parties/${activePartyCode}/gameState`).update({
+                phase: "starting",
+                roundNumber: 0,
+                startedAt: now,
+                startedBy: activeUserUid,
+                updatedAt: now
+            });
+            await database.ref(`parties/${activePartyCode}/status`).set("playing");
+        } catch (error) {
+            console.error("Could not start Clown Convention:", error);
+            lobbyStatus.textContent = error.code === "PERMISSION_DENIED"
+                ? "Firebase denied the start signal. Check that the published rules allow the host to update gameState and status."
+                : `Could not start the Convention: ${error.message || error}`;
+            startGameButton.disabled = false;
+            startGameButton.textContent = "Start Game";
+        }
+    });
+
     document.getElementById("leave-convention-button").addEventListener("click", () => {
         stopPartyListeners();
         activePartyCode = null;
         activeUserUid = null;
         activeIsHost = false;
+        currentPartyData = null;
+        startGameButton.hidden = true;
         requestsSection.hidden = true;
         showConventionScreen(menuScreen);
     });

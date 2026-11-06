@@ -383,6 +383,7 @@ button:disabled { opacity:.45; cursor:not-allowed; }
 
 
 /* CLOWN CONVENTION */
+.convention-screen { max-width: 720px; }
 .convention-screen > button {
     margin: 8px;
     background: #0077b6;
