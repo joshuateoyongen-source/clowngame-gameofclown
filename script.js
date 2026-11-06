@@ -1,3 +1,40 @@
+// ==========================================
+// FIREBASE CONNECTION
+// ==========================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDM3YVbEP7wZRySo5KQka7uC0Jr8gYRTOo",
+    authDomain: "clown-convention.firebaseapp.com",
+    databaseURL: "https://clown-convention-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "clown-convention",
+    storageBucket: "clown-convention.firebasestorage.app",
+    messagingSenderId: "657154049924",
+    appId: "1:657154049924:web:74e444fa31a210edb03fd1"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+window.clownFirebase = {
+    auth: firebase.auth(),
+    database: firebase.database()
+};
+
+// Sign in anonymously
+window.clownFirebase.auth.signInAnonymously()
+    .then((userCredential) => {
+        console.log(
+            "Firebase anonymous sign-in successful!",
+            userCredential.user.uid
+        );
+    })
+    .catch((error) => {
+        console.error("Firebase authentication error:", error);
+    });
+
+
+
+
+
 const fish = [
     {
         image: "images/cg1.JPG",
