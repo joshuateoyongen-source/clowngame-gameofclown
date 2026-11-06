@@ -7213,7 +7213,7 @@ const clownfishGuide = {
     },
 
           "Tricinctus": {
-        image: "images/tricinctus4.JPG",
+        image: "images/tricinctus4.JPEG",
 
         scientificName: "Amphiprion tricinctus",
 
