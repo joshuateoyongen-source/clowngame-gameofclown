@@ -10006,20 +10006,48 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
 (() => {
     const menuScreen = document.getElementById("convention-menu-screen");
     const createScreen = document.getElementById("convention-create-screen");
+    const joinScreen = document.getElementById("convention-join-screen");
     const lobbyScreen = document.getElementById("convention-lobby-screen");
     const createStatus = document.getElementById("convention-create-status");
+    const joinStatus = document.getElementById("convention-join-status");
     const lobbyStatus = document.getElementById("convention-lobby-status");
     const playerList = document.getElementById("convention-player-list");
+    const requestsSection = document.getElementById("convention-join-requests");
+    const requestList = document.getElementById("convention-request-list");
 
-    if (!menuScreen || !createScreen || !lobbyScreen) return;
+    if (!menuScreen || !createScreen || !joinScreen || !lobbyScreen) return;
 
     let activePartyCode = null;
+    let activeUserUid = null;
+    let activeIsHost = false;
     let membersListener = null;
+    let requestsListener = null;
+    let approvalListener = null;
+    let ownRequestListener = null;
+
+    // A player's assigned colour is stored in Firebase as one of these keys.
+    const conventionNameColours = {
+        red: "#e53935",
+        maroon: "#800000",
+        orange: "#e87500",
+        green: "#2e8b57",
+        darkGreen: "#006400",
+        darkYellow: "#a87900",
+        blue: "#1565c0",
+        violet: "#8a2be2",
+        purple: "#800080",
+        pink: "#d81b60"
+    };
+
+    function assignRandomNameColour() {
+        const colourKeys = Object.keys(conventionNameColours);
+        return colourKeys[Math.floor(Math.random() * colourKeys.length)];
+    }
 
     function showConventionScreen(screenToShow) {
         [homeScreen, challengeScreen, guideScreen, gameScreen,
          document.getElementById("cluny-lobby"), document.getElementById("duel-screen"),
-         menuScreen, createScreen, lobbyScreen].forEach(screen => {
+         menuScreen, createScreen, joinScreen, lobbyScreen].forEach(screen => {
             if (screen) screen.hidden = screen !== screenToShow;
         });
     }
@@ -10061,16 +10089,214 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
 
         entries.forEach(member => {
             const item = document.createElement("li");
-            item.textContent = `${member.name}${member.role === "host" ? " — Host" : ""}`;
+            const name = document.createElement("span");
+            name.textContent = member.name || "Unnamed player";
+            const assignedColour = conventionNameColours[member.nameColour];
+            name.style.color = assignedColour || "#263238";
+            item.appendChild(name);
+
+            if (member.role === "host") {
+                const hostLabel = document.createElement("span");
+                hostLabel.textContent = " — Host";
+                hostLabel.style.color = "#263238";
+                item.appendChild(hostLabel);
+            }
             playerList.appendChild(item);
         });
     }
 
-    function stopMembersListener() {
-        if (membersListener && activePartyCode && window.clownFirebase) {
-            window.clownFirebase.database.ref(`parties/${activePartyCode}/members`).off("value", membersListener);
-        }
+    function stopPartyListeners() {
+        if (!window.clownFirebase) return;
+        const database = window.clownFirebase.database;
+        if (membersListener && activePartyCode) database.ref(`parties/${activePartyCode}/members`).off("value", membersListener);
+        if (requestsListener && activePartyCode) database.ref(`joinRequests/${activePartyCode}`).off("value", requestsListener);
+        if (approvalListener && activePartyCode && activeUserUid) database.ref(`parties/${activePartyCode}/members/${activeUserUid}`).off("value", approvalListener);
+        if (ownRequestListener && activePartyCode && activeUserUid) database.ref(`joinRequests/${activePartyCode}/${activeUserUid}`).off("value", ownRequestListener);
         membersListener = null;
+        requestsListener = null;
+        approvalListener = null;
+        ownRequestListener = null;
+    }
+
+    function startMembersListener(code) {
+        const database = window.clownFirebase.database;
+        if (membersListener) database.ref(`parties/${code}/members`).off("value", membersListener);
+        membersListener = snapshot => showPlayers(snapshot.val() || {});
+        database.ref(`parties/${code}/members`).on("value", membersListener, error => {
+            console.error("Convention member-list listener failed:", error);
+            lobbyStatus.textContent = "The live player list could not be updated.";
+        });
+    }
+
+    function renderJoinRequests(requests) {
+        requestList.replaceChildren();
+        const entries = Object.entries(requests || {});
+        requestsSection.hidden = !activeIsHost || entries.length === 0;
+        if (!activeIsHost || !entries.length) return;
+
+        entries.forEach(([uid, request]) => {
+            const item = document.createElement("li");
+            item.className = "convention-request-item";
+            const label = document.createElement("span");
+            label.textContent = request.name || "Unnamed player";
+            item.appendChild(label);
+
+            const actions = document.createElement("div");
+            actions.className = "convention-request-actions";
+            const approve = document.createElement("button");
+            approve.type = "button";
+            approve.textContent = "Approve";
+            approve.addEventListener("click", () => approveJoinRequest(uid, request, approve));
+            const reject = document.createElement("button");
+            reject.type = "button";
+            reject.textContent = "Reject";
+            reject.addEventListener("click", () => rejectJoinRequest(uid, reject));
+            actions.append(approve, reject);
+            item.appendChild(actions);
+            requestList.appendChild(item);
+        });
+    }
+
+    async function approveJoinRequest(uid, request, button) {
+        if (!activePartyCode || !activeIsHost) return;
+        button.disabled = true;
+        try {
+            const database = window.clownFirebase.database;
+            const partyRef = database.ref(`parties/${activePartyCode}`);
+            const snapshot = await partyRef.once("value");
+            const party = snapshot.val();
+            if (!party || party.status !== "waiting") throw new Error("This Convention is no longer accepting players.");
+            const members = party.members || {};
+            if (members[uid]) {
+                await database.ref(`joinRequests/${activePartyCode}/${uid}`).remove();
+                return;
+            }
+            if (party.mode === "duels" && Object.keys(members).length >= 2) {
+                throw new Error("Party Duels already has its two players.");
+            }
+            const playerName = String(request.name || "").trim().slice(0, 17);
+            if (!playerName) throw new Error("This join request has no valid display name.");
+            await database.ref(`parties/${activePartyCode}/members/${uid}`).set({
+                name: playerName,
+                nameColour: assignRandomNameColour(),
+                role: "player",
+                joinedAt: Date.now(),
+                score: 0
+            });
+            await database.ref(`joinRequests/${activePartyCode}/${uid}`).remove();
+            lobbyStatus.textContent = `${playerName} joined the Convention.`;
+        } catch (error) {
+            console.error("Could not approve Convention join request:", error);
+            lobbyStatus.textContent = error.code === "PERMISSION_DENIED"
+                ? "Firebase denied approval. Check the published database rules."
+                : (error.message || "Could not approve this request.");
+            button.disabled = false;
+        }
+    }
+
+    async function rejectJoinRequest(uid, button) {
+        if (!activePartyCode || !activeIsHost) return;
+        button.disabled = true;
+        try {
+            await window.clownFirebase.database.ref(`joinRequests/${activePartyCode}/${uid}`).remove();
+        } catch (error) {
+            console.error("Could not reject Convention join request:", error);
+            lobbyStatus.textContent = "Could not reject this request. Please try again.";
+            button.disabled = false;
+        }
+    }
+
+    function watchHostRequests(code) {
+        const database = window.clownFirebase.database;
+        if (requestsListener) database.ref(`joinRequests/${code}`).off("value", requestsListener);
+        requestsSection.hidden = true;
+        requestsListener = snapshot => renderJoinRequests(snapshot.val() || {});
+        database.ref(`joinRequests/${code}`).on("value", requestsListener, error => {
+            console.error("Convention join-request listener failed:", error);
+            lobbyStatus.textContent = "Could not load join requests. Check the database rules.";
+        });
+    }
+
+    function enterJoinedLobby(code, member) {
+        stopPartyListeners();
+        activePartyCode = code;
+        activeIsHost = false;
+        activeUserUid = window.clownFirebase.auth.currentUser.uid;
+        document.getElementById("convention-code-display").textContent = code;
+        document.getElementById("convention-lobby-mode").textContent = "You have joined this Convention.";
+        lobbyStatus.textContent = `Welcome, ${member.name}!`;
+        requestsSection.hidden = true;
+        startMembersListener(code);
+        showConventionScreen(lobbyScreen);
+    }
+
+    async function requestToJoinConvention() {
+        const button = document.getElementById("confirm-join-convention-button");
+        const code = document.getElementById("convention-join-code").value.trim().toUpperCase();
+        const name = document.getElementById("convention-join-name").value.trim();
+        joinStatus.textContent = "";
+        if (!/^[A-Z]{4}$/.test(code)) {
+            joinStatus.textContent = "Please enter a valid four-letter Convention code.";
+            return;
+        }
+        if (!name || name.length > 17) {
+            joinStatus.textContent = "Please enter a display name between 1 and 17 characters.";
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Sending request…";
+        try {
+            const user = await window.clownFirebaseReady;
+            if (!user) throw new Error("Firebase sign-in has not completed. Please refresh and try again.");
+            stopPartyListeners();
+            activePartyCode = code;
+            activeUserUid = user.uid;
+            activeIsHost = false;
+            const database = window.clownFirebase.database;
+            await database.ref(`joinRequests/${code}/${user.uid}`).set({ name, requestedAt: Date.now() });
+            joinStatus.textContent = "Request sent! Waiting for the host to approve you…";
+
+            approvalListener = snapshot => {
+                const member = snapshot.val();
+                if (member) {
+                    enterJoinedLobby(code, member);
+                }
+            };
+            database.ref(`parties/${code}/members/${user.uid}`).on("value", approvalListener, error => {
+                console.error("Convention approval listener failed:", error);
+                joinStatus.textContent = "Could not check your approval status. Please try again.";
+            });
+
+            ownRequestListener = async snapshot => {
+                if (snapshot.exists()) return;
+                try {
+                    const memberSnapshot = await database.ref(`parties/${code}/members/${user.uid}`).once("value");
+                    if (memberSnapshot.exists()) enterJoinedLobby(code, memberSnapshot.val());
+                    else {
+                        stopPartyListeners();
+                        activePartyCode = null;
+                        joinStatus.textContent = "The host declined your request, or the request is no longer active.";
+                        button.disabled = false;
+                        button.textContent = "Request to Join";
+                    }
+                } catch (error) {
+                    console.error("Could not confirm Convention request status:", error);
+                }
+            };
+            database.ref(`joinRequests/${code}/${user.uid}`).on("value", ownRequestListener, error => {
+                console.error("Convention request listener failed:", error);
+            });
+        } catch (error) {
+            console.error("Could not request to join Convention:", error);
+            joinStatus.textContent = error.code === "PERMISSION_DENIED"
+                ? "We couldn't find an available Convention with that code, or it is no longer accepting requests. Please check the code."
+                : `Could not send your request: ${error.message || error}`;
+            stopPartyListeners();
+            activePartyCode = null;
+            button.disabled = false;
+            button.textContent = "Request to Join";
+        }
     }
 
     async function createConvention() {
@@ -10096,7 +10322,19 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                 createStatus.textContent = "Choose between 10 and 45 seconds per round.";
                 return;
             }
-            settings = { maxPlayers: null, rounds, roundTimeSeconds, pointBoost: document.getElementById("convention-point-boost").checked };
+            settings = {
+                maxPlayers: null,
+                rounds,
+                roundTimeSeconds,
+                pointBoost: document.getElementById("convention-point-boost").checked,
+                challenges: {
+                    blink: document.getElementById("convention-point-blink").checked,
+                    downTheClown: document.getElementById("convention-point-down-clown").checked,
+                    clownMorpho: document.getElementById("convention-point-morpho").checked,
+                    clownWarp: document.getElementById("convention-point-warp").checked,
+                    clownHazelnut: document.getElementById("convention-point-hazelnut").checked
+                }
+            };
         } else {
             settings = {
                 maxPlayers: 2,
@@ -10126,7 +10364,13 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                 createdAt: timestamp,
                 settings,
                 members: {
-                    [user.uid]: { name, role: "host", joinedAt: timestamp, score: 0 }
+                    [user.uid]: {
+                        name,
+                        nameColour: assignRandomNameColour(),
+                        role: "host",
+                        joinedAt: timestamp,
+                        score: 0
+                    }
                 },
                 gameState: { phase: "lobby", roundNumber: 0, updatedAt: timestamp }
             };
@@ -10149,18 +10393,17 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                 throw lastError || new Error("Could not create a unique party code. Please try again.");
             }
 
-            stopMembersListener();
+            stopPartyListeners();
             activePartyCode = createdCode;
+            activeUserUid = user.uid;
+            activeIsHost = true;
             document.getElementById("convention-code-display").textContent = createdCode;
             document.getElementById("convention-lobby-mode").textContent = mode === "duels" ? "Party Duels · 2 players" : `Point Party · ${settings.rounds} rounds · ${settings.roundTimeSeconds}s per round`;
             lobbyStatus.textContent = "Your Convention is ready. Waiting for friends to request to join…";
             showPlayers(partyData.members);
 
-            membersListener = snapshot => showPlayers(snapshot.val() || {});
-            database.ref(`parties/${createdCode}/members`).on("value", membersListener, error => {
-                console.error("Convention member-list listener failed:", error);
-                lobbyStatus.textContent = "The lobby was created, but the live player list could not be updated.";
-            });
+            startMembersListener(createdCode);
+            watchHostRequests(createdCode);
 
             console.log("Clown Convention created successfully:", createdCode);
             showConventionScreen(lobbyScreen);
@@ -10186,7 +10429,16 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     });
 
     document.getElementById("join-convention-button").addEventListener("click", () => {
-        // Join flow is implemented in the next development step.
+        joinStatus.textContent = "";
+        document.getElementById("convention-join-code").value = "";
+        document.getElementById("convention-join-name").value = "";
+        showConventionScreen(joinScreen);
+    });
+
+    document.getElementById("confirm-join-convention-button").addEventListener("click", requestToJoinConvention);
+
+    document.getElementById("convention-join-code").addEventListener("input", event => {
+        event.target.value = event.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4);
     });
 
     document.querySelectorAll('input[name="convention-mode"]').forEach(radio => {
@@ -10197,14 +10449,17 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
 
     document.querySelectorAll(".convention-back-button").forEach(button => {
         button.addEventListener("click", () => {
-            if (button.closest("#convention-create-screen")) showConventionScreen(menuScreen);
+            if (button.closest("#convention-create-screen") || button.closest("#convention-join-screen")) showConventionScreen(menuScreen);
             else showConventionScreen(homeScreen);
         });
     });
 
     document.getElementById("leave-convention-button").addEventListener("click", () => {
-        stopMembersListener();
+        stopPartyListeners();
         activePartyCode = null;
+        activeUserUid = null;
+        activeIsHost = false;
+        requestsSection.hidden = true;
         showConventionScreen(menuScreen);
     });
 })();

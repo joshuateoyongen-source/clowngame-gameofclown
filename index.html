@@ -27,9 +27,22 @@
         <h1>Clown Convention</h1>
         <p>Create a new Convention or join a friend's Convention.</p>
         <button type="button" id="create-convention-button">Create Convention</button>
-        <button type="button" id="join-convention-button" disabled title="Joining will be added in the next step">Join Convention</button>
-        <p class="convention-note">Joining is coming next. For now, let's get party creation working.</p>
+        <button type="button" id="join-convention-button">Join Convention</button>
         <button type="button" class="convention-back-button">Back to Home</button>
+    </section>
+
+    <section id="convention-join-screen" class="game-container convention-screen" hidden>
+        <h1>Join Convention</h1>
+        <p>Enter the four-letter code shared by the Convention host.</p>
+        <label class="convention-field">Convention code
+            <input id="convention-join-code" type="text" maxlength="4" autocomplete="off" placeholder="ABCD" spellcheck="false">
+        </label>
+        <label class="convention-field">Your display name
+            <input id="convention-join-name" type="text" maxlength="17" autocomplete="nickname" placeholder="Enter your name">
+        </label>
+        <p id="convention-join-status" class="convention-status" role="status" aria-live="polite"></p>
+        <button type="button" id="confirm-join-convention-button">Request to Join</button>
+        <button type="button" class="convention-back-button">Back</button>
     </section>
 
     <section id="convention-create-screen" class="game-container convention-screen" hidden>
@@ -51,6 +64,14 @@
                 <input id="convention-round-time" type="number" min="10" max="45" value="20">
             </label>
             <label class="convention-checkbox"><input id="convention-point-boost" type="checkbox"> Enable Point Boost</label>
+            <div class="convention-point-challenges">
+                <p><strong>Optional Challenges</strong></p>
+                <label class="convention-checkbox"><input type="checkbox" id="convention-point-blink"> Blink Mode — Clown Hide</label>
+                <label class="convention-checkbox"><input type="checkbox" id="convention-point-down-clown"> Down the Clown</label>
+                <label class="convention-checkbox"><input type="checkbox" id="convention-point-morpho"> Clown Morpho</label>
+                <label class="convention-checkbox"><input type="checkbox" id="convention-point-warp"> Clown Warp</label>
+                <label class="convention-checkbox"><input type="checkbox" id="convention-point-hazelnut"> Clown Hazelnut</label>
+            </div>
         </div>
         <div id="duels-settings" class="convention-settings">
             <p><strong>Party Duels</strong> supports exactly two human players. Choose any optional challenges:</p>
@@ -71,6 +92,10 @@
         <p id="convention-lobby-mode"></p>
         <h2>Players</h2>
         <ul id="convention-player-list" class="convention-player-list"></ul>
+        <section id="convention-join-requests" class="convention-requests" hidden>
+            <h2>Join Requests</h2>
+            <ul id="convention-request-list" class="convention-player-list"></ul>
+        </section>
         <p id="convention-lobby-status" class="convention-status" role="status" aria-live="polite">Waiting for players…</p>
         <button type="button" id="leave-convention-button">Leave Convention</button>
     </section>
