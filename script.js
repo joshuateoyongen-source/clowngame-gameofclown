@@ -10862,6 +10862,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     let pdHostTimerKey = null;
     let pdLastSoundRound = null;
     let pdLastDamageSoundRound = null;
+    let pdLastBellGuessIds = new Set();
     if (pd.select && Array.isArray(species)) {
         pd.select.replaceChildren();
         species.forEach(name => { const option=document.createElement("option"); option.value=name; option.textContent=name; pd.select.appendChild(option); });
@@ -10981,7 +10982,15 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         const chosen=pd.select.value; if(!chosen){pd.status.textContent="Choose a species first.";return;}
         const elapsedMs=Math.max(0,Math.min(30000,pointPartyNow()-Number(state.startedAt)));
         pdSubmitPending=true; pd.select.disabled=true; pd.submit.disabled=true; pd.status.textContent="Guess locked in — waiting for your opponent…";
-        try { await window.clownFirebase.database.ref(`parties/${activePartyCode}/guesses/${state.roundNumber}/${activeUserUid}`).set({species:chosen,elapsedMs,submittedAt:pointPartyNow()}); if (typeof playDuelBell === "function") playDuelBell(); }
+        try {
+    await window.clownFirebase.database
+        .ref(`parties/${activePartyCode}/guesses/${state.roundNumber}/${activeUserUid}`)
+        .set({
+            species: chosen,
+            elapsedMs,
+            submittedAt: pointPartyNow()
+        });
+}
         catch(error){pdSubmitPending=false;pd.select.disabled=false;pd.submit.disabled=false;pd.status.textContent=`Could not submit guess: ${error.message||error}`;}
     }
     pd.submit.addEventListener("click",pdSubmitGuess);
@@ -11007,7 +11016,7 @@ if (
 }
         if(party.status==="waiting"&&state.phase==="lobby"){
             stopPartyDuelsMusic();
-            pdStopVisualTimers(); pdRenderedKey=null; pdSubmitPending=false; pdLastResolvedKey=null; pdStartingRound=false; pdHostTimerKey=null; pdLastSoundRound=null; pdLastDamageSoundRound=null; pd.select.disabled=false;pd.submit.disabled=false;pd.stop.hidden=true;
+            pdStopVisualTimers(); pdRenderedKey=null; pdSubmitPending=false; pdLastResolvedKey=null; pdStartingRound=false; pdHostTimerKey=null; pdLastSoundRound=null; pdLastDamageSoundRound=null; pdLastBellGuessIds.clear(); pd.select.disabled=false;pd.submit.disabled=false;pd.stop.hidden=true;
             showConventionScreen(lobbyScreen); return;
         }
         if(party.status!=="playing"&&party.status!=="finished")return;
@@ -11023,6 +11032,19 @@ if (
         if(state.phase==="round"){
             startPartyDuelsMusic();
             showConventionScreen(partyDuelsScreen);
+            const roundGuesses = party.guesses?.[state.roundNumber] || {};
+
+Object.keys(roundGuesses).forEach(uid => {
+    const bellKey = `${state.roundNumber}:${uid}`;
+
+    if (!pdLastBellGuessIds.has(bellKey)) {
+        pdLastBellGuessIds.add(bellKey);
+
+        if (typeof playDuelBell === "function") {
+            playDuelBell();
+        }
+    }
+});
             const key=`${state.roundNumber}:${state.startedAt}`;
             if(pdRenderedKey!==key){
                 pdRenderedKey=key;pdSubmitPending=false;pd.select.value=species[0]||"";pd.select.disabled=false;pd.submit.disabled=false;pd.reveal.textContent="";
