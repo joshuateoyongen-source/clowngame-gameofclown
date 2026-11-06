@@ -515,3 +515,12 @@ button:disabled { opacity:.45; cursor:not-allowed; }
     #point-party-image { max-height: 330px; }
     .point-party-roundline { margin-left: 4px; margin-right: 4px; }
 }
+
+/* Convention settings editor and Point Boost explanation */
+.point-boost-option { text-align:left; margin:10px 0 14px; }
+.point-boost-option small { display:block; margin:4px 0 0 26px; color:#555; line-height:1.4; }
+#convention-settings-editor { margin-top:18px; padding-top:14px; border-top:1px solid #d8d8d8; }
+#convention-settings-editor[hidden] { display:none !important; }
+#convention-settings-editor .convention-field { display:block; margin:10px auto; }
+#convention-settings-editor input[type="number"] { display:block; width:100%; max-width:220px; margin:5px auto; padding:8px; }
+.host-game-control { margin-top:12px; background:#a83232; }

@@ -41,7 +41,7 @@
             <input id="convention-join-name" type="text" maxlength="17" autocomplete="nickname" placeholder="Enter your name">
         </label>
         <p id="convention-join-status" class="convention-status" role="status" aria-live="polite"></p>
-        <button type="button" id="confirm-join-convention-button">Request to Join</button>
+        <button type="button" id="confirm-join-convention-button">Join Convention</button>
         <button type="button" class="convention-back-button">Back</button>
     </section>
 
@@ -63,7 +63,7 @@
             <label class="convention-field">Time per round (10–45 seconds)
                 <input id="convention-round-time" type="number" min="10" max="45" value="20">
             </label>
-            <label class="convention-checkbox"><input id="convention-point-boost" type="checkbox"> Enable Point Boost</label>
+            <div class="point-boost-option"><label class="convention-checkbox"><input id="convention-point-boost" type="checkbox"> Enable Point Boost</label><small>Enabling Point Boost gives players more points per round as the game progresses.</small></div>
             <div class="convention-point-challenges">
                 <p><strong>Optional Challenges</strong></p>
                 <label class="convention-checkbox"><input type="checkbox" id="convention-point-blink"> Blink Mode — Clown Hide</label>
@@ -112,6 +112,7 @@
             <h2>Leaderboard</h2>
             <ol id="point-party-leaderboard-list" class="convention-player-list"></ol>
         </section>
+        <button type="button" id="point-party-stop-button" class="host-game-control" hidden>Stop Game and Return to Lobby</button>
         <button type="button" id="point-party-leave-button">Leave Convention</button>
     </section>
 
@@ -124,10 +125,35 @@
             <h2>Convention Settings</h2>
             <div id="convention-lobby-settings-details">Loading settings…</div>
         </section>
+        <section id="convention-settings-editor" class="convention-settings" hidden>
+            <h2>Modify Convention Settings</h2>
+            <p class="convention-note">The game mode cannot be changed after the Convention is created.</p>
+            <div id="lobby-point-party-editor">
+                <label class="convention-field">Number of rounds (5–25)<input id="lobby-convention-rounds" type="number" min="5" max="25"></label>
+                <label class="convention-field">Time per round (10–45 seconds)<input id="lobby-convention-round-time" type="number" min="10" max="45"></label>
+                <div class="point-boost-option"><label class="convention-checkbox"><input id="lobby-convention-point-boost" type="checkbox"> Enable Point Boost</label><small>Enabling Point Boost gives players more points per round as the game progresses.</small></div>
+                <div class="convention-point-challenges">
+                    <p><strong>Optional Challenges</strong></p>
+                    <label class="convention-checkbox"><input type="checkbox" id="lobby-point-blink"> Blink Mode — Clown Hide</label>
+                    <label class="convention-checkbox"><input type="checkbox" id="lobby-point-down-clown"> Down the Clown</label>
+                    <label class="convention-checkbox"><input type="checkbox" id="lobby-point-morpho"> Clown Morpho</label>
+                    <label class="convention-checkbox"><input type="checkbox" id="lobby-point-warp"> Clown Warp</label>
+                    <label class="convention-checkbox"><input type="checkbox" id="lobby-point-hazelnut"> Clown Hazelnut</label>
+                </div>
+            </div>
+            <div id="lobby-duels-editor">
+                <p><strong>Party Duels Challenges</strong></p>
+                <label class="convention-checkbox"><input type="checkbox" id="lobby-duels-down-clown"> Down the Clown</label>
+                <label class="convention-checkbox"><input type="checkbox" id="lobby-duels-morpho"> Clown Morpho</label>
+                <label class="convention-checkbox"><input type="checkbox" id="lobby-duels-warp"> Clown Warp</label>
+                <label class="convention-checkbox"><input type="checkbox" id="lobby-duels-hazelnut"> Clown Hazelnut</label>
+            </div>
+            <p id="convention-settings-save-status" class="convention-status" role="status" aria-live="polite"></p>
+            <button type="button" id="save-convention-settings-button">Save Settings</button>
+        </section>
         <h2>Players</h2>
         <ul id="convention-player-list" class="convention-player-list"></ul>
         <section id="convention-join-requests" class="convention-requests" hidden>
-            <h2>Join Requests</h2>
             <ul id="convention-request-list" class="convention-player-list"></ul>
         </section>
         <p id="convention-lobby-status" class="convention-status" role="status" aria-live="polite">Waiting for players…</p>

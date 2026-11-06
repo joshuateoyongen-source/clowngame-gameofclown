@@ -7839,6 +7839,7 @@ document.addEventListener("keydown", function(event) {
     }
 
     if (event.code === "Space") {
+        if (document.getElementById("point-party-screen") && !document.getElementById("point-party-screen").hidden) return;
         event.preventDefault();
         if (duelActive) return;
         if (!answered) checkAnswer();
@@ -10034,6 +10035,8 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
 
     const startGameButton = document.getElementById("start-convention-game-button");
     const lobbySettingsDetails = document.getElementById("convention-lobby-settings-details");
+    const settingsEditor = document.getElementById("convention-settings-editor");
+    const pointPartyStopButton = document.getElementById("point-party-stop-button");
 
     // A player's assigned colour is stored in Firebase as one of these keys.
     const conventionNameColours = {
@@ -10539,9 +10542,25 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     }
 
     function handlePointPartyState(party) {
-        if (!party || party.mode !== "pointParty" || party.status !== "playing" && party.status !== "finished") return;
+        if (!party || party.mode !== "pointParty") return;
         const state = party.gameState || {};
+        if (party.status === "waiting" && state.phase === "lobby") {
+            clearPointPartyTimers();
+            pointPartyRenderedRoundKey = null;
+            pointPartyEndingRoundKey = null;
+            pointPartySubmissionPending = false;
+            pointPartySelect.disabled = false;
+            pointPartySubmit.disabled = false;
+            pointPartyStopButton.hidden = true;
+            settingsEditor.hidden = !activeIsHost;
+            updateStartButton(party);
+            showConventionScreen(lobbyScreen);
+            lobbyStatus.textContent = "The game has stopped. The Convention is back on standby.";
+            return;
+        }
+        if (party.status !== "playing" && party.status !== "finished") return;
         document.getElementById("point-party-code").textContent = `Convention ${activePartyCode || "----"}`;
+        pointPartyStopButton.hidden = !activeIsHost || (party.status !== "playing" && party.status !== "finished");
         if (party.status === "playing" && !pointPartyLiveListenersActive) {
             startPointPartyLiveListeners(activePartyCode);
         }
@@ -10624,19 +10643,21 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     }
 
     pointPartySubmit.addEventListener("click", submitPointPartyGuess);
-    document.getElementById("point-party-leave-button").addEventListener("click", () => {
-        stopPartyListeners();
-        activePartyCode = null;
-        activeUserUid = null;
-        activeIsHost = false;
-        currentPartyData = null;
-        pointPartyRenderedRoundKey = null;
-        pointPartyEndingRoundKey = null;
-        pointPartySubmissionPending = false;
-        startGameButton.hidden = true;
-        requestsSection.hidden = true;
-        showConventionScreen(menuScreen);
+
+    // Point Party: Spacebar and right-click both lock in the currently selected answer.
+    document.addEventListener("keydown", event => {
+        if (event.code !== "Space" || pointPartyScreen.hidden) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        submitPointPartyGuess();
+    }, true);
+    pointPartyScreen.addEventListener("contextmenu", event => {
+        event.preventDefault();
+        if (!pointPartyScreen.hidden) submitPointPartyGuess();
     });
+
+    pointPartyStopButton.addEventListener("click", stopCurrentConventionGame);
+    document.getElementById("point-party-leave-button").addEventListener("click", leaveActiveConvention);
 
     function stopPointPartyLiveListeners() {
         if (!window.clownFirebase || !activePartyCode) return;
@@ -10755,6 +10776,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
 
         document.getElementById("convention-lobby-mode").textContent =
             party.mode === "duels" ? "Party Duels" : "Point Party";
+        renderSettingsEditor(party);
         updateStartButton(party);
         handlePointPartyState(party);
         if (party.status === "playing" || party.gameState?.phase === "starting") {
@@ -10763,6 +10785,141 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         } else if (party.status === "finished") {
             lobbyStatus.textContent = "This Convention has finished.";
         }
+    }
+
+    function renderSettingsEditor(party) {
+        settingsEditor.hidden = !activeIsHost || !activePartyCode || party.status !== "waiting";
+        if (!activeIsHost || !party || settingsEditor.dataset.partyCode === activePartyCode) return;
+        settingsEditor.dataset.partyCode = activePartyCode;
+        const settings = party.settings || {};
+        const challenges = settings.challenges || {};
+        const pointParty = party.mode === "pointParty";
+        document.getElementById("lobby-point-party-editor").hidden = !pointParty;
+        document.getElementById("lobby-duels-editor").hidden = pointParty;
+        if (pointParty) {
+            document.getElementById("lobby-convention-rounds").value = Number(settings.rounds) || 10;
+            document.getElementById("lobby-convention-round-time").value = Number(settings.roundTimeSeconds) || 20;
+            document.getElementById("lobby-convention-point-boost").checked = settings.pointBoost === true;
+            document.getElementById("lobby-point-blink").checked = challenges.blink === true;
+            document.getElementById("lobby-point-down-clown").checked = challenges.downTheClown === true;
+            document.getElementById("lobby-point-morpho").checked = challenges.clownMorpho === true;
+            document.getElementById("lobby-point-warp").checked = challenges.clownWarp === true;
+            document.getElementById("lobby-point-hazelnut").checked = challenges.clownHazelnut === true;
+        } else {
+            document.getElementById("lobby-duels-down-clown").checked = challenges.downTheClown === true;
+            document.getElementById("lobby-duels-morpho").checked = challenges.clownMorpho === true;
+            document.getElementById("lobby-duels-warp").checked = challenges.clownWarp === true;
+            document.getElementById("lobby-duels-hazelnut").checked = challenges.clownHazelnut === true;
+        }
+    }
+
+    async function saveConventionSettings() {
+        if (!activeIsHost || !activePartyCode || !currentPartyData || currentPartyData.status !== "waiting") return;
+        const status = document.getElementById("convention-settings-save-status");
+        const button = document.getElementById("save-convention-settings-button");
+        let settings;
+        if (currentPartyData.mode === "pointParty") {
+            const rounds = Number(document.getElementById("lobby-convention-rounds").value);
+            const roundTimeSeconds = Number(document.getElementById("lobby-convention-round-time").value);
+            if (!Number.isInteger(rounds) || rounds < 5 || rounds > 25) { status.textContent = "Choose between 5 and 25 rounds."; return; }
+            if (!Number.isInteger(roundTimeSeconds) || roundTimeSeconds < 10 || roundTimeSeconds > 45) { status.textContent = "Choose between 10 and 45 seconds per round."; return; }
+            settings = {
+                maxPlayers: null, rounds, roundTimeSeconds,
+                pointBoost: document.getElementById("lobby-convention-point-boost").checked,
+                challenges: {
+                    blink: document.getElementById("lobby-point-blink").checked,
+                    downTheClown: document.getElementById("lobby-point-down-clown").checked,
+                    clownMorpho: document.getElementById("lobby-point-morpho").checked,
+                    clownWarp: document.getElementById("lobby-point-warp").checked,
+                    clownHazelnut: document.getElementById("lobby-point-hazelnut").checked
+                }
+            };
+        } else {
+            settings = {
+                maxPlayers: 2,
+                challenges: {
+                    downTheClown: document.getElementById("lobby-duels-down-clown").checked,
+                    clownMorpho: document.getElementById("lobby-duels-morpho").checked,
+                    clownWarp: document.getElementById("lobby-duels-warp").checked,
+                    clownHazelnut: document.getElementById("lobby-duels-hazelnut").checked
+                }
+            };
+        }
+        button.disabled = true;
+        status.textContent = "Saving settings…";
+        try {
+            await window.clownFirebase.database.ref(`parties/${activePartyCode}/settings`).set(settings);
+            status.textContent = "Convention settings saved.";
+        } catch (error) {
+            console.error("Could not save Convention settings:", error);
+            status.textContent = error.code === "PERMISSION_DENIED" ? "Firebase denied this settings update. Make sure the host settings rule is published." : `Could not save settings: ${error.message || error}`;
+        } finally { button.disabled = false; }
+    }
+
+    document.getElementById("save-convention-settings-button").addEventListener("click", saveConventionSettings);
+
+    async function stopCurrentConventionGame() {
+        if (!activeIsHost || !activePartyCode || !currentPartyData) return;
+        const button = pointPartyStopButton;
+        button.disabled = true;
+        button.textContent = "Stopping…";
+        clearPointPartyTimers();
+        try {
+            const database = window.clownFirebase.database;
+            await database.ref(`parties/${activePartyCode}/status`).set("waiting");
+            const freshMembersSnapshot = await database.ref(`parties/${activePartyCode}/members`).once("value");
+            const scoreResets = {};
+            Object.keys(freshMembersSnapshot.val() || {}).forEach(uid => { scoreResets[`${uid}/score`] = 0; });
+            if (Object.keys(scoreResets).length) await database.ref(`parties/${activePartyCode}/members`).update(scoreResets);
+            await database.ref(`parties/${activePartyCode}/guesses`).remove();
+            await database.ref(`parties/${activePartyCode}/gameState`).set({
+                phase: "lobby", roundNumber: 0, updatedAt: pointPartyNow(), stoppedBy: activeUserUid
+            });
+            pointPartyStopButton.hidden = true;
+            button.disabled = false;
+            button.textContent = "Stop Game and Return to Lobby";
+            showConventionScreen(lobbyScreen);
+            lobbyStatus.textContent = "The game has stopped. The Convention is back on standby.";
+        } catch (error) {
+            console.error("Could not stop Convention game:", error);
+            pointPartyStatus.textContent = `Could not stop the game: ${error.message || error}`;
+            button.disabled = false;
+            button.textContent = "Stop Game and Return to Lobby";
+        }
+    }
+
+    async function leaveActiveConvention() {
+        if (!activePartyCode || !activeUserUid) { showConventionScreen(menuScreen); return; }
+        const code = activePartyCode;
+        const uid = activeUserUid;
+        const wasHost = activeIsHost;
+        try {
+            const database = window.clownFirebase.database;
+            if (wasHost) {
+                await database.ref(`parties/${code}`).remove();
+            } else {
+                await database.ref(`parties/${code}/members/${uid}`).remove();
+            }
+        } catch (error) {
+            console.error("Could not leave Convention:", error);
+            const message = `Could not leave the Convention: ${error.message || error}. Check that the updated Firebase rules have been published.`;
+            if (!pointPartyScreen.hidden) pointPartyStatus.textContent = message;
+            else lobbyStatus.textContent = message;
+            return;
+        }
+        stopPartyListeners();
+        activePartyCode = null;
+        activeUserUid = null;
+        activeIsHost = false;
+        currentPartyData = null;
+        pointPartyRenderedRoundKey = null;
+        pointPartyEndingRoundKey = null;
+        pointPartySubmissionPending = false;
+        startGameButton.hidden = true;
+        pointPartyStopButton.hidden = true;
+        settingsEditor.hidden = true;
+        requestsSection.hidden = true;
+        showConventionScreen(menuScreen);
     }
 
     function updateStartButton(party = currentPartyData) {
@@ -10788,6 +10945,12 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                 return;
             }
             renderConventionSettings(party);
+            if (party.status === "waiting" && party.gameState?.phase === "lobby") {
+                clearPointPartyTimers();
+                pointPartyStopButton.hidden = true;
+                showConventionScreen(lobbyScreen);
+                if (party.gameState?.stoppedBy) lobbyStatus.textContent = "The host stopped the game. The Convention is back on standby.";
+            }
         };
         database.ref(`parties/${code}`).on("value", partyDetailsListener, error => {
             console.error("Convention details listener failed:", error);
@@ -10799,6 +10962,15 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         const database = window.clownFirebase.database;
         if (membersListener) database.ref(`parties/${code}/members`).off("value", membersListener);
         membersListener = snapshot => {
+            if (!snapshot.exists()) {
+                showPlayers({});
+                if (activePartyCode === code && !activeIsHost) {
+                    stopPartyListeners();
+                    activePartyCode = null; activeUserUid = null; currentPartyData = null;
+                    showConventionScreen(menuScreen);
+                }
+                return;
+            }
             const members = snapshot.val() || {};
             showPlayers(members);
             if (currentPartyData) {
@@ -10922,17 +11094,10 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         const code = document.getElementById("convention-join-code").value.trim().toUpperCase();
         const name = document.getElementById("convention-join-name").value.trim();
         joinStatus.textContent = "";
-        if (!/^[A-Z]{4}$/.test(code)) {
-            joinStatus.textContent = "Please enter a valid four-letter Convention code.";
-            return;
-        }
-        if (!name || name.length > 17) {
-            joinStatus.textContent = "Please enter a display name between 1 and 17 characters.";
-            return;
-        }
-
+        if (!/^[A-Z]{4}$/.test(code)) { joinStatus.textContent = "Please enter a valid four-letter Convention code."; return; }
+        if (!name || name.length > 17) { joinStatus.textContent = "Please enter a display name between 1 and 17 characters."; return; }
         button.disabled = true;
-        button.textContent = "Sending request…";
+        button.textContent = "Joining…";
         try {
             const user = await window.clownFirebaseReady;
             if (!user) throw new Error("Firebase sign-in has not completed. Please refresh and try again.");
@@ -10941,48 +11106,26 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             activeUserUid = user.uid;
             activeIsHost = false;
             const database = window.clownFirebase.database;
-            await database.ref(`joinRequests/${code}/${user.uid}`).set({ name, requestedAt: Date.now() });
-            joinStatus.textContent = "Request sent! Waiting for the host to approve you…";
-
-            approvalListener = snapshot => {
-                const member = snapshot.val();
-                if (member) {
-                    enterJoinedLobby(code, member);
-                }
+            const member = {
+                name,
+                nameColour: assignRandomNameColour(),
+                role: "player",
+                joinedAt: Date.now(),
+                score: 0
             };
-            database.ref(`parties/${code}/members/${user.uid}`).on("value", approvalListener, error => {
-                console.error("Convention approval listener failed:", error);
-                joinStatus.textContent = "Could not check your approval status. Please try again.";
-            });
-
-            ownRequestListener = async snapshot => {
-                if (snapshot.exists()) return;
-                try {
-                    const memberSnapshot = await database.ref(`parties/${code}/members/${user.uid}`).once("value");
-                    if (memberSnapshot.exists()) enterJoinedLobby(code, memberSnapshot.val());
-                    else {
-                        stopPartyListeners();
-                        activePartyCode = null;
-                        joinStatus.textContent = "The host declined your request, or the request is no longer active.";
-                        button.disabled = false;
-                        button.textContent = "Request to Join";
-                    }
-                } catch (error) {
-                    console.error("Could not confirm Convention request status:", error);
-                }
-            };
-            database.ref(`joinRequests/${code}/${user.uid}`).on("value", ownRequestListener, error => {
-                console.error("Convention request listener failed:", error);
-            });
+            await database.ref(`parties/${code}/members/${user.uid}`).set(member);
+            enterJoinedLobby(code, member);
         } catch (error) {
-            console.error("Could not request to join Convention:", error);
+            console.error("Could not join Convention:", error);
             joinStatus.textContent = error.code === "PERMISSION_DENIED"
-                ? "We couldn't find an available Convention with that code, or it is no longer accepting requests. Please check the code."
-                : `Could not send your request: ${error.message || error}`;
+                ? "Could not join. Check the four-letter code, make sure the Convention is waiting for players, and check that it has space."
+                : `Could not join the Convention: ${error.message || error}`;
             stopPartyListeners();
-            activePartyCode = null;
+            activePartyCode = null; activeUserUid = null; activeIsHost = false;
             button.disabled = false;
-            button.textContent = "Request to Join";
+            button.textContent = "Join Convention";
+        } finally {
+            if (activePartyCode === code) { button.disabled = false; button.textContent = "Join Convention"; }
         }
     }
 
@@ -11086,12 +11229,11 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             activeIsHost = true;
             currentPartyData = partyData;
             document.getElementById("convention-code-display").textContent = createdCode;
-            lobbyStatus.textContent = "Your Convention is ready. Waiting for friends to request to join…";
+            lobbyStatus.textContent = "Your Convention is ready. Share the code so friends can join.";
             showPlayers(partyData.members);
 
             startMembersListener(createdCode);
             startPartyDetailsListener(createdCode);
-            watchHostRequests(createdCode);
 
             console.log("Clown Convention created successfully:", createdCode);
             showConventionScreen(lobbyScreen);
@@ -11180,14 +11322,5 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         }
     });
 
-    document.getElementById("leave-convention-button").addEventListener("click", () => {
-        stopPartyListeners();
-        activePartyCode = null;
-        activeUserUid = null;
-        activeIsHost = false;
-        currentPartyData = null;
-        startGameButton.hidden = true;
-        requestsSection.hidden = true;
-        showConventionScreen(menuScreen);
-    });
+    document.getElementById("leave-convention-button").addEventListener("click", leaveActiveConvention);
 })();
