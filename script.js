@@ -6661,7 +6661,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Ocellaris, Percula",
+            "Epigrammata, Ocellaris, Percula",
 
         extraNotes:
             "Fat Fig"
@@ -6860,6 +6860,29 @@ const clownfishGuide = {
 
         extraNotes:
             "Ephipp, ephipp, loves to pee with fake."
+    },
+
+    "Epigrammata": {
+        image: "images/epi16.jpg",
+
+        scientificName: "Amphiprion epigrammata",
+
+        description:
+            "Epigrammata Clowns are a distinct species from A. biaculeatus. They are found around Queensland, Australia as well as the neighbouring regions.",
+
+        whitebars: "3 White Bars",
+
+        identificationTips: [
+            "Epigrammata Clowns are the only Clowns to have very yellow-tinged white bars. Biaculeatus Clowns have whiter white bars in comparison.",
+            "Epigrammata Clowns are generally darker and more maroon in colour than Biaculeatus Clowns.",
+
+        ],
+
+        similarSpecies:
+            "Biaculeatus",
+
+        extraNotes:
+            "Epic Gamma! Epic Zulu!!"
     },
 
     "Fuscocaudatus": {
