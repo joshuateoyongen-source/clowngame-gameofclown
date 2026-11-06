@@ -3,12 +3,14 @@
 // The first online visit downloads the listed game assets for offline use.
 
 const CACHE_NAME = "clown-game-offline-v3";
+const ASSET_MANIFEST_VERSION = "c965259a5653";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./script.js",
   "./style.css",
-  "./manifest.json"
+  "./manifest.json",
+  "./offline-assets.json"
 ];
 
 const ASSETS_TO_CACHE = [
@@ -1372,13 +1374,43 @@ self.addEventListener("install", (event) => {
       }
     }
 
-    // Cache assets in small batches to avoid launching 1,300+ requests at once.
-    // A failed asset is reported, while the rest of the game continues caching.
+        // Load the automatically generated image manifest.
+    const manifestUrl = new URL(
+      "./offline-assets.json",
+      self.registration.scope
+    );
+
+    const manifestResponse = await cache.match(manifestUrl);
+
+    if (!manifestResponse) {
+      throw new Error("Offline image manifest was not cached.");
+    }
+
+    const dynamicImageAssets = await manifestResponse.json();
+
+    if (!Array.isArray(dynamicImageAssets)) {
+      throw new Error("Offline image manifest is not a valid array.");
+    }
+
+    // Keep the other manually listed assets, but replace
+    // the old manually maintained image list with the new one.
+    const allAssetsToCache = [
+      ...new Set([
+        ...ASSETS_TO_CACHE.filter(path => !path.startsWith("images/")),
+        ...dynamicImageAssets
+      ])
+    ];
+
+    console.log(
+      `[Clown Game] Preparing to cache ${allAssetsToCache.length} assets.`
+    );
+
+    // Cache assets in small batches.
     const batchSize = 20;
     const failedAssets = [];
 
-    for (let i = 0; i < ASSETS_TO_CACHE.length; i += batchSize) {
-      const batch = ASSETS_TO_CACHE.slice(i, i + batchSize);
+    for (let i = 0; i < allAssetsToCache.length; i += batchSize) {
+      const batch = allAssetsToCache.slice(i, i + batchSize);
       await Promise.all(batch.map(async (path) => {
         try {
           const url = new URL(path, self.registration.scope);
@@ -1398,7 +1430,7 @@ self.addEventListener("install", (event) => {
         "Check the browser console for their paths."
       );
     } else {
-      console.log(`[Clown Game] Offline cache ready: ${ASSETS_TO_CACHE.length} assets cached.`);
+      console.log(`[Clown Game] Offline cache ready: ${allAssetsToCache.length} assets cached.`);
     }
 
     await self.skipWaiting();

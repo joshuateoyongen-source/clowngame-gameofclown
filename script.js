@@ -1,5 +1,5 @@
 // ==========================================
-// FIREBASE CONNECTION
+// FIREBASE CONNECTION — LOAD ONLY FOR CONVENTION
 // ==========================================
 
 const firebaseConfig = {
@@ -12,26 +12,70 @@ const firebaseConfig = {
     appId: "1:657154049924:web:74e444fa31a210edb03fd1"
 };
 
-firebase.initializeApp(firebaseConfig);
+let firebaseLoadPromise = null;
 
-window.clownFirebase = {
-    auth: firebase.auth(),
-    database: firebase.database()
-};
+window.clownFirebase = null;
+window.clownFirebaseReady = null;
 
-// Sign in anonymously
-window.clownFirebaseReady = window.clownFirebase.auth.signInAnonymously()
-    .then((userCredential) => {
-        console.log(
-            "Firebase anonymous sign-in successful!",
-            userCredential.user.uid
-        );
-        return userCredential.user;
-    })
-    .catch((error) => {
-        console.error("Firebase authentication error:", error);
-        return null;
+function loadFirebaseScript(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error("Could not load Firebase."));
+        document.head.appendChild(script);
     });
+}
+
+async function ensureFirebaseReady() {
+    if (!navigator.onLine) {
+        throw new Error("Clown Convention requires an internet connection.");
+    }
+
+    if (window.clownFirebaseReady) {
+        return window.clownFirebaseReady;
+    }
+
+    if (firebaseLoadPromise) {
+        return firebaseLoadPromise;
+    }
+
+    firebaseLoadPromise = (async () => {
+        await loadFirebaseScript(
+            "https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"
+        );
+
+        await loadFirebaseScript(
+            "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"
+        );
+
+        await loadFirebaseScript(
+            "https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"
+        );
+
+        firebase.initializeApp(firebaseConfig);
+
+        window.clownFirebase = {
+            auth: firebase.auth(),
+            database: firebase.database()
+        };
+
+        window.clownFirebaseReady =
+            window.clownFirebase.auth.signInAnonymously()
+                .then(userCredential => userCredential.user);
+
+        return await window.clownFirebaseReady;
+    })();
+
+    try {
+        return await firebaseLoadPromise;
+    } catch (error) {
+        firebaseLoadPromise = null;
+        window.clownFirebaseReady = null;
+        window.clownFirebase = null;
+        throw error;
+    }
+}
 
 
 
@@ -6186,6 +6230,7 @@ const fish = [
 
 
 
+
 let shuffledFish = [];
 let currentFishIndex = 0;
 
@@ -10385,9 +10430,17 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     let pointPartyEndingRoundKey = null;
     let pointPartySubmissionPending = false;
     let pointPartyServerTimeOffset = 0;
-    window.clownFirebase.database.ref(".info/serverTimeOffset").on("value", snapshot => {
-        pointPartyServerTimeOffset = Number(snapshot.val()) || 0;
-    });
+    let pointPartyServerTimeListenerAttached = false;
+
+    function attachPointPartyServerTimeListener() {
+        if (pointPartyServerTimeListenerAttached) return;
+
+        pointPartyServerTimeListenerAttached = true;
+
+        window.clownFirebase.database.ref(".info/serverTimeOffset").on("value", snapshot => {
+            pointPartyServerTimeOffset = Number(snapshot.val()) || 0;
+        });
+    }
 
     function pointPartyNow() {
         return Date.now() + pointPartyServerTimeOffset;
@@ -11793,9 +11846,16 @@ Object.keys(roundGuesses).forEach(uid => {
         }
     }
 
-    document.getElementById("clown-convention-button").addEventListener("click", () => {
+    document.getElementById("clown-convention-button").addEventListener("click", async () => {
+    try {
+        await ensureFirebaseReady();
+        attachPointPartyServerTimeListener();
         showConventionScreen(menuScreen);
-    });
+    } catch (error) {
+        alert("Clown Convention requires an internet connection. Please reconnect and try again.");
+        console.error("Convention connection failed:", error);
+    }
+});
 
     document.getElementById("create-convention-button").addEventListener("click", () => {
         createStatus.textContent = "";

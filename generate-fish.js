@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 // ==========================================
 // FILENAME PREFIX → SPECIES NAME
@@ -12,6 +13,21 @@ const path = require("path");
 //Select "new terminal"
 //INSERT COPYPASTA TO GENERATE NEW SPECIES NAME into the new terminal
 //"node generate-fish.js" (do not include the quotation marks "")
+
+
+
+//how to upload to git
+
+//Add photographs to images/.
+//Run node generate-fish.js.
+//Run git add -A.
+//Run git commit -m "Your update description".
+//Run git pull --rebase origin main.
+//Run git push origin main.
+
+
+
+
 
 const speciesMap = {
     akallopisos: "Akallopisos",
@@ -85,6 +101,8 @@ const speciesMap = {
 
 const imagesFolder = path.join(__dirname, "images");
 const scriptFile = path.join(__dirname, "script.js");
+const offlineManifestFile = path.join(__dirname, "offline-assets.json");
+const serviceWorkerFile = path.join(__dirname, "service-worker.js");
 
 
 // ==========================================
@@ -200,6 +218,64 @@ fish.sort((a, b) => {
         { numeric: true }
     );
 });
+
+// ==========================================
+// GENERATE OFFLINE IMAGE MANIFEST
+// ==========================================
+
+// Include every supported image in the images folder.
+const offlineAssets = files
+    .map(file => `images/${file}`)
+    .sort((a, b) => a.localeCompare(b));
+
+const offlineManifestContents =
+    JSON.stringify(offlineAssets, null, 2) + "\n";
+
+// Generate the manifest file.
+fs.writeFileSync(
+    offlineManifestFile,
+    offlineManifestContents,
+    "utf8"
+);
+
+// Create a hash so the service worker changes whenever
+// the offline image list changes.
+const manifestHash = crypto
+    .createHash("sha256")
+    .update(offlineManifestContents)
+    .digest("hex")
+    .slice(0, 12);
+
+// Update the service worker's manifest version.
+let serviceWorkerContents = fs.readFileSync(
+    serviceWorkerFile,
+    "utf8"
+);
+
+const versionPattern =
+    /const ASSET_MANIFEST_VERSION = "[^"]*";/;
+
+if (!versionPattern.test(serviceWorkerContents)) {
+    console.error(
+        'ERROR: Could not find ASSET_MANIFEST_VERSION in service-worker.js'
+    );
+    process.exit(1);
+}
+
+serviceWorkerContents = serviceWorkerContents.replace(
+    versionPattern,
+    `const ASSET_MANIFEST_VERSION = "${manifestHash}";`
+);
+
+fs.writeFileSync(
+    serviceWorkerFile,
+    serviceWorkerContents,
+    "utf8"
+);
+
+console.log(`Generated offline manifest with ${offlineAssets.length} images.`);
+console.log("Updated service-worker.js manifest version.");
+
 
 
 // ==========================================
