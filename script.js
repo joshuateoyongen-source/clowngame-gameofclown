@@ -1219,6 +1219,10 @@ const fish = [
         species: "Biaculeatus"
     },
     {
+        image: "images/maroon58.jpg",
+        species: "Biaculeatus"
+    },
+    {
         image: "images/bicinctus1.JPG",
         species: "Bicinctus"
     },
@@ -2357,6 +2361,86 @@ const fish = [
     {
         image: "images/ef40.jpg",
         species: "Ephippium"
+    },
+    {
+        image: "images/epi1.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi2.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi3.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi4.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi5.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi6.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi7.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi8.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi9.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi11.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi12.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi13.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi14.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi15.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi16.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi17.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi18.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi19.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi20.jpg",
+        species: "Epigrammata"
+    },
+    {
+        image: "images/epi21.jpg",
+        species: "Epigrammata"
     },
     {
         image: "images/frenatus1.JPEG",
@@ -6223,6 +6307,7 @@ const fish = [
         species: "Tricinctus"
     }
 ];
+
 
 
 
