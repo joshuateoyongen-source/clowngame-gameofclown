@@ -2116,10 +2116,6 @@ const fish = [
         species: "Clarkii"
     },
     {
-        image: "images/clarkii62.jpg",
-        species: "Clarkii"
-    },
-    {
         image: "images/ef1.JPG",
         species: "Ephippium"
     },
@@ -3776,7 +3772,7 @@ const fish = [
         species: "Milii"
     },
     {
-        image: "images/milii17.webp",
+        image: "images/milii17.jpg",
         species: "Milii"
     },
     {
@@ -6113,6 +6109,7 @@ const fish = [
 
 
 
+
 let shuffledFish = [];
 let currentFishIndex = 0;
 
@@ -6553,6 +6550,475 @@ const clownfishGuide = {
         extraNotes:
             "Chrys so chill."
     },
+
+ "Chrysopterus": {
+        image: "images/chrysopterus1.JPG",
+
+        scientificName: "Amphiprion chrysopterus",
+
+        description:
+            "Chrysopterus Clowns are found from Papua New Guinea's eastern coast all the way to the surrounding reefs of Micronesia, Vanuatu and Tuvalu.",
+
+        whitebars: "2 White Bars",
+
+        identificationTips: [
+            "Chrysopterus Clowns have a black coloured trunk/body, which is common in similar Clowns such as Allardi and Clarkii, but rarer in Maohiensis.",
+            "Chrysopterus Clowns usually have a white caudal fin, but can sometimes have a yellow one instead.",
+            "Chrysopterus Clowns' anal fin will usually be black, compared to in Allardi and Maohiensis where it is usually white."
+
+
+        ],
+
+        similarSpecies:
+            "Allardi, Clarkii, Maohiensis",
+
+        extraNotes:
+            "A fren of Scuba Sam is a fren of Melan."
+    },
+
+    "Bicinctus": {
+        image: "images/bicinctus1.JPG",
+
+        scientificName: "Amphiprion bicinctus",
+
+        description:
+            "As their name suggests, Bicinctus Clowns have two white bars. They are found around the Arabian Peninsula, from the Strait of Hormuz to the Gulf of Aden. They have also been recorded within the Chagos Archipelago, with their relatives the Chagos Clowns (A. chagosensis).",
+
+        whitebars: "2 White Bars",
+
+        identificationTips: [
+            "Bicinctus Clowns have yellow fins and a somewhat black shaded body. Sometimes, this black shading is not noticeable, and the Clown can resemble Chagosensis.",
+            "Bicinctus Clowns usually have large fins relative to their body; such proportions of fins are rare in other Clowns, especially Chagosensis."
+
+
+        ],
+
+        similarSpecies:
+            "Chagosensis",
+
+        extraNotes:
+            "Professional Clown Gamers abbreviate this species as 'Bih'."
+    },
+
+
+    "Clarkii": {
+        image: "images/clarkii60.JPG",
+
+        scientificName: "Amphiprion clarkii",
+
+        description:
+            "The most widely distributed Clown, Clarkiis can be found from Eastern Africa all the way to Australia and beyond. Therefore, Clarkii has many regional variants of itself.",
+
+        whitebars: "3 White Bars",
+
+        identificationTips: [
+            "Clarkii Clowns have a black patch on their forehead, known as the 'black cap'. This is associated with Clarkii, but is also common in other Clowns, such as Allardi, Chrysogaster, Fuscocaudatus, Latifaciatus and Tricinctus to name a few.",
+            "Clarkii Clowns usually have a yellow to light-yellow caudal fin. A translucent. Also, a 'luminescent' yet slightly pale caudal fin is almost unique to Clarkii.",
+            "Clarkii's pelvic and anal fins will usually be yellow, and its belly black (including the rest of its body being black). This is uncommon in other Clowns",
+            "Clarkii is the only Clown that can pair with a Malu anemone; hence a Clown is a Clarkii if it has paired with one.",
+            "",
+            "To tell Clarkii apart from regional subspecies/variants, the typical Clarkii has a black trunk with yellow fins."
+
+
+        ],
+
+        similarSpecies:
+            "Allardi, Chrysopterus, Latifaciatus, Maohiensis,Tricinctus",
+
+        extraNotes:
+            "Clarkii Malu"
+    },
+
+    "Ephippium": {
+        image: "images/ef6.JPG",
+
+        scientificName: "Amphiprion ephippium",
+
+        description:
+            "Ephippium Clowns are found around the reefs of South-East Asia, and are relatives of the saddlebacks (Polymnus and Sebae).",
+
+        whitebars: "None",
+
+        identificationTips: [
+            "Ephippium Clowns usually have no white bars; they have a black coloured saddle against the rest of their red-orange body.",
+            "In the case that Ephippium has one white tomato bar (a single white bar near the operculum), they will still possess the same red body with the black saddle."
+
+        ],
+
+        similarSpecies:
+            "None",
+
+        extraNotes:
+            "Ephipp, ephipp, loves to pee with fake."
+    },
+
+    "Fuscocaudatus": {
+        image: "images/fusco5.JPG",
+
+        scientificName: "Amphiprion fuscocaudatus",
+
+        description:
+            "Fuscocaudatus Clowns are endemic to the Seychelles archipelago. Their caudal fin has a pin-like pattern, making it one of the most unique-looking Clowns.",
+
+        whitebars: "3 White Bars",
+
+        identificationTips: [
+            "Fuscocaudatus Clowns have a unique caudal fin; it has several black spikes or pins in it.",
+            "Fuscocaudatus Clowns have a similar body colouration to Chrysogaster, of a black trunk and dorsal fins against a yellow belly and pevic and anal fins.",
+            "Fuscocaudatus sometimes has a copyright showcasing the character V from the show Murder Drones. This is most common in Fuscocaudatus, but can be found in other African Clowns such as Allardi and Chrysogaster.",
+
+        ],
+
+        similarSpecies:
+            "Chrysogaster",
+
+        extraNotes:
+            "Veeeeeeeeeeeeeeee! VEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE!!!!!"
+    },
+
+   "Frenatus": {
+        image: "images/frenatus7.jpg",
+
+        scientificName: "Amphiprion frenatus",
+
+        description:
+            "Frenatus Clowns are one of the tomato Clowns, and is found around the South China Sea and Australia.",
+
+        whitebars: "1 White Bar",
+
+        identificationTips: [
+            "Frenatus, like the other tomatoes, has one white bar running behind the Clown's head.",
+            "Frenatus usually has black on its body, but it resembles soot instead of appearing as a clean, black colour. In Melanopus, the body is almost always very black, and in Rubrocinctus, the body is quite dark.",
+            "Frenatus has some of its coverage taken with the Mech Arena character Torchlight. This is unique to Frenatus."
+
+        ],
+
+        similarSpecies:
+            "Melanopus, Rubrocinctus",
+
+        extraNotes:
+            "If you are falling behind in Clown Game, just Ketchup!"
+    },
+
+
+       "Japonicus": {
+        image: "images/japon13.webp",
+
+        scientificName: "Amphiprion japonicus (Clarkii Variant)",
+
+        description:
+            "Japonicus Clowns are a variant of A. clarkii that are found around the Taiwan Sea, as far north as the Ryukyu islands.",
+            
+        whitebars: "2/3 White Bars",
+
+        identificationTips: [
+            "Japonicus Clowns resemble Clarkii Clowns, but they are much darker in appearance, with more of their body being black in colour.",
+            "A notable amount of the Japonicus coverage was taken either during an algae bloom or at nighttime. This can be found in other clowns too, so do not solely rely on this particular meta."
+
+        ],
+
+        similarSpecies:
+            "Chrysargyrus, Clarkii",
+
+        extraNotes:
+            "What a Nippon Clown this Clown is!"   
+    },
+
+           "Latifaciatus": {
+        image: "images/lat2.JPEG",
+
+        scientificName: "Amphiprion latifaciatus",
+
+        description:
+            "Latifaciatus Clowns are found surrounding the coast of Madagascar, and are one of the only Clowns with a forked caudal fin!.",
+            
+        whitebars: "2 White Bars",
+
+        identificationTips: [
+            "Latifaciatus Clowns are one of only two Clowns to have a forked caudal fin, meaning that that fin has two fork spikes. The only other is A. Omanensis.",
+            "Latifaciatus Clowns' orange/yellow tint is usually slightly more vivid compared to other Clowns.",
+            "Latifaciatus Clowns may have a white dash on the upperside of their caudal fin, which can also be regularly seen in Allardi, Clarkii and other Clowns.",
+            "A large amount of Latifaciatus' coverage was taken with bad quality video cameras, hence the image quality in-game is much poorer than usual. This is highly indicitive of this species.",
+            "Some of Latifaciatus' coverage was taken in fish tanks with purple lights, hence the coverage appears with a purple hue. This has been known to also occur in Fuscocaudatus and Percula.",
+
+
+        ],
+
+        similarSpecies:
+            "Allardi, Clarkii, Japonicus, Sebae",
+
+        extraNotes:
+            "Better to be Lat than to be Late..."   
+    },
+
+           "Latezonatus": {
+        image: "images/late3.JPG",
+
+        scientificName: "Amphiprion latezonatus",
+
+        description:
+            "Latezonatus Clowns are found along the subtropical Eastern Australian coast, from southern Queensland to northern New South Wales, and as far east as Norfolk island and Lord Howe island.",
+            
+        whitebars: "3 White Bars",
+
+        identificationTips: [
+            "Latezonatus Clowns are the only Clowns that are black and white with three white bands (excluding the Ocellaris Darwin Variant).",
+            "Latezonatus Clowns have a noticeably wide second white bar. This is not found in any other Clown.",
+            "The anemones of Latezonatus Clowns will usually be faint green to gray in colour.",
+            "Latezonatus Clowns have a blue lining on their lips as well as the lining of their white bars.",
+
+        ],
+
+        similarSpecies:
+            "None",
+
+        extraNotes:
+            "Worse to be Late than to be Lat..."   
+    },
+
+
+           "Maohiensis": {
+        image: "images/maohiensis3.JPG",
+
+        scientificName: "Amphiprion maohiensis",
+
+        description:
+            "Once thought to be a regional variant of A. chrysopterus, Maohiensis was officially declared a species in 2024! It is found around the polynesian region, further east than its relative Chrysopterus. Within Clown Game, consistently telling apart Chrysopterus and Maohiensis is one of the hardest things to do such that even professional players mix the two up sometimes.",
+            
+        whitebars: "2 White Bars",
+
+        identificationTips: [
+            "Although many Clowns within the Pacific region have blue-tinged white bars, Maohiensis usually has a more noticable blue tinge to these bars, especially more so than Chrysopterus.",
+            "Every fin of Maohiensis is ALWAYS yellow. In chrysopterus, they may be black, yellow or white.",
+            "Maohiensis' dorsal fin is generally not as tall as Chrysopterus or other Clowns.",
+            
+    
+        ],
+
+        similarSpecies:
+            "Chrysopterus",
+
+        extraNotes:
+            "Never forget the Maohiensis incident..."   
+    },
+
+
+           "Melanopus": {
+        image: "images/melan7.JPEG",
+
+        scientificName: "Amphiprion melanopus",
+
+        description:
+            "Melanopus Clowns are one of the tomato Clowns, and are found from the Great Barrier Reef eastwards to Guam, New Guinea, Vanuatu and even Samoa!",            
+        whitebars: "1 White Bar (tomato)",
+
+        identificationTips: [
+            "Melanopus' dorsal, caudal and sometimes its anal fin will be a bright and vibrant yellow in contrast to the rest of its black or orange body. This vibrant yellow to the rear does not ever occur within other tomato Clowns.",
+    
+    
+        ],
+
+        similarSpecies:
+            "Frenatus, Rubrocinctus",
+
+        extraNotes:
+            "2nd in line to the Keoki Stender's private Clown Yacht Club."   
+    },
+
+           "Milii": {
+        image: "images/milii5.webp",
+
+        scientificName: "Amphiprion milii (Clarkii Variant)",
+
+        description:
+            "Milii Clowns are a Clarkii Variant found along Austrlia's northern coast.",            
+        whitebars: "3 White Bars",
+
+        identificationTips: [
+            "Milii Clowns are usually amost fully black except for a bright yellow caudal fin, closely resembling Sebae Clowns. However, Sebae will have a saddle bar (second white bar), whilst for Milii, it will look just like its other two bars.",
+            "Milii Clowns may appear very similar to Clarkii, but will be have more black colouration than Clarkii."
+    
+        ],
+
+        similarSpecies:
+            "Clarkii, Sebae",
+
+        extraNotes:
+            "Clark E. adores the Milii!"  
+            
+            
+    },
+
+           "Leucokranos": {
+        image: "images/leucokranos8.jpg",
+
+        scientificName: "Amphiprion leucokranos",
+
+        description:
+            "Also known as 'white-bonnet Clowns', Leucokranos Clowns are found around South-East Asia.",
+
+        whitebars: "1 White Bar (Leucokranos)",
+
+        identificationTips: [
+            "Leucokranos Clowns have a unique white bar, which is made up of a chinstrap running down to the belly, and near the dorsal fin there is a dash, or what is commonly referred to as the 'crown' or 'bonnet'. Thiellei also has this special white bar.",
+            
+        ],
+
+        similarSpecies:
+            "Thiellei",
+
+        extraNotes:
+            "Nobody jokes around like the Circus Crown."  
+            
+            
+    },
+
+           "Mccullochi": {
+        image: "images/mccullochi3.JPG",
+
+        scientificName: "Amphiprion mccullochi",
+
+        description:
+            "Mccullochi Clowns are one of two Clowns found around Lord Howe island. In this case, Mccullochi Clowns are endemic to this region.",
+
+        whitebars: "Usually 1 White Bar",
+
+        identificationTips: [
+            "Mccullochi Clowns will almost always have exactly one white bar, and the upper tip of this white bar will curve towards the Clown's body instead of continuing up to the dorsal fins.",
+            "Mccullochi Clowns ALWAYS have a white chalky patch on their mouths, much like Akindynos Clowns, and also a white caudal fin."
+            
+        ],
+
+        similarSpecies:
+            "None",
+
+        extraNotes:
+            "Hurry up and make or lock in you guess!"  
+            
+    },
+
+           "Nigripes": {
+        image: "images/nigripes4.JPG",
+
+        scientificName: "Amphiprion nigripes",
+
+        description:
+            "Nigripes Clowns are found around the Maldives, and are endemic to that archipelago.",
+
+        whitebars: "1 White Bar",
+
+        identificationTips: [
+            "Nigripes Clowns ALWAYS have a black belly contrasted to an orange body, and vivid-yellow pectoral, dorsal and caudal fins.",
+            "Nigripes is only found within Magnifica anemones, which are characterised by a usually pink or purple column with long tentacles."
+            
+        ],
+
+        similarSpecies:
+            "None",
+
+        extraNotes:
+            "Everybody loves Nigripes Clowns!"  
+            
+    },
+
+           "Omanensis": {
+        image: "images/oman2.JPG",
+
+        scientificName: "Amphiprion omanensis",
+
+        description:
+            "As their name suggests, Omanensis Clowns are endemic Oman's coast. They are one of two Clowns to have a forked caudal fin, the other being Latifaciatus.",
+
+        whitebars: "1 White Bar",
+
+        identificationTips: [
+            "Omanensis Clowns have forked caudal fins. The only other Clown with a forked caudal fin is Latifaciatus.",
+            "Omanensis has a very dark brown, maroon and sometimes black body, which is rare in other Clowns.",
+            "Compared to other Clowns and especially to Akindynos, Omanensis has close to no chalky white patch around its mouth.",
+        ],
+
+        similarSpecies:
+            "Akindynos",
+
+        extraNotes:
+            "'Oh man, I guessed Akindynos again!'"  
+            
+    },
+
+           "Perideraion": {
+        image: "images/perideraion1.JPG",
+
+        scientificName: "Amphiprion perideraion",
+
+        description:
+            "Perideraion Clowns are found from Northern Australia to South-East Asia, and as far east as Melanesia.",
+
+        whitebars: "1 White Bar and a Skunk Bar (Horizontal)",
+
+        identificationTips: [
+            "Perideraion Clowns have a special combination of white bars; one horizontal running from its dorsal fins down to its belly like a chinstrap, and additionally a skunk bar running along its dorsal fins. This is unique to Perideraion.",
+            "Perideraion can sometimes appear very reddish-pink. This colour of Clown is found nowhere else."
+        ],
+
+        similarSpecies:
+            "None",
+
+        extraNotes:
+            "Perideraion Clowns are commonly known as Pink Skunk Clowns, even though they are not Pink, and they are not true skunks. A genuine identity crisis!"  
+            
+    },
+
+
+           "Polymnus": {
+        image: "images/polymnus1.JPG",
+
+        scientificName: "Amphiprion polymnus",
+
+        description:
+            "Also known as the Saddleback Clown, these are one of the most famous Clowns, found all around South-East Asia, north to the Ryukyu islands, south to Australia and as far east as Melanesia.",
+
+        whitebars: "3 White Bars (saddle)",
+
+        identificationTips: [
+            "The caudal fin of Polymnus is black, with a translucent white lining around it, forming a unique-looking fin. Sebae's is yellow instead.",
+            "Polymnus has a 2nd white bar that resembles a saddle, curving upwards and away from the Clown's head. This is also found in Sebae.",
+            "Polymnus males and females differ greatly in colouration; the females are almost entirely black apart from their white bars, and are much bigger compared to the males, who still have black colouration but are much more orange.",
+            "Some of Polymnus' coverage was taken alongside the British Broadcasting Channel's wildlife team, hence a BBC copyright can be seen. This is unique to Polymnus."
+        ],
+
+        similarSpecies:
+            "Sebae",
+
+        extraNotes:
+            "Watch this BBC video on Saddleback Clowns here: https://www.youtube.com/watch?v=rn6R4ncd2OU"  
+            
+    },
+
+           "Rubrocinctus": {
+        image: "images/rubro6.JPG",
+
+        scientificName: "Amphiprion rubrocinctus",
+
+        description:
+            "Also known as the Australian Clown, Rubrocinctus Clowns are one of the tomatoes, and are found along the northern coast of Western Australia and the Northern Territory..",
+
+        whitebars: "1 White Bar (tomato)",
+
+        identificationTips: [
+           "Rubrocinctus Clowns generally have more black colouration than the other teo tomatoes, Frenatus and Melanopus.",
+           "In some of Rubrocinctus' coverage, a red pixel glitch can be seen somewhere on the screen. This has been recorded in other Clowns, but not yet within the other two tomatoes."
+
+        ],
+
+        similarSpecies:
+            "Frenatus, Melanopus",
+
+        extraNotes:
+            "Rubrocinctus Clowns have been abbreviated as 'Rubro'."  
+            
+    },
+
+
 
 
 
