@@ -11355,15 +11355,15 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             const heading = pointPartyScreen.querySelector("h1");
             if (heading) heading.textContent = "Clown Convention — Point Party";
             settingsEditor.hidden = true;
-conventionEditorExpanded = false;
+            conventionEditorExpanded = false;
 
-const editToggle = document.getElementById("toggle-convention-editor-button");
-if (editToggle) {
-    editToggle.textContent = "Edit Convention";
-}
+            const editToggle = document.getElementById("toggle-convention-editor-button");
+            if (editToggle) {
+                editToggle.textContent = "Edit Convention";
+            }
 
-updateStartButton(party);
-showConventionScreen(lobbyScreen);
+            updateStartButton(party);
+            showConventionScreen(lobbyScreen);
             lobbyStatus.textContent = "The game has stopped. The Convention is back on standby.";
             return;
         }
@@ -12074,15 +12074,25 @@ Object.keys(roundGuesses).forEach(uid => {
         if (control) control.addEventListener("input", updateConventionSettingsSaveButton);
         if (control) control.addEventListener("change", updateConventionSettingsSaveButton);
     });
-    document.getElementById("save-convention-settings-button").addEventListener("click", saveConventionSettings);
-    document.getElementById("toggle-convention-editor-button").addEventListener("click", () => {
+const saveSettingsButton = document.getElementById("save-convention-settings-button");
+if (saveSettingsButton) {
+    saveSettingsButton.addEventListener("click", saveConventionSettings);
+}
+
+const editConventionButton = document.getElementById("toggle-convention-editor-button");
+
+if (editConventionButton) {
+    editConventionButton.addEventListener("click", () => {
         if (!activeIsHost || !currentPartyData || currentPartyData.status !== "waiting") return;
+
         conventionEditorExpanded = !conventionEditorExpanded;
         settingsEditor.hidden = !conventionEditorExpanded;
-        document.getElementById("toggle-convention-editor-button").textContent = conventionEditorExpanded
+
+        editConventionButton.textContent = conventionEditorExpanded
             ? "Collapse Convention Edits"
             : "Edit Convention";
     });
+}
 
     async function stopCurrentConventionGame() {
         if (!activeIsHost || !activePartyCode || !currentPartyData) return;
