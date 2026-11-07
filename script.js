@@ -10592,6 +10592,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     let pointPartyGuessesListenerRound = null;
     let pointPartyLiveListenersActive = false;
     let currentPartyData = null;
+    let conventionEditorExpanded = false;
 
     const startGameButton = document.getElementById("start-convention-game-button");
     const lobbySettingsDetails = document.getElementById("convention-lobby-settings-details");
@@ -10746,8 +10747,10 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     let pointPartyTimerInterval = null;
     let pointPartyBlinkTimeout = null;
     let pointPartyHostTimer = null;
+    let pointPartyAllGuessedTimer = null;
     let pointPartyResultsTimer = null;
     let pointPartyHostTimerKey = null;
+    let pointPartyAllGuessedTimerKey = null;
     let pointPartyResultsTimerKey = null;
     let pointPartyRenderedRoundKey = null;
     let pointPartyStartingRound = false;
@@ -10786,12 +10789,15 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         if (pointPartyTimerInterval) clearInterval(pointPartyTimerInterval);
         if (pointPartyBlinkTimeout) clearTimeout(pointPartyBlinkTimeout);
         if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
+        if (pointPartyAllGuessedTimer) clearTimeout(pointPartyAllGuessedTimer);
         if (pointPartyResultsTimer) clearTimeout(pointPartyResultsTimer);
         pointPartyTimerInterval = null;
         pointPartyBlinkTimeout = null;
         pointPartyHostTimer = null;
+        pointPartyAllGuessedTimer = null;
         pointPartyResultsTimer = null;
         pointPartyHostTimerKey = null;
+        pointPartyAllGuessedTimerKey = null;
         pointPartyResultsTimerKey = null;
     }
 
@@ -10864,7 +10870,9 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         pointPartyWarpLayer.style.visibility = "visible";
         pointPartyResults.querySelector("h2").textContent = isFinal ? "Final Results" : `Round ${state.roundNumber} Results`;
         document.getElementById("point-party-answer").textContent = party.mode === "triggerfishChase"
-            ? `The correct species was ${state.answer || "—"}. The team earned ${Number(state.playersRoundScore) || 0} points; the Triggerfish earned ${Number(state.triggerfishRoundScore) || 0} points.`
+            ? (isFinal
+                ? `${state.winner === "players" ? "The players win!" : state.winner === "triggerfish" ? "The Triggerfish wins!" : state.winner === "draw" ? "It's a draw!" : "The game has finished."} Final score — Players: ${Number(state.playersTotal) || 0}; Triggerfish: ${Number(state.triggerfishTotal) || 0}.`
+                : `The correct species was ${state.answer || "—"}. The team earned ${Number(state.playersRoundScore) || 0} points; the Triggerfish earned ${Number(state.triggerfishRoundScore) || 0} points.`)
             : (state.answer ? `The correct species was ${state.answer}.` : "The Convention has finished.");
         if (party.mode === "triggerfishChase") renderTriggerfishBars(state, Object.keys(members).length);
 
@@ -10988,7 +10996,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         document.getElementById("triggerfish-scoreboard").hidden = !isTriggerfish;
         pointPartyLeaderboard.hidden = isTriggerfish;
         if (isTriggerfish) renderTriggerfishBars(state, Object.keys(party.members || {}).length);
-        pointPartyRoundDisplay.textContent = `Round ${roundNumber} of ${Number(party.settings?.rounds) || 0}`;
+        pointPartyRoundDisplay.textContent = isTriggerfish ? `Round ${roundNumber}` : `Round ${roundNumber} of ${Number(party.settings?.rounds) || 0}`;
         pointPartyResults.hidden = true;
         pointPartyGuessArea.hidden = false;
         renderPointPartyLeaderboard(party);
@@ -11043,7 +11051,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             if (!freshParty || freshParty.status !== "playing") return;
             const roundNumber = requestedRoundNumber || ((Number(freshParty.gameState?.roundNumber) || 0) + 1);
             const totalRounds = Number(freshParty.settings?.rounds) || 10;
-            if (roundNumber > totalRounds) {
+            if (freshParty.mode !== "triggerfishChase" && roundNumber > totalRounds) {
                 await database.ref(`parties/${activePartyCode}/gameState`).update({
                     phase: "finished", finishedAt: pointPartyNow(), updatedAt: pointPartyNow()
                 });
@@ -11126,14 +11134,25 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                     triggerfishRoundScore = Math.floor(triggerfishRoundScore * 0.93);
                 }
                 const state = party.gameState || {};
+                const playersTotal = (Number(state.playersTotal) || 0) + playersRoundScore;
+                const triggerfishTotal = (Number(state.triggerfishTotal) || 0) + triggerfishRoundScore;
+                const target = triggerfishTargetForPlayers(playerCount);
+                let winner = null;
+                if (playersTotal >= target || triggerfishTotal >= target) {
+                    if (playersTotal >= target && triggerfishTotal >= target) {
+                        winner = playersTotal === triggerfishTotal ? "draw" : (playersTotal > triggerfishTotal ? "players" : "triggerfish");
+                    } else {
+                        winner = playersTotal >= target ? "players" : "triggerfish";
+                    }
+                }
                 const resultsEndsAt = pointPartyNow() + 6500;
                 await database.ref(`parties/${activePartyCode}/gameState`).update({
                     phase: "results", answer: answerFish.species, roundScores,
                     playersRoundScore, triggerfishRoundScore,
-                    playersTotal: (Number(state.playersTotal) || 0) + playersRoundScore,
-                    triggerfishTotal: (Number(state.triggerfishTotal) || 0) + triggerfishRoundScore,
+                    playersTotal, triggerfishTotal,
                     triggerfishMaxScore: maxTriggerfishScore,
-                    triggerfishTarget: triggerfishTargetForPlayers(playerCount),
+                    triggerfishTarget: target,
+                    winner,
                     resultsEndsAt, updatedAt: pointPartyNow()
                 });
                 return;
@@ -11169,44 +11188,61 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     }
 
     function schedulePointPartyHostRoundEnd(party) {
-        if (!activeIsHost) return;
+        if (!activeIsHost || !activePartyCode) return;
         const state = party.gameState || {};
         const roundNumber = Number(state.roundNumber) || 0;
-        const timerKey = `${roundNumber}:${state.startedAt || 0}`;
+        const timerKey = `${activePartyCode}:${roundNumber}:${state.startedAt || 0}:${state.endsAt || 0}`;
         const memberUids = Object.keys(party.members || {});
         const roundGuesses = party.guesses?.[roundNumber] || {};
         const everyoneHasGuessed = memberUids.length > 0 && memberUids.every(uid => !!roundGuesses[uid]);
 
+        // Keep a dedicated deadline timer alive for the entire round. The
+        // early-finish timer must never replace or cancel this safety net.
         if (pointPartyHostTimerKey !== timerKey) {
             if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
+            if (pointPartyAllGuessedTimer) clearTimeout(pointPartyAllGuessedTimer);
             pointPartyHostTimerKey = timerKey;
-            const delay = Math.max(0, Number(state.endsAt) - pointPartyNow());
+            pointPartyAllGuessedTimerKey = null;
             const expectedStartedAt = Number(state.startedAt) || 0;
             const expectedEndsAt = Number(state.endsAt) || 0;
-            pointPartyHostTimer = setTimeout(async () => {
+            const verifyDeadline = async () => {
                 try {
-                    const latest = (await window.clownFirebase.database.ref(`parties/${activePartyCode}/gameState`).once("value")).val();
-                    if (!latest || latest.phase !== "round" || Number(latest.roundNumber) !== roundNumber || Number(latest.startedAt) !== expectedStartedAt || Number(latest.endsAt) !== expectedEndsAt) return;
+                    const latestParty = (await window.clownFirebase.database.ref(`parties/${activePartyCode}`).once("value")).val();
+                    const latest = latestParty?.gameState;
+                    if (!latestParty || latestParty.status !== "playing" || !latest || latest.phase !== "round" || Number(latest.roundNumber) !== roundNumber || Number(latest.startedAt) !== expectedStartedAt || Number(latest.endsAt) !== expectedEndsAt) return;
                     if (pointPartyNow() + 25 < expectedEndsAt) {
-                        pointPartyHostTimerKey = null;
-                        schedulePointPartyHostRoundEnd({ ...party, gameState: latest });
+                        pointPartyHostTimer = setTimeout(verifyDeadline, Math.max(250, expectedEndsAt - pointPartyNow() + 250));
                         return;
                     }
                     endPointPartyRound(roundNumber);
-                } catch (error) { console.error("Could not verify the Point Party round deadline:", error); }
-            }, delay + 250);
+                } catch (error) {
+                    console.error("Could not verify the Point Party round deadline; retrying:", error);
+                    pointPartyHostTimer = setTimeout(verifyDeadline, 1000);
+                }
+            };
+            pointPartyHostTimer = setTimeout(verifyDeadline, Math.max(0, expectedEndsAt - pointPartyNow()) + 250);
         }
 
-        if (everyoneHasGuessed && pointPartyEndingRoundKey !== `${activePartyCode}:${roundNumber}`) {
-            if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
-            pointPartyHostTimer = setTimeout(async () => {
+        // If everybody answers, resolve promptly, but retain the independent
+        // deadline timer in case this early check or Firebase temporarily fails.
+        if (everyoneHasGuessed && pointPartyAllGuessedTimerKey !== timerKey) {
+            if (pointPartyAllGuessedTimer) clearTimeout(pointPartyAllGuessedTimer);
+            pointPartyAllGuessedTimerKey = timerKey;
+            pointPartyAllGuessedTimer = setTimeout(async () => {
                 try {
                     const latestParty = (await window.clownFirebase.database.ref(`parties/${activePartyCode}`).once("value")).val();
-                    if (!latestParty || latestParty.status !== "playing" || latestParty.gameState?.phase !== "round" || Number(latestParty.gameState.roundNumber) !== roundNumber) return;
+                    if (!latestParty || latestParty.status !== "playing" || latestParty.gameState?.phase !== "round" || Number(latestParty.gameState.roundNumber) !== roundNumber || Number(latestParty.gameState.startedAt) !== Number(state.startedAt)) return;
                     const latestMembers = Object.keys(latestParty.members || {});
                     const latestGuesses = latestParty.guesses?.[roundNumber] || {};
-                    if (latestMembers.length && latestMembers.every(uid => !!latestGuesses[uid])) endPointPartyRound(roundNumber);
-                } catch (error) { console.error("Could not verify all-player submissions:", error); }
+                    if (latestMembers.length && latestMembers.every(uid => !!latestGuesses[uid])) {
+                        endPointPartyRound(roundNumber);
+                    } else {
+                        pointPartyAllGuessedTimerKey = null;
+                    }
+                } catch (error) {
+                    console.error("Could not verify all-player submissions; the round deadline remains active:", error);
+                    pointPartyAllGuessedTimerKey = null;
+                }
             }, 150);
         }
     }
@@ -11219,7 +11255,24 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         if (pointPartyResultsTimer) clearTimeout(pointPartyResultsTimer);
         pointPartyResultsTimerKey = timerKey;
         const delay = Math.max(0, Number(state.resultsEndsAt) - pointPartyNow());
-        pointPartyResultsTimer = setTimeout(() => {
+        pointPartyResultsTimer = setTimeout(async () => {
+            if (party.mode === "triggerfishChase") {
+                if (state.winner) {
+                    try {
+                        const database = window.clownFirebase.database;
+                        await database.ref(`parties/${activePartyCode}/gameState`).update({
+                            phase: "finished", finishedAt: pointPartyNow(), updatedAt: pointPartyNow()
+                        });
+                        await database.ref(`parties/${activePartyCode}/status`).set("finished");
+                    } catch (error) {
+                        console.error("Could not finish Triggerfish Chase:", error);
+                        pointPartyResultsTimerKey = null;
+                    }
+                } else {
+                    startPointPartyRound(party, Number(state.roundNumber) + 1);
+                }
+                return;
+            }
             const totalRounds = Number(party.settings?.rounds) || 10;
             if (Number(state.roundNumber) >= totalRounds) {
                 const database = window.clownFirebase.database;
@@ -11275,12 +11328,15 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     }
 
     function applyTriggerfishChallengeMultipliers(score, challenges) {
+        // Challenges still make the Triggerfish less effective, but the
+        // reductions are milder than the original multipliers so stacking
+        // several challenges does not suppress its score excessively.
         let result = score;
-        if (challenges.blink) result *= 0.9;
-        if (challenges.clownMorpho) result *= 0.82;
-        if (challenges.clownWarp) result *= 0.89;
-        if (challenges.downTheClown) result *= 0.94;
-        if (challenges.clownHazelnut) result *= 0.6;
+        if (challenges.blink) result *= 0.95;          // Clown Hide: -5%
+        if (challenges.clownMorpho) result *= 0.91;    // Morpho: -9%
+        if (challenges.clownWarp) result *= 0.945;    // Warp: -5.5%
+        if (challenges.downTheClown) result *= 0.97;  // Upside Down: -3%
+        if (challenges.clownHazelnut) result *= 0.8;  // Hazelnut: -20%
         return Math.floor(result);
     }
 
@@ -11298,9 +11354,16 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             document.getElementById("triggerfish-scoreboard").hidden = true;
             const heading = pointPartyScreen.querySelector("h1");
             if (heading) heading.textContent = "Clown Convention — Point Party";
-            settingsEditor.hidden = !activeIsHost;
-            updateStartButton(party);
-            showConventionScreen(lobbyScreen);
+            settingsEditor.hidden = true;
+conventionEditorExpanded = false;
+
+const editToggle = document.getElementById("toggle-convention-editor-button");
+if (editToggle) {
+    editToggle.textContent = "Edit Convention";
+}
+
+updateStartButton(party);
+showConventionScreen(lobbyScreen);
             lobbyStatus.textContent = "The game has stopped. The Convention is back on standby.";
             return;
         }
@@ -11370,21 +11433,36 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         pointPartySelect.disabled = true;
         pointPartySubmit.disabled = true;
         pointPartyStatus.textContent = "Submitting your guess…";
+        let submissionWatchdogExpired = false;
+        const submissionWatchdog = setTimeout(() => {
+            if (!pointPartySubmissionPending || currentPartyData?.gameState?.phase !== "round" || Number(currentPartyData?.gameState?.roundNumber) !== Number(state.roundNumber)) return;
+            submissionWatchdogExpired = true;
+            pointPartySubmissionPending = false;
+            pointPartySelect.disabled = false;
+            pointPartySubmit.disabled = false;
+            pointPartyStatus.textContent = "The connection is taking a while. Check your connection, then try locking in again.";
+        }, 6000);
         try {
             await window.clownFirebase.database.ref(`parties/${activePartyCode}/guesses/${state.roundNumber}/${activeUserUid}`).set({
                 species: selectedSpecies,
                 elapsedMs,
                 submittedAt: pointPartyNow()
             });
-            pointPartyStatus.textContent = "Guess locked in! Waiting for the other players…";
+            clearTimeout(submissionWatchdog);
+            if (!submissionWatchdogExpired && currentPartyData?.gameState?.phase === "round" && Number(currentPartyData?.gameState?.roundNumber) === Number(state.roundNumber)) {
+                pointPartyStatus.textContent = "Guess locked in! Waiting for the other players…";
+            }
         } catch (error) {
+            clearTimeout(submissionWatchdog);
             console.error("Could not submit Point Party guess:", error);
-            pointPartyStatus.textContent = error.code === "PERMISSION_DENIED"
-                ? "Your guess was not accepted. The round may have ended or you may already have submitted."
-                : `Could not submit your guess: ${error.message || error}`;
-            pointPartySubmissionPending = false;
-            pointPartySelect.disabled = false;
-            pointPartySubmit.disabled = false;
+            if (currentPartyData?.gameState?.phase === "round" && Number(currentPartyData?.gameState?.roundNumber) === Number(state.roundNumber)) {
+                pointPartyStatus.textContent = error.code === "PERMISSION_DENIED"
+                    ? "Your guess was not accepted. The round may have ended or you may already have submitted."
+                    : `Could not submit your guess: ${error.message || error}`;
+                pointPartySubmissionPending = false;
+                pointPartySelect.disabled = false;
+                pointPartySubmit.disabled = false;
+            }
         }
     }
 
@@ -11901,13 +11979,25 @@ Object.keys(roundGuesses).forEach(uid => {
     }
 
     function renderSettingsEditor(party) {
-        settingsEditor.hidden = !activeIsHost || !activePartyCode || party.status !== "waiting";
+        const canEdit = !!(activeIsHost && activePartyCode && party && party.status === "waiting");
+        const editToggle = document.getElementById("toggle-convention-editor-button");
+        const lobbySettingsSection = document.getElementById("convention-lobby-settings");
+        if (editToggle) editToggle.hidden = !canEdit;
+        if (lobbySettingsSection) lobbySettingsSection.hidden = !!activeIsHost;
         const button = document.getElementById("save-convention-settings-button");
-        if (!activeIsHost || !party) {
+        if (!canEdit) {
+            settingsEditor.hidden = true;
+            conventionEditorExpanded = false;
+            if (editToggle) editToggle.textContent = "Edit Convention";
             if (button) button.hidden = true;
             return;
         }
         const isNewParty = settingsEditor.dataset.partyCode !== activePartyCode;
+        if (isNewParty) {
+            conventionEditorExpanded = false;
+            if (editToggle) editToggle.textContent = "Edit Convention";
+        }
+        settingsEditor.hidden = !conventionEditorExpanded;
         const alreadyEdited = !isNewParty && button && !button.hidden;
         const pointParty = party.mode === "pointParty";
         const triggerfish = party.mode === "triggerfishChase";
@@ -11985,6 +12075,14 @@ Object.keys(roundGuesses).forEach(uid => {
         if (control) control.addEventListener("change", updateConventionSettingsSaveButton);
     });
     document.getElementById("save-convention-settings-button").addEventListener("click", saveConventionSettings);
+    document.getElementById("toggle-convention-editor-button").addEventListener("click", () => {
+        if (!activeIsHost || !currentPartyData || currentPartyData.status !== "waiting") return;
+        conventionEditorExpanded = !conventionEditorExpanded;
+        settingsEditor.hidden = !conventionEditorExpanded;
+        document.getElementById("toggle-convention-editor-button").textContent = conventionEditorExpanded
+            ? "Collapse Convention Edits"
+            : "Edit Convention";
+    });
 
     async function stopCurrentConventionGame() {
         if (!activeIsHost || !activePartyCode || !currentPartyData) return;
