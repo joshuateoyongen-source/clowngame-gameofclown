@@ -2203,6 +2203,114 @@ const fish = [
         species: "Clarkii"
     },
     {
+        image: "images/clarkii62.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii63.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii64.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii65.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii66.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii67.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii68.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii69.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii70.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii71.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii72.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii73.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii74.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii75.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii76.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii77.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii78.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii79.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii80.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii81.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii82.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii83.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii84.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii85.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii86.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii87.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii88.jpg",
+        species: "Clarkii"
+    },
+    {
         image: "images/ef1.JPG",
         species: "Ephippium"
     },
@@ -2899,6 +3007,74 @@ const fish = [
         species: "Japonicus"
     },
     {
+        image: "images/japon18.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon19.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon20.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon21.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon22.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon23.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon24.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon25.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon26.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon27.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon28.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon29.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon30.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon31.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon32.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon33.jpg",
+        species: "Japonicus"
+    },
+    {
+        image: "images/japon34.jpg",
+        species: "Japonicus"
+    },
+    {
         image: "images/late1.JPG",
         species: "Latezonatus"
     },
@@ -3536,6 +3712,14 @@ const fish = [
     },
     {
         image: "images/maohiensis41.jpg",
+        species: "Maohiensis"
+    },
+    {
+        image: "images/maohiensis42.jpeg",
+        species: "Maohiensis"
+    },
+    {
+        image: "images/maohiensis43.jpeg",
         species: "Maohiensis"
     },
     {
@@ -4464,6 +4648,18 @@ const fish = [
     },
     {
         image: "images/ocellaris90.jpeg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris91.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris92.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris93.jpg",
         species: "Ocellaris"
     },
     {
@@ -6463,6 +6659,7 @@ const fish = [
         species: "Tricinctus"
     }
 ];
+
 
 
 

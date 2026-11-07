@@ -151,6 +151,9 @@ const files = fs.readdirSync(imagesFolder)
 
 const fish = [];
 
+// Store images that cannot be assigned to a species
+const incorrectlyNamedImages = [];
+
 for (const file of files) {
 
     // Remove extension
@@ -164,14 +167,15 @@ for (const file of files) {
     const match =
         filenameWithoutExtension.match(/^(.+?)(\d+)$/);
 
-    if (!match) {
+if (!match) {
 
-        console.warn(
-            `WARNING: Could not determine species from "${file}"`
-        );
+    incorrectlyNamedImages.push({
+        file: file,
+        reason: "Incorrect filename format (must end with a number)"
+    });
 
-        continue;
-    }
+    continue;
+}
 
     // Example:
     // ocellaris1 → prefix = ocellaris
@@ -182,14 +186,15 @@ for (const file of files) {
     // Find species
     const species = speciesMap[prefix];
 
-    if (!species) {
+if (!species) {
 
-        console.warn(
-            `WARNING: No species mapping found for "${file}"`
-        );
+    incorrectlyNamedImages.push({
+        file: file,
+        reason: `Unknown species prefix "${prefix}"`
+    });
 
-        continue;
-    }
+    continue;
+}   
 
     fish.push({
         image: `images/${file}`,
@@ -402,5 +407,39 @@ console.log("");
 
 console.log("Updated:");
 console.log("script.js");
+
+console.log("");
+
+// ==========================================
+// REPORT INCORRECTLY NAMED IMAGES
+// ==========================================
+
+console.log("==========================================");
+console.log("       IMAGE NAMING CHECK");
+console.log("==========================================");
+console.log("");
+
+if (incorrectlyNamedImages.length === 0) {
+
+    console.log("SUCCESS! All images were assigned to a species.");
+
+} else {
+
+    console.log(
+        `WARNING: Found ${incorrectlyNamedImages.length} incorrectly named image(s):`
+    );
+
+    console.log("");
+
+    incorrectlyNamedImages.forEach((item, index) => {
+
+        console.log(`${index + 1}. ${item.file}`);
+        console.log(`   Problem: ${item.reason}`);
+        console.log("");
+
+    });
+
+    console.log("Please rename these images and run the generator again.");
+}
 
 console.log("");
