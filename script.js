@@ -3879,6 +3879,14 @@ const fish = [
         species: "Melanopus"
     },
     {
+        image: "images/melan58.jpg",
+        species: "Melanopus"
+    },
+    {
+        image: "images/melan59.jpg",
+        species: "Melanopus"
+    },
+    {
         image: "images/milii1.webp",
         species: "Milii"
     },
@@ -4407,6 +4415,58 @@ const fish = [
         species: "Ocellaris"
     },
     {
+        image: "images/ocellaris78.jpeg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris79.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris80.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris81.jpeg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris82.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris83.jpeg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris84.jpeg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris85.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris86.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris87.jpeg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris88.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris89.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris90.jpeg",
+        species: "Ocellaris"
+    },
+    {
         image: "images/oman1.JPG",
         species: "Omanensis"
     },
@@ -4911,6 +4971,42 @@ const fish = [
         species: "Percula"
     },
     {
+        image: "images/percula63.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula64.jpeg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula65.jpeg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula66.jpeg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula67.jpeg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula68.jpeg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula69.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula70.jpg",
+        species: "Percula"
+    },
+    {
+        image: "images/percula71.jpg",
+        species: "Percula"
+    },
+    {
         image: "images/perideraion1.JPG",
         species: "Perideraion"
     },
@@ -5152,6 +5248,14 @@ const fish = [
     },
     {
         image: "images/perideraion62.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion63.jpg",
+        species: "Perideraion"
+    },
+    {
+        image: "images/perideraion64.jpg",
         species: "Perideraion"
     },
     {
@@ -5759,6 +5863,54 @@ const fish = [
         species: "Sandarancinos"
     },
     {
+        image: "images/sandarancinos46.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos47.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos48.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos49.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos50.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos51.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos52.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos53.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos54.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos55.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos56.jpg",
+        species: "Sandarancinos"
+    },
+    {
+        image: "images/sandarancinos57.jpg",
+        species: "Sandarancinos"
+    },
+    {
         image: "images/sebae1.JPEG",
         species: "Sebae"
     },
@@ -6311,6 +6463,7 @@ const fish = [
         species: "Tricinctus"
     }
 ];
+
 
 
 
@@ -7445,7 +7598,7 @@ fishImage.style.opacity = "0";
     // to a tiny resolution before displaying it enlarged.
     if (hazelnutMode) {
         const lowResCanvas = document.createElement("canvas");
-        const lowResWidth = 48;
+        const lowResWidth = 96;
         const sourceWidth = newImage.naturalWidth || 1;
         const sourceHeight = newImage.naturalHeight || 1;
         lowResCanvas.width = lowResWidth;
@@ -7455,7 +7608,7 @@ fishImage.style.opacity = "0";
         );
 
         const lowResContext = lowResCanvas.getContext("2d");
-        lowResContext.imageSmoothingEnabled = true;
+        lowResContext.imageSmoothingEnabled = false;
         lowResContext.drawImage(
             newImage,
             0,
@@ -8063,7 +8216,7 @@ const duration =
         ],
         {
             duration:
-                duration * 1000,
+                duration * 1000 * (document.body.classList.contains("convention-underwater-enter") ? 0.48 : 1),
 
             easing:
                 "linear",
@@ -9759,33 +9912,53 @@ function showDuelFish() {
     }
 
     if (clunyChallenges.hazelnut) {
-        challengeFilters.push("blur(3px)");
+        challengeFilters.push("blur(1.4px)");
+        duelImage.style.imageRendering = "pixelated";
+    } else {
+        duelImage.style.imageRendering = "auto";
     }
 
     const challengeFilter = challengeFilters.join(" ");
 
-    // Load the image exactly once.
+    // Load the image once, then apply the same gentler 96px Hazelnut effect
+    // used by the other game modes before revealing it.
     let imageLoaded = false;
+    duelImage.dataset.hazelnutProcessed = "false";
 
-    function handleDuelImageLoaded() {
+    function revealLoadedDuelImage() {
         if (imageLoaded || !duelActive) return;
-
         imageLoaded = true;
-
         duelImage.style.filter = challengeFilter;
         duelImage.style.visibility = "visible";
-
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 if (!duelActive) return;
-
-                if (clunyChallenges.warp) {
-                    applyClunyWarp(challengeFilter);
-                } else {
-                    duelImage.style.opacity = "1";
-                }
+                if (clunyChallenges.warp) applyClunyWarp(challengeFilter);
+                else duelImage.style.opacity = "1";
             });
         });
+    }
+
+    function handleDuelImageLoaded() {
+        if (!duelActive || imageLoaded) return;
+        if (clunyChallenges.hazelnut && duelImage.dataset.hazelnutProcessed !== "true") {
+            try {
+                const canvas = document.createElement("canvas");
+                const width = 96;
+                const height = Math.max(1, Math.round(width * duelImage.naturalHeight / duelImage.naturalWidth));
+                canvas.width = width;
+                canvas.height = height;
+                const context = canvas.getContext("2d");
+                context.imageSmoothingEnabled = false;
+                context.drawImage(duelImage, 0, 0, width, height);
+                duelImage.dataset.hazelnutProcessed = "true";
+                duelImage.src = canvas.toDataURL("image/jpeg", 0.58);
+                return;
+            } catch (error) {
+                console.warn("Cluny Court Hazelnut processing failed:", error);
+            }
+        }
+        revealLoadedDuelImage();
     }
 
     duelImage.onload = handleDuelImageLoaded;
@@ -10439,9 +10612,37 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     }
 
     function showConventionScreen(screenToShow) {
+        const conventionScreens = [menuScreen, createScreen, joinScreen, lobbyScreen, pointPartyScreen, partyDuelsScreen];
+        const entering = screenToShow === menuScreen && !homeScreen.hidden;
+        const leaving = screenToShow === homeScreen && conventionScreens.some(screen => screen && !screen.hidden);
+        if (entering || leaving) {
+            document.body.classList.remove("convention-underwater-enter", "convention-underwater-exit");
+            void document.body.offsetWidth;
+            document.body.classList.add(entering ? "convention-underwater-enter" : "convention-underwater-exit");
+            if (entering) document.body.classList.add("convention-underwater");
+            const fishImages = Array.from(document.querySelectorAll(".background-fish"));
+            const startedAt = performance.now();
+            const duration = 950;
+            const baseRates = new Map(fishImages.map(image => [image, image.getAnimations().map(animation => ({ animation, rate: animation.playbackRate }))]));
+            const animateFish = now => {
+                const progress = Math.min(1, (now - startedAt) / duration);
+                const eased = progress * progress * (3 - 2 * progress);
+                const rate = entering
+                    ? (progress < 0.42 ? 1 + 1.7 * (progress / 0.42) : 2.7 - 1.9 * ((progress - 0.42) / 0.58))
+                    : (progress < 0.42 ? 1 - 1.8 * (progress / 0.42) : -0.8 + 0.3 * ((progress - 0.42) / 0.58));
+                baseRates.forEach(items => items.forEach(item => { item.animation.playbackRate = entering ? rate * item.rate : rate * item.rate; }));
+                if (progress < 1) requestAnimationFrame(animateFish);
+                else {
+                    baseRates.forEach(items => items.forEach(item => { item.animation.playbackRate = item.rate; }));
+                    document.body.classList.remove("convention-underwater-enter", "convention-underwater-exit");
+                    if (leaving) document.body.classList.remove("convention-underwater");
+                }
+            };
+            requestAnimationFrame(animateFish);
+        }
         [homeScreen, challengeScreen, guideScreen, gameScreen,
          document.getElementById("cluny-lobby"), document.getElementById("duel-screen"),
-         menuScreen, createScreen, joinScreen, lobbyScreen, pointPartyScreen, partyDuelsScreen].forEach(screen => {
+         ...conventionScreens].forEach(screen => {
             if (screen) screen.hidden = screen !== screenToShow;
         });
     }
@@ -10451,9 +10652,12 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     }
 
     function updateModeSettings() {
-        const pointParty = selectedMode() === "pointParty";
+        const mode = selectedMode();
+        const pointParty = mode === "pointParty";
+        const triggerfish = mode === "triggerfishChase";
         document.getElementById("point-party-settings").hidden = !pointParty;
-        document.getElementById("duels-settings").hidden = pointParty;
+        document.getElementById("triggerfish-settings").hidden = !triggerfish;
+        document.getElementById("duels-settings").hidden = pointParty || triggerfish;
     }
 
     function makePartyCode() {
@@ -10533,6 +10737,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
     const pointPartyGuessArea = document.getElementById("point-party-guess-area");
 
     let pointPartyTimerInterval = null;
+    let pointPartyBlinkTimeout = null;
     let pointPartyHostTimer = null;
     let pointPartyResultsTimer = null;
     let pointPartyHostTimerKey = null;
@@ -10572,9 +10777,11 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
 
     function clearPointPartyTimers() {
         if (pointPartyTimerInterval) clearInterval(pointPartyTimerInterval);
+        if (pointPartyBlinkTimeout) clearTimeout(pointPartyBlinkTimeout);
         if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
         if (pointPartyResultsTimer) clearTimeout(pointPartyResultsTimer);
         pointPartyTimerInterval = null;
+        pointPartyBlinkTimeout = null;
         pointPartyHostTimer = null;
         pointPartyResultsTimer = null;
         pointPartyHostTimerKey = null;
@@ -10645,10 +10852,14 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         const roundScores = state.roundScores || {};
         pointPartyResults.hidden = false;
         pointPartyGuessArea.hidden = true;
+        if (pointPartyBlinkTimeout) clearTimeout(pointPartyBlinkTimeout);
+        pointPartyImage.style.visibility = "visible";
+        pointPartyWarpLayer.style.visibility = "visible";
         pointPartyResults.querySelector("h2").textContent = isFinal ? "Final Results" : `Round ${state.roundNumber} Results`;
-        document.getElementById("point-party-answer").textContent = state.answer
-            ? `The correct species was ${state.answer}.`
-            : "The Convention has finished.";
+        document.getElementById("point-party-answer").textContent = party.mode === "triggerfishChase"
+            ? `The correct species was ${state.answer || "—"}. The team earned ${Number(state.playersRoundScore) || 0} points; the Triggerfish earned ${Number(state.triggerfishRoundScore) || 0} points.`
+            : (state.answer ? `The correct species was ${state.answer}.` : "The Convention has finished.");
+        if (party.mode === "triggerfishChase") renderTriggerfishBars(state, Object.keys(members).length);
 
         const scoreList = document.getElementById("point-party-round-scores");
         scoreList.replaceChildren();
@@ -10659,7 +10870,11 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             ranked.forEach(([uid, member]) => {
                 const row = document.createElement("p");
                 const details = roundScores[uid] || { points: 0, correct: false };
-                row.textContent = `${member.name || "Player"}: ${details.correct ? "Correct" : "No points"} — ${Number(details.points) || 0} points`;
+                const name = document.createElement("span");
+                name.textContent = member.name || "Player";
+                const colourMap = { red: "#e53935", maroon: "#800000", orange: "#e87500", green: "#2e8b57", darkGreen: "#006400", darkYellow: "#a87900", blue: "#1565c0", violet: "#8a2be2", purple: "#800080", pink: "#d81b60" };
+                name.style.color = colourMap[member.nameColour] || "#263238";
+                row.append(name, document.createTextNode(`: ${details.correct ? "Correct" : "No points"} — ${Number(details.points) || 0} points`));
                 scoreList.appendChild(row);
             });
         }
@@ -10690,12 +10905,12 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             if (challengeState.hazelnut && pointPartyImage.naturalWidth) {
                 try {
                     const canvas = document.createElement("canvas");
-                    const width = 48;
+                    const width = 96;
                     const height = Math.max(1, Math.round(width * pointPartyImage.naturalHeight / pointPartyImage.naturalWidth));
                     canvas.width = width;
                     canvas.height = height;
                     const context = canvas.getContext("2d");
-                    context.imageSmoothingEnabled = true;
+                    context.imageSmoothingEnabled = false;
                     context.drawImage(pointPartyImage, 0, 0, width, height);
                     displaySource = canvas.toDataURL("image/jpeg", 0.4);
                     pointPartyImage.onload = null;
@@ -10721,6 +10936,18 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                 pointPartyImage.style.opacity = "0";
             } else {
                 pointPartyImage.style.opacity = "1";
+            }
+            if (challenges.blink) {
+                if (pointPartyBlinkTimeout) clearTimeout(pointPartyBlinkTimeout);
+                pointPartyImage.style.visibility = "visible";
+                pointPartyWarpLayer.style.visibility = "visible";
+                const thisRoundKey = roundKey;
+                pointPartyBlinkTimeout = setTimeout(() => {
+                    if (pointPartyRenderedRoundKey === thisRoundKey && pointPartyResults.hidden) {
+                        pointPartyImage.style.visibility = "hidden";
+                        pointPartyWarpLayer.style.visibility = "hidden";
+                    }
+                }, 600);
             }
         };
         pointPartyImage.onload = finishImageLoad;
@@ -10748,6 +10975,12 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         const totalPlayers = Object.keys(party.members || {}).length;
         const submittedCount = Object.keys(party.guesses?.[roundNumber] || {}).length;
 
+        const isTriggerfish = party.mode === "triggerfishChase";
+        const heading = pointPartyScreen.querySelector("h1");
+        if (heading) heading.textContent = isTriggerfish ? "Clown Convention — Triggerfish Chase" : "Clown Convention — Point Party";
+        document.getElementById("triggerfish-scoreboard").hidden = !isTriggerfish;
+        pointPartyLeaderboard.hidden = isTriggerfish;
+        if (isTriggerfish) renderTriggerfishBars(state, Object.keys(party.members || {}).length);
         pointPartyRoundDisplay.textContent = `Round ${roundNumber} of ${Number(party.settings?.rounds) || 0}`;
         pointPartyResults.hidden = true;
         pointPartyGuessArea.hidden = false;
@@ -10760,15 +10993,14 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             pointPartySelect.disabled = false;
             pointPartySubmit.disabled = false;
             renderPointPartyImage(party, roundKey);
+            if (pointPartyBlinkTimeout) clearTimeout(pointPartyBlinkTimeout);
+            pointPartyImage.style.visibility = "visible";
+            pointPartyWarpLayer.style.visibility = "visible";
             if (pointPartyTimerInterval) clearInterval(pointPartyTimerInterval);
             pointPartyTimerInterval = setInterval(() => {
                 const remaining = Math.max(0, Number(state.endsAt) - pointPartyNow());
                 pointPartyTimerDisplay.textContent = `${(remaining / 1000).toFixed(1)}s`;
-                if (party.settings?.challenges?.blink) {
-                    const visible = (pointPartyNow() - Number(state.startedAt)) % 900 < 450;
-                    pointPartyImage.style.visibility = visible ? "visible" : "hidden";
-                    pointPartyWarpLayer.style.visibility = visible ? "visible" : "hidden";
-                } else {
+                if (!party.settings?.challenges?.blink) {
                     pointPartyImage.style.visibility = "visible";
                     pointPartyWarpLayer.style.visibility = "visible";
                 }
@@ -10828,6 +11060,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             // have guesses stored under it. Clear them before publishing the round.
             await database.ref(`parties/${activePartyCode}/guesses/${roundNumber}`).remove();
             pointPartyEndingRoundKey = null;
+            const previousState = freshParty.gameState || {};
             await database.ref(`parties/${activePartyCode}/gameState`).set({
                 phase: "round",
                 roundNumber,
@@ -10835,6 +11068,12 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                 startedAt: now,
                 endsAt: now + durationMs,
                 challengeState,
+                ...(freshParty.mode === "triggerfishChase" ? {
+                    playersTotal: Number(previousState.playersTotal) || 0,
+                    triggerfishTotal: Number(previousState.triggerfishTotal) || 0,
+                    triggerfishTarget: triggerfishTargetForPlayers(Object.keys(freshParty.members || {}).length),
+                    triggerfishMaxScore: 700 + (Math.max(2, Object.keys(freshParty.members || {}).length) - 2) * 400
+                } : {}),
                 updatedAt: now
             });
         } catch (error) {
@@ -10859,6 +11098,35 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             if (!answerFish) throw new Error(`The fish database does not contain ${party.gameState.image}`);
 
             const members = party.members || {};
+            if (party.mode === "triggerfishChase") {
+                const guesses = party.guesses?.[roundNumber] || {};
+                const playerCount = Math.max(2, Object.keys(members).length);
+                let playersRoundScore = 0;
+                const roundScores = {};
+                Object.entries(members).forEach(([uid]) => {
+                    const guess = guesses[uid];
+                    const correct = !!guess && guess.species === answerFish.species;
+                    const points = correct ? calculateTriggerfishPlayerPoints(guess.elapsedMs) : 0;
+                    playersRoundScore += points;
+                    roundScores[uid] = { correct, points, elapsedMs: guess ? Number(guess.elapsedMs) || 0 : null };
+                });
+                const maxTriggerfishScore = 700 + (playerCount - 2) * 400;
+                const rawTriggerfishScore = rollTriggerfishScore(maxTriggerfishScore);
+                const cappedTriggerfishScore = Math.min(350 * playerCount, rawTriggerfishScore);
+                const triggerfishRoundScore = applyTriggerfishChallengeMultipliers(cappedTriggerfishScore, party.settings?.challenges || {});
+                const state = party.gameState || {};
+                const resultsEndsAt = pointPartyNow() + 6500;
+                await database.ref(`parties/${activePartyCode}/gameState`).update({
+                    phase: "results", answer: answerFish.species, roundScores,
+                    playersRoundScore, triggerfishRoundScore,
+                    playersTotal: (Number(state.playersTotal) || 0) + playersRoundScore,
+                    triggerfishTotal: (Number(state.triggerfishTotal) || 0) + triggerfishRoundScore,
+                    triggerfishMaxScore: maxTriggerfishScore,
+                    triggerfishTarget: triggerfishTargetForPlayers(playerCount),
+                    resultsEndsAt, updatedAt: pointPartyNow()
+                });
+                return;
+            }
             const guesses = party.guesses?.[roundNumber] || {};
             const multiplier = pointPartyMultiplier(party.settings || {}, roundNumber);
             const roundScores = {};
@@ -10902,12 +11170,33 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
             pointPartyHostTimerKey = timerKey;
             const delay = Math.max(0, Number(state.endsAt) - pointPartyNow());
-            pointPartyHostTimer = setTimeout(() => endPointPartyRound(roundNumber), delay + 250);
+            const expectedStartedAt = Number(state.startedAt) || 0;
+            const expectedEndsAt = Number(state.endsAt) || 0;
+            pointPartyHostTimer = setTimeout(async () => {
+                try {
+                    const latest = (await window.clownFirebase.database.ref(`parties/${activePartyCode}/gameState`).once("value")).val();
+                    if (!latest || latest.phase !== "round" || Number(latest.roundNumber) !== roundNumber || Number(latest.startedAt) !== expectedStartedAt || Number(latest.endsAt) !== expectedEndsAt) return;
+                    if (pointPartyNow() + 25 < expectedEndsAt) {
+                        pointPartyHostTimerKey = null;
+                        schedulePointPartyHostRoundEnd({ ...party, gameState: latest });
+                        return;
+                    }
+                    endPointPartyRound(roundNumber);
+                } catch (error) { console.error("Could not verify the Point Party round deadline:", error); }
+            }, delay + 250);
         }
 
         if (everyoneHasGuessed && pointPartyEndingRoundKey !== `${activePartyCode}:${roundNumber}`) {
             if (pointPartyHostTimer) clearTimeout(pointPartyHostTimer);
-            pointPartyHostTimer = setTimeout(() => endPointPartyRound(roundNumber), 150);
+            pointPartyHostTimer = setTimeout(async () => {
+                try {
+                    const latestParty = (await window.clownFirebase.database.ref(`parties/${activePartyCode}`).once("value")).val();
+                    if (!latestParty || latestParty.status !== "playing" || latestParty.gameState?.phase !== "round" || Number(latestParty.gameState.roundNumber) !== roundNumber) return;
+                    const latestMembers = Object.keys(latestParty.members || {});
+                    const latestGuesses = latestParty.guesses?.[roundNumber] || {};
+                    if (latestMembers.length && latestMembers.every(uid => !!latestGuesses[uid])) endPointPartyRound(roundNumber);
+                } catch (error) { console.error("Could not verify all-player submissions:", error); }
+            }, 150);
         }
     }
 
@@ -10933,8 +11222,59 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         }, delay);
     }
 
+    function triggerfishTargetForPlayers(playerCount) {
+        if (playerCount <= 2) return 7250;
+        if (playerCount === 3) return 11000;
+        if (playerCount === 4) return 16000;
+        return 16000 + (playerCount - 4) * 4900;
+    }
+
+    function renderTriggerfishBars(state, playerCount) {
+        const target = triggerfishTargetForPlayers(playerCount);
+        const triggerfishTotal = Math.max(0, Number(state.triggerfishTotal) || 0);
+        const playersTotal = Math.max(0, Number(state.playersTotal) || 0);
+        const triggerPct = Math.max(0, Math.min(100, triggerfishTotal / target * 100));
+        const playersPct = Math.max(0, Math.min(100, playersTotal / target * 100));
+        const triggerFill = document.getElementById("triggerfish-progress-fill");
+        const playersFill = document.getElementById("players-progress-fill");
+        const triggerMarker = document.getElementById("triggerfish-progress-marker");
+        const playersMarker = document.getElementById("players-progress-marker");
+        if (triggerFill) triggerFill.style.width = `${triggerPct}%`;
+        if (playersFill) playersFill.style.width = `${playersPct}%`;
+        if (triggerMarker) triggerMarker.style.left = `${triggerPct}%`;
+        if (playersMarker) playersMarker.style.left = `${playersPct}%`;
+    }
+
+    function calculateTriggerfishPlayerPoints(elapsedMs) {
+        const seconds = Math.max(0, Number(elapsedMs) || 0) / 1000;
+        return Math.max(45, Math.floor(350 - (305 * Math.min(seconds, 20) / 20)));
+    }
+
+    function rollTriggerfishScore(maxScore) {
+        const roll = Math.random();
+        let score;
+        if (roll < 0.5) {
+            score = Math.round(maxScore * (0.75 + Math.random() * 0.10));
+        } else if (roll < 0.8) {
+            score = Math.floor(Math.random() * (maxScore + 1));
+        } else {
+            score = Math.floor(Math.random() * 201);
+        }
+        return Math.min(350 * Math.max(2, Math.floor(maxScore / 350)), score);
+    }
+
+    function applyTriggerfishChallengeMultipliers(score, challenges) {
+        let result = score;
+        if (challenges.blink) result *= 0.9;
+        if (challenges.clownMorpho) result *= 0.82;
+        if (challenges.clownWarp) result *= 0.89;
+        if (challenges.downTheClown) result *= 0.94;
+        if (challenges.clownHazelnut) result *= 0.6;
+        return Math.floor(result);
+    }
+
     function handlePointPartyState(party) {
-        if (!party || party.mode !== "pointParty") return;
+        if (!party || (party.mode !== "pointParty" && party.mode !== "triggerfishChase")) return;
         const state = party.gameState || {};
         if (party.status === "waiting" && state.phase === "lobby") {
             clearPointPartyTimers();
@@ -10944,6 +11284,9 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             pointPartySelect.disabled = false;
             pointPartySubmit.disabled = false;
             pointPartyStopButton.hidden = true;
+            document.getElementById("triggerfish-scoreboard").hidden = true;
+            const heading = pointPartyScreen.querySelector("h1");
+            if (heading) heading.textContent = "Clown Convention — Point Party";
             settingsEditor.hidden = !activeIsHost;
             updateStartButton(party);
             showConventionScreen(lobbyScreen);
@@ -11180,20 +11523,48 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         if (!image || !state.image) return;
         const cs=state.challengeState||{};
         image.style.transform=`rotate(${cs.upsideDown?180:0}deg)`;
-        image.style.filter=[cs.morpho?"hue-rotate(180deg)":"",cs.hazelnut?"blur(3px)":""].filter(Boolean).join(" ")||"none";
+        image.style.filter=[cs.morpho?"hue-rotate(180deg)":"",cs.hazelnut?"blur(1.4px)":""].filter(Boolean).join(" ")||"none";
+        image.style.imageRendering = cs.hazelnut ? "pixelated" : "auto";
         warp.hidden=!cs.warp; warp.replaceChildren();
         warp.style.filter=image.style.filter;
         warp.style.transform=image.style.transform;
         image.style.opacity=cs.warp?"0":"1";
+        let imageProcessed = false;
         const finish=()=>{
-            if(!image.naturalWidth || !cs.warp) return;
-            (cs.tileOrder||pdTileOrder()).forEach(index=>{
+            if(!image.naturalWidth || imageProcessed) return;
+            imageProcessed = true;
+            if (cs.hazelnut && image.dataset.hazelnutProcessed !== "true") {
+                try {
+                    const canvas = document.createElement("canvas");
+                    const width = 96;
+                    const height = Math.max(1, Math.round(width * image.naturalHeight / image.naturalWidth));
+                    canvas.width = width; canvas.height = height;
+                    const context = canvas.getContext("2d");
+                    context.imageSmoothingEnabled = false;
+                    context.drawImage(image, 0, 0, width, height);
+                    image.dataset.hazelnutProcessed = "true";
+                    image.style.imageRendering = "pixelated";
+                    image.src = canvas.toDataURL("image/jpeg", 0.58);
+                } catch (error) { console.warn("Party Duels Hazelnut processing failed:", error); }
+            }
+            if(cs.warp) (cs.tileOrder||pdTileOrder()).forEach(index=>{
                 const tile=document.createElement("div"); tile.className="party-duels-warp-tile";
                 const row=Math.floor(index/3), col=index%3;
                 tile.style.backgroundImage=`url("${image.src}")`; tile.style.backgroundSize="300% 300%"; tile.style.backgroundPosition=`${col*50}% ${row*50}%`;
                 warp.appendChild(tile);
             });
+            if (challenges.blink) {
+                if (pdBlinkTimer) clearTimeout(pdBlinkTimer);
+                image.style.visibility = "visible"; warp.style.visibility = "visible";
+                const roundKey = `${state.roundNumber}:${state.startedAt}`;
+                pdBlinkTimer = setTimeout(() => {
+                    if (pdRenderedKey === roundKey && !pd.reveal.textContent) {
+                        image.style.visibility = "hidden"; warp.style.visibility = "hidden";
+                    }
+                }, 600);
+            }
         };
+        image.dataset.hazelnutProcessed = "false";
         image.onload=finish; image.src=state.image; if(image.complete) finish();
         document.getElementById("party-duels-challenges").textContent=[
             challenges.blink?"Blink Mode — Clown Hide":null,
@@ -11203,7 +11574,7 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             challenges.clownHazelnut?"Clown Hazelnut":null
         ].filter(Boolean).join(" · ") || "No optional challenges";
     }
-    function pdStopVisualTimers(){ if(pdHostDeadline)clearTimeout(pdHostDeadline); if(pdBlinkTimer)clearInterval(pdBlinkTimer); if(pdClockInterval)clearInterval(pdClockInterval); pdHostDeadline=null; pdBlinkTimer=null; pdClockInterval=null; }
+    function pdStopVisualTimers(){ if(pdHostDeadline)clearTimeout(pdHostDeadline); if(pdBlinkTimer)clearTimeout(pdBlinkTimer); if(pdClockInterval)clearInterval(pdClockInterval); pdHostDeadline=null; pdBlinkTimer=null; pdClockInterval=null; }
     async function pdStartRound(roundNumber) {
         if(!activeIsHost||!activePartyCode) return;
         const ref=window.clownFirebase.database.ref(`parties/${activePartyCode}`);
@@ -11260,7 +11631,17 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
             if(pdHostTimerKey!==key){
                 if(pdHostDeadline)clearTimeout(pdHostDeadline);
                 pdHostTimerKey=key;
-                pdHostDeadline=setTimeout(()=>{pdHostDeadline=null;pdHostTimerKey=null;pdResolveRound(currentPartyData,round);},Math.max(0,Number(state.endsAt)-pointPartyNow())+100);
+                const expectedStartedAt=Number(state.startedAt)||0;
+                const expectedEndsAt=Number(state.endsAt)||0;
+                pdHostDeadline=setTimeout(async()=>{
+                    pdHostDeadline=null;pdHostTimerKey=null;
+                    try {
+                        const latest=(await window.clownFirebase.database.ref(`parties/${activePartyCode}/gameState`).once("value")).val();
+                        if(!latest||latest.phase!=="round"||Number(latest.roundNumber)!==round||Number(latest.startedAt)!==expectedStartedAt||Number(latest.endsAt)!==expectedEndsAt)return;
+                        if(pointPartyNow()+25<expectedEndsAt){pdScheduleHost({...party,gameState:latest});return;}
+                        pdResolveRound(currentPartyData,round);
+                    } catch(error){console.error("Could not verify the Party Duels deadline:",error);}
+                },Math.max(0,expectedEndsAt-pointPartyNow())+100);
             }
         } else if(state.phase==="roundResult"){
             const key=`results:${state.roundNumber}:${state.resultsEndsAt}`;
@@ -11343,9 +11724,9 @@ Object.keys(roundGuesses).forEach(uid => {
             const key=`${state.roundNumber}:${state.startedAt}`;
             if(pdRenderedKey!==key){
                 pdRenderedKey=key;pdSubmitPending=false;pd.select.value=species[0]||"";pd.select.disabled=false;pd.submit.disabled=false;pd.reveal.textContent="";
-                pd.round.textContent=`Round ${state.roundNumber}`;pdRenderFish(state,challenges);pdStopVisualTimers();
+                pd.round.textContent=`Round ${state.roundNumber}`;pdStopVisualTimers();pdRenderFish(state,challenges);
                 pdClockInterval=setInterval(()=>{const left=Math.max(0,Number(state.endsAt)-pointPartyNow());pd.timer.textContent=`${(left/1000).toFixed(1)}s`;if(left<=0){pd.select.disabled=true;pd.submit.disabled=true;}},100);
-                if(challenges.blink){pdBlinkTimer=setInterval(()=>{const visible=(pointPartyNow()-Number(state.startedAt))%900<450;pd.image.style.visibility=visible?"visible":"hidden";pd.warp.style.visibility=visible?"visible":"hidden";},80);}else{pd.image.style.visibility="visible";pd.warp.style.visibility="visible";}
+                pd.image.style.visibility="visible";pd.warp.style.visibility="visible";
             }
             const myGuess=party.guesses?.[state.roundNumber]?.[activeUserUid];
             if(myGuess){pd.select.disabled=true;pd.submit.disabled=true;pd.status.textContent="Your guess is locked in. Waiting for the other player…";}
@@ -11354,7 +11735,7 @@ Object.keys(roundGuesses).forEach(uid => {
         }
         if(state.phase==="roundResult"){
             startPartyDuelsMusic();
-            pdStopVisualTimers();showConventionScreen(partyDuelsScreen);pdRenderHealth(party);
+            pdStopVisualTimers();pd.image.style.visibility="visible";pd.warp.style.visibility="visible";showConventionScreen(partyDuelsScreen);pdRenderHealth(party);
             const ids=pdPlayers(party), results=state.roundResults||{};
             if(pdLastDamageSoundRound!==Number(state.roundNumber)&&ids.some(uid=>(results[uid]?.damage||0)>0)){pdLastDamageSoundRound=Number(state.roundNumber);if(typeof playDuelHealthLossSound==="function")playDuelHealthLossSound();}
             pd.reveal.textContent=`The Clown was: ${state.answer}. `+ids.map(uid=>`${pdName(uid,party)}: ${results[uid]?.correct?"Correct":"Incorrect"}${results[uid]?.damage?` · −${results[uid].damage.toLocaleString()} HP`:""}${results[uid]?.healing?` · +${results[uid].healing} HP`:""}`).join(" | ");
@@ -11391,6 +11772,11 @@ Object.keys(roundGuesses).forEach(uid => {
             lines.push("<strong>Game mode:</strong> Party Duels");
             lines.push("<strong>Players:</strong> 2 (one versus one)");
             lines.push("<strong>Rules:</strong> No Move — 5,000 HP per player");
+        } else if (party.mode === "triggerfishChase") {
+            lines.push("<strong>Game mode:</strong> Triggerfish Chase");
+            lines.push("<strong>Rounds:</strong> 10");
+            lines.push(`<strong>Time per round:</strong> ${Number(settings.roundTimeSeconds) || 30} seconds`);
+            lines.push("<strong>Players:</strong> Cooperative team versus Triggerfish");
         } else {
             lines.push("<strong>Game mode:</strong> Point Party");
             lines.push(`<strong>Rounds:</strong> ${Number(settings.rounds) || "—"}`);
@@ -11410,7 +11796,7 @@ Object.keys(roundGuesses).forEach(uid => {
         });
 
         document.getElementById("convention-lobby-mode").textContent =
-            party.mode === "duels" ? "Party Duels" : "Point Party";
+            party.mode === "duels" ? "Party Duels" : party.mode === "triggerfishChase" ? "Triggerfish Chase" : "Point Party";
         renderSettingsEditor(party);
         updateStartButton(party);
         handlePointPartyState(party);
@@ -11424,6 +11810,19 @@ Object.keys(roundGuesses).forEach(uid => {
     }
 
     function readConventionEditorSettings() {
+        if (currentPartyData?.mode === "triggerfishChase") {
+            return {
+                maxPlayers: null, rounds: 10,
+                roundTimeSeconds: Number(document.getElementById("lobby-triggerfish-round-time").value),
+                challenges: {
+                    blink: document.getElementById("lobby-triggerfish-blink").checked,
+                    downTheClown: document.getElementById("lobby-triggerfish-down-clown").checked,
+                    clownMorpho: document.getElementById("lobby-triggerfish-morpho").checked,
+                    clownWarp: document.getElementById("lobby-triggerfish-warp").checked,
+                    clownHazelnut: document.getElementById("lobby-triggerfish-hazelnut").checked
+                }
+            };
+        }
         if (currentPartyData?.mode === "pointParty") {
             return {
                 maxPlayers: null,
@@ -11453,6 +11852,10 @@ Object.keys(roundGuesses).forEach(uid => {
 
     function normalizedConventionSettings(settings, mode) {
         const c = settings?.challenges || {};
+        if (mode === "triggerfishChase") return {
+            maxPlayers: null, rounds: 10, roundTimeSeconds: Number(settings?.roundTimeSeconds) || 30,
+            challenges: { blink: c.blink === true, downTheClown: c.downTheClown === true, clownMorpho: c.clownMorpho === true, clownWarp: c.clownWarp === true, clownHazelnut: c.clownHazelnut === true }
+        };
         if (mode === "pointParty") return {
             maxPlayers: null,
             rounds: Number(settings?.rounds) || 10,
@@ -11496,8 +11899,10 @@ Object.keys(roundGuesses).forEach(uid => {
         const isNewParty = settingsEditor.dataset.partyCode !== activePartyCode;
         const alreadyEdited = !isNewParty && button && !button.hidden;
         const pointParty = party.mode === "pointParty";
+        const triggerfish = party.mode === "triggerfishChase";
         document.getElementById("lobby-point-party-editor").hidden = !pointParty;
-        document.getElementById("lobby-duels-editor").hidden = pointParty;
+        document.getElementById("lobby-triggerfish-editor").hidden = !triggerfish;
+        document.getElementById("lobby-duels-editor").hidden = pointParty || triggerfish;
         currentPartyData = party;
 
         // Keep in-progress edits intact, but refresh the editor from Firebase
@@ -11506,7 +11911,14 @@ Object.keys(roundGuesses).forEach(uid => {
             settingsEditor.dataset.partyCode = activePartyCode;
             const settings = party.settings || {};
             const challenges = settings.challenges || {};
-            if (pointParty) {
+            if (triggerfish) {
+                document.getElementById("lobby-triggerfish-round-time").value = Number(settings.roundTimeSeconds) || 30;
+                document.getElementById("lobby-triggerfish-blink").checked = challenges.blink === true;
+                document.getElementById("lobby-triggerfish-down-clown").checked = challenges.downTheClown === true;
+                document.getElementById("lobby-triggerfish-morpho").checked = challenges.clownMorpho === true;
+                document.getElementById("lobby-triggerfish-warp").checked = challenges.clownWarp === true;
+                document.getElementById("lobby-triggerfish-hazelnut").checked = challenges.clownHazelnut === true;
+            } else if (pointParty) {
                 document.getElementById("lobby-convention-rounds").value = Number(settings.rounds) || 10;
                 document.getElementById("lobby-convention-round-time").value = Number(settings.roundTimeSeconds) || 20;
                 document.getElementById("lobby-convention-point-boost").checked = settings.pointBoost === true;
@@ -11531,6 +11943,9 @@ Object.keys(roundGuesses).forEach(uid => {
         const status = document.getElementById("convention-settings-save-status");
         const button = document.getElementById("save-convention-settings-button");
         const settings = readConventionEditorSettings();
+        if (currentPartyData.mode === "triggerfishChase") {
+            if (!Number.isInteger(settings.roundTimeSeconds) || settings.roundTimeSeconds < 15 || settings.roundTimeSeconds > 45) { status.textContent = "Choose between 15 and 45 seconds per round."; return; }
+        }
         if (currentPartyData.mode === "pointParty") {
             if (!Number.isInteger(settings.rounds) || settings.rounds < 5 || settings.rounds > 25) { status.textContent = "Choose between 5 and 25 rounds."; return; }
             if (!Number.isInteger(settings.roundTimeSeconds) || settings.roundTimeSeconds < 10 || settings.roundTimeSeconds > 45) { status.textContent = "Choose between 10 and 45 seconds per round."; return; }
@@ -11551,6 +11966,7 @@ Object.keys(roundGuesses).forEach(uid => {
     [
         "lobby-convention-rounds", "lobby-convention-round-time", "lobby-convention-point-boost",
         "lobby-point-blink", "lobby-point-down-clown", "lobby-point-morpho", "lobby-point-warp", "lobby-point-hazelnut",
+        "lobby-triggerfish-round-time", "lobby-triggerfish-blink", "lobby-triggerfish-down-clown", "lobby-triggerfish-morpho", "lobby-triggerfish-warp", "lobby-triggerfish-hazelnut",
         "lobby-duels-blink", "lobby-duels-down-clown", "lobby-duels-morpho", "lobby-duels-warp", "lobby-duels-hazelnut"
     ].forEach(id => {
         const control = document.getElementById(id);
@@ -11850,7 +12266,23 @@ Object.keys(roundGuesses).forEach(uid => {
         }
 
         let settings;
-        if (mode === "pointParty") {
+        if (mode === "triggerfishChase") {
+            const roundTimeSeconds = Number(document.getElementById("triggerfish-round-time").value);
+            if (!Number.isInteger(roundTimeSeconds) || roundTimeSeconds < 15 || roundTimeSeconds > 45) {
+                createStatus.textContent = "Choose between 15 and 45 seconds per round.";
+                return;
+            }
+            settings = {
+                maxPlayers: null, rounds: 10, roundTimeSeconds,
+                challenges: {
+                    blink: document.getElementById("triggerfish-blink").checked,
+                    downTheClown: document.getElementById("triggerfish-down-clown").checked,
+                    clownMorpho: document.getElementById("triggerfish-morpho").checked,
+                    clownWarp: document.getElementById("triggerfish-warp").checked,
+                    clownHazelnut: document.getElementById("triggerfish-hazelnut").checked
+                }
+            };
+        } else if (mode === "pointParty") {
             const rounds = Number(document.getElementById("convention-rounds").value);
             const roundTimeSeconds = Number(document.getElementById("convention-round-time").value);
             if (!Number.isInteger(rounds) || rounds < 5 || rounds > 25) {

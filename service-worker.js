@@ -2,8 +2,8 @@
 // Generated from the project's CSV file list.
 // The first online visit downloads the listed game assets for offline use.
 
-const CACHE_NAME = "clown-game-offline-v3";
-const ASSET_MANIFEST_VERSION = "c965259a5653";
+const CACHE_NAME = "clown-game-offline-v4";
+const ASSET_MANIFEST_VERSION = "triggerfish-chase-20261107";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -35,6 +35,8 @@ const ASSETS_TO_CACHE = [
   "bot-images/rosie.png",
   "bot-images/Ruffledrinking.png",
   "bot-images/tf2.png",
+  "bot-images/trigger.JPG",
+  "bot-images/clownshoal.JPG",
   "bot-images/thegoat.png",
   "bot-images/vander.png",
   "bot-images/viperate.png",

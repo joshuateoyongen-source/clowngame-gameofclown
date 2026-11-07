@@ -48,6 +48,8 @@ const speciesMap = {
     // Special filename
     ef: "Ephippium",
 
+    epi: "Epigrammata",
+
     frenatus: "Frenatus",
 
     // Special filename

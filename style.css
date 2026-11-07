@@ -537,3 +537,28 @@ button:disabled { opacity:.45; cursor:not-allowed; }
 #party-duels-warp-layer[hidden] { display:none; }
 .party-duels-warp-tile { background-repeat:no-repeat; }
 @media(max-width:600px){.party-duels-health-grid{gap:10px;font-size:.9rem}.party-duels-image-container{min-height:130px}}
+
+
+/* Triggerfish Chase progress bars */
+.triggerfish-scoreboard { max-width: 650px; margin: 12px auto 20px; display: grid; gap: 17px; }
+.triggerfish-scoreboard[hidden] { display: none !important; }
+.triggerfish-progress-row { width: 100%; padding: 0 25px; box-sizing: border-box; }
+.triggerfish-progress-track { position: relative; height: 19px; width: 100%; border-radius: 999px; background: #dce5e8; box-shadow: inset 0 1px 3px rgba(0,0,0,.18); }
+.triggerfish-progress-fill { height: 100%; width: 0%; border-radius: inherit; transition: width 950ms cubic-bezier(.2,.7,.2,1); }
+.triggerfish-fill { background: linear-gradient(90deg,#d18b24,#f1bd54); }
+.players-fill { background: linear-gradient(90deg,#1686b5,#57c5df); }
+.triggerfish-progress-marker { position: absolute; z-index: 2; top: 50%; left: 0%; width: 48px; height: 48px; object-fit: contain; transform: translate(-50%,-50%); transition: left 950ms cubic-bezier(.2,.7,.2,1); pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,.22)); }
+.triggerfish-progress-row:first-child .triggerfish-progress-marker { width: 52px; height: 52px; }
+@media(max-width:600px){.triggerfish-progress-row{padding:0 20px}.triggerfish-progress-track{height:16px}.triggerfish-progress-marker{width:40px;height:40px}.triggerfish-progress-row:first-child .triggerfish-progress-marker{width:44px;height:44px}}
+
+/* Clown Convention underwater entrance and ascent */
+body.convention-underwater-enter { animation: conventionDive 900ms ease both; }
+body.convention-underwater-exit { animation: conventionRise 850ms ease both; }
+@keyframes conventionDive { 0% { filter:hue-rotate(0deg) saturate(1); } 45% { filter:hue-rotate(24deg) saturate(.82); } 100% { filter:hue-rotate(48deg) saturate(.72); } }
+@keyframes conventionRise { 0% { filter:hue-rotate(48deg) saturate(.72); } 55% { filter:hue-rotate(22deg) saturate(.86); } 100% { filter:hue-rotate(0deg) saturate(1); } }
+
+body.convention-underwater .convention-screen:not([hidden]) { transform: translateY(18px) scale(.99); transition: transform 900ms ease, filter 900ms ease; filter: hue-rotate(18deg) saturate(.86); }
+body.convention-underwater-enter .convention-screen:not([hidden]) { animation: conventionDiveContent 900ms ease both; }
+body.convention-underwater-exit #home-screen:not([hidden]) { animation: conventionRiseContent 850ms ease both; }
+@keyframes conventionDiveContent { 0% { transform:translateY(-8px) scale(1); filter:hue-rotate(0deg); } 45% { transform:translateY(32px) scale(.985); filter:hue-rotate(22deg); } 100% { transform:translateY(18px) scale(.99); filter:hue-rotate(18deg); } }
+@keyframes conventionRiseContent { 0% { transform:translateY(18px) scale(.99); filter:hue-rotate(18deg); } 55% { transform:translateY(-14px) scale(1.01); filter:hue-rotate(8deg); } 100% { transform:translateY(0) scale(1); filter:hue-rotate(0deg); } }
