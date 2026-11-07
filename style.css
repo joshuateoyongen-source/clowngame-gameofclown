@@ -1,5 +1,6 @@
 * { box-sizing: border-box; }
-body { margin:0; min-height:100vh; font-family:Arial,Helvetica,sans-serif; background:linear-gradient(180deg,#0077b6,#023e8a); color:white; display:flex; justify-content:center; align-items:center; padding:20px; }
+body { margin:0; min-height:100vh; font-family:Arial,Helvetica,sans-serif; background:linear-gradient(180deg,#0077b6,#023e8a); background-attachment:fixed; transition:background 900ms ease; color:white; display:flex; justify-content:center; align-items:center; padding:20px; }
+body.convention-underwater { background:linear-gradient(180deg,#00345f,#001b3d); background-attachment:fixed; }
 .game-container { width:100%; max-width:800px; background:rgba(255,255,255,.95); color:#222; border-radius:20px; padding:30px; box-shadow:0 10px 30px rgba(0,0,0,.3); text-align:center; position:relative; z-index:2; }
 h1 { margin-top:0; margin-bottom:5px; font-size:36px; color:#023e8a; }
 .instructions { margin-top:5px; color:#555; }
@@ -551,14 +552,11 @@ button:disabled { opacity:.45; cursor:not-allowed; }
 .triggerfish-progress-row:first-child .triggerfish-progress-marker { width: 52px; height: 52px; }
 @media(max-width:600px){.triggerfish-progress-row{padding:0 20px}.triggerfish-progress-track{height:16px}.triggerfish-progress-marker{width:40px;height:40px}.triggerfish-progress-row:first-child .triggerfish-progress-marker{width:44px;height:44px}}
 
-/* Clown Convention underwater entrance and ascent */
-body.convention-underwater-enter { animation: conventionDive 900ms ease both; }
-body.convention-underwater-exit { animation: conventionRise 850ms ease both; }
-@keyframes conventionDive { 0% { filter:hue-rotate(0deg) saturate(1); } 45% { filter:hue-rotate(24deg) saturate(.82); } 100% { filter:hue-rotate(48deg) saturate(.72); } }
-@keyframes conventionRise { 0% { filter:hue-rotate(48deg) saturate(.72); } 55% { filter:hue-rotate(22deg) saturate(.86); } 100% { filter:hue-rotate(0deg) saturate(1); } }
-
-body.convention-underwater .convention-screen:not([hidden]) { transform: translateY(18px) scale(.99); transition: transform 900ms ease, filter 900ms ease; filter: hue-rotate(18deg) saturate(.86); }
+/* Clown Convention underwater entrance and ascent.
+   The persistent effect darkens only the page background; buttons and panels keep
+   their original colours. The JavaScript still accelerates the background fish
+   briefly while entering and leaving the convention. */
 body.convention-underwater-enter .convention-screen:not([hidden]) { animation: conventionDiveContent 900ms ease both; }
 body.convention-underwater-exit #home-screen:not([hidden]) { animation: conventionRiseContent 850ms ease both; }
-@keyframes conventionDiveContent { 0% { transform:translateY(-8px) scale(1); filter:hue-rotate(0deg); } 45% { transform:translateY(32px) scale(.985); filter:hue-rotate(22deg); } 100% { transform:translateY(18px) scale(.99); filter:hue-rotate(18deg); } }
-@keyframes conventionRiseContent { 0% { transform:translateY(18px) scale(.99); filter:hue-rotate(18deg); } 55% { transform:translateY(-14px) scale(1.01); filter:hue-rotate(8deg); } 100% { transform:translateY(0) scale(1); filter:hue-rotate(0deg); } }
+@keyframes conventionDiveContent { 0% { transform:translateY(-8px) scale(1); } 45% { transform:translateY(32px) scale(.985); } 100% { transform:translateY(18px) scale(.99); } }
+@keyframes conventionRiseContent { 0% { transform:translateY(18px) scale(.99); } 55% { transform:translateY(-14px) scale(1.01); } 100% { transform:translateY(0) scale(1); } }

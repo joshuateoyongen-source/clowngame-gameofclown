@@ -10053,6 +10053,13 @@ function getBotAccuracy() {
     let accuracy = selectedClunyBot.accuracy;
     const s = duelCurrentFish?.species;
 
+    // Special accuracy against the deliberately fake species.
+    // These are fixed probabilities and are not reduced by challenge penalties.
+    if (s?.toLowerCase() === "a fake") {
+        if (selectedClunyBot.name === "J") return 4;
+        if (selectedClunyBot.name === "Ohnepixel") return 99;
+    }
+
     if (
         selectedClunyBot.name === "Auntie Anna" &&
         (s === "Ocellaris" || s === "Percula")
@@ -11113,7 +11120,11 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                 const maxTriggerfishScore = 700 + (playerCount - 2) * 400;
                 const rawTriggerfishScore = rollTriggerfishScore(maxTriggerfishScore);
                 const cappedTriggerfishScore = Math.min(350 * playerCount, rawTriggerfishScore);
-                const triggerfishRoundScore = applyTriggerfishChallengeMultipliers(cappedTriggerfishScore, party.settings?.challenges || {});
+                let triggerfishRoundScore = applyTriggerfishChallengeMultipliers(cappedTriggerfishScore, party.settings?.challenges || {});
+                // 37% chance that the Triggerfish loses 7% of this round's final score.
+                if (Math.random() < 0.37) {
+                    triggerfishRoundScore = Math.floor(triggerfishRoundScore * 0.93);
+                }
                 const state = party.gameState || {};
                 const resultsEndsAt = pointPartyNow() + 6500;
                 await database.ref(`parties/${activePartyCode}/gameState`).update({
