@@ -211,6 +211,26 @@ const fish = [
         species: "a Fake"
     },
     {
+        image: "images/cg33.jpg",
+        species: "a Fake"
+    },
+    {
+        image: "images/cg34.jpg",
+        species: "a Fake"
+    },
+    {
+        image: "images/cg35.jpg",
+        species: "a Fake"
+    },
+    {
+        image: "images/cg36.jpg",
+        species: "a Fake"
+    },
+    {
+        image: "images/cg37.jpg",
+        species: "a Fake"
+    },
+    {
         image: "images/akallopisos1.jpeg",
         species: "Akallopisos"
     },
@@ -988,6 +1008,22 @@ const fish = [
     },
     {
         image: "images/barberi41.jpg",
+        species: "Barberi"
+    },
+    {
+        image: "images/barberi42.jpg",
+        species: "Barberi"
+    },
+    {
+        image: "images/barberi43.jpg",
+        species: "Barberi"
+    },
+    {
+        image: "images/barberi44.jpg",
+        species: "Barberi"
+    },
+    {
+        image: "images/barberi45.jpg",
         species: "Barberi"
     },
     {
@@ -2311,6 +2347,18 @@ const fish = [
         species: "Clarkii"
     },
     {
+        image: "images/clarkii89.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii90.jpg",
+        species: "Clarkii"
+    },
+    {
+        image: "images/clarkii91.jpg",
+        species: "Clarkii"
+    },
+    {
         image: "images/ef1.JPG",
         species: "Ephippium"
     },
@@ -2808,6 +2856,14 @@ const fish = [
     },
     {
         image: "images/frenatus64.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus65.jpg",
+        species: "Frenatus"
+    },
+    {
+        image: "images/frenatus66.jpg",
         species: "Frenatus"
     },
     {
@@ -4663,6 +4719,22 @@ const fish = [
         species: "Ocellaris"
     },
     {
+        image: "images/ocellaris94.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris95.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris96.jpg",
+        species: "Ocellaris"
+    },
+    {
+        image: "images/ocellaris97.jpg",
+        species: "Ocellaris"
+    },
+    {
         image: "images/oman1.JPG",
         species: "Omanensis"
     },
@@ -6327,6 +6399,26 @@ const fish = [
         species: "Sebae"
     },
     {
+        image: "images/sebae57.jpg",
+        species: "Sebae"
+    },
+    {
+        image: "images/sebae58.jpg",
+        species: "Sebae"
+    },
+    {
+        image: "images/sebae59.jpg",
+        species: "Sebae"
+    },
+    {
+        image: "images/sebae60.jpg",
+        species: "Sebae"
+    },
+    {
+        image: "images/sebae61.jpg",
+        species: "Sebae"
+    },
+    {
         image: "images/snyderi1.webp",
         species: "Snyderi"
     },
@@ -6424,6 +6516,10 @@ const fish = [
     },
     {
         image: "images/thi10.jpeg",
+        species: "Thiellei"
+    },
+    {
+        image: "images/thi10.jpg",
         species: "Thiellei"
     },
     {
@@ -6659,6 +6755,7 @@ const fish = [
         species: "Tricinctus"
     }
 ];
+
 
 
 
@@ -11322,9 +11419,9 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
                     playersRoundScore += points;
                     roundScores[uid] = { correct, points, elapsedMs: guess ? Number(guess.elapsedMs) || 0 : null };
                 });
-                const maxTriggerfishScore = 700 + (playerCount - 2) * 400;
+                const maxTriggerfishScore = 900 + (playerCount - 2) * 400;
                 const rawTriggerfishScore = rollTriggerfishScore(maxTriggerfishScore);
-                const cappedTriggerfishScore = Math.min(350 * playerCount, rawTriggerfishScore);
+                const cappedTriggerfishScore = Math.min(450 * playerCount, rawTriggerfishScore);
                 let triggerfishRoundScore = applyTriggerfishChallengeMultipliers(cappedTriggerfishScore, party.settings?.challenges || {});
                 // 37% chance that the Triggerfish loses 7% of this round's final score.
                 if (Math.random() < 0.37) {
@@ -11515,13 +11612,14 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         const roll = Math.random();
         let score;
         if (roll < 0.5) {
-            score = Math.round(maxScore * (0.75 + Math.random() * 0.10));
+            // Half the time, Triggerfish aims for 65%–85% of its scoring ceiling.
+            score = Math.round(maxScore * (0.65 + Math.random() * 0.20));
         } else if (roll < 0.8) {
             score = Math.floor(Math.random() * (maxScore + 1));
         } else {
             score = Math.floor(Math.random() * 201);
         }
-        return Math.min(350 * Math.max(2, Math.floor(maxScore / 350)), score);
+        return Math.min(maxScore, score);
     }
 
     function applyTriggerfishChallengeMultipliers(score, challenges) {
@@ -11529,11 +11627,11 @@ renderClunyBots(); populateDuelSpecies(); updateDuelHealth();
         // reductions are milder than the original multipliers so stacking
         // several challenges does not suppress its score excessively.
         let result = score;
-        if (challenges.blink) result *= 0.95;          // Clown Hide: -5%
-        if (challenges.clownMorpho) result *= 0.91;    // Morpho: -9%
-        if (challenges.clownWarp) result *= 0.945;    // Warp: -5.5%
-        if (challenges.downTheClown) result *= 0.97;  // Upside Down: -3%
-        if (challenges.clownHazelnut) result *= 0.8;  // Hazelnut: -20%
+        if (challenges.blink) result *= 0.98;          // Clown Hide: -2%
+        if (challenges.clownMorpho) result *= 0.96;    // Morpho: -4%
+        if (challenges.clownWarp) result *= 0.97;      // Warp: -3%
+        if (challenges.downTheClown) result *= 0.98;  // Upside Down: -2%
+        if (challenges.clownHazelnut) result *= 0.92; // Hazelnut: -8%
         return Math.floor(result);
     }
 

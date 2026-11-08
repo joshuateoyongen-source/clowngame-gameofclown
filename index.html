@@ -75,7 +75,7 @@
             </div>
         </div>
         <div id="triggerfish-settings" class="convention-settings" hidden>
-            <p><strong>Triggerfish Chase</strong> is a cooperative 10-round challenge. The team competes against a Triggerfish bot. Choose a round duration and optional challenges:</p>
+            <p><strong>Triggerfish Chase</strong> is a cooperative race between your group of Clowns against the formidable triggerfish Pituitary Picasso! The first to reach the point goal is the victor!</p>
             <label class="convention-field">Time per round (15–45 seconds)
                 <input id="triggerfish-round-time" type="number" min="15" max="45" value="30">
             </label>
@@ -89,7 +89,7 @@
             </div>
         </div>
         <div id="duels-settings" class="convention-settings">
-            <p><strong>Party Duels</strong> supports exactly two human players and follows Cluny Court's No Move rules: 5,000 HP per player, with the fish visible throughout each 30-second round. Choose any optional challenges:</p>
+            <p><strong>Party Duels</strong> acts like a regular Cluny Court Duel against one other player. Think fast, guess fast, and earn the victory before your opponent can respond.</p>
             <label class="convention-checkbox"><input type="checkbox" id="convention-duels-blink"> Blink Mode — Clown Hide</label>
             <label class="convention-checkbox"><input type="checkbox" id="convention-down-clown"> Down the Clown</label>
             <label class="convention-checkbox"><input type="checkbox" id="convention-morpho"> Clown Morpho</label>
@@ -102,14 +102,14 @@
     </section>
 
     <section id="point-party-screen" class="game-container convention-screen point-party-screen" hidden>
-        <h1>Clown Convention — Point Party</h1>
+        <p><strong>Point Party</strong> is an every-clown-for-themself gamemode where Clown players race to each earn the most points possible after a set number of rounds! Guess quickly to earn more points than your opponents!</p>
         <p id="point-party-code" class="convention-note"></p>
         <section id="triggerfish-scoreboard" class="triggerfish-scoreboard" hidden aria-label="Triggerfish Chase progress">
             <div class="triggerfish-progress-row">
-                <div class="triggerfish-progress-track"><div id="triggerfish-progress-fill" class="triggerfish-progress-fill triggerfish-fill"></div><img id="triggerfish-progress-marker" class="triggerfish-progress-marker" src="bot-images/trigger.png" alt="Triggerfish"></div>
+                <div class="triggerfish-progress-track"><div id="triggerfish-progress-fill" class="triggerfish-progress-fill triggerfish-fill"></div><img id="triggerfish-progress-marker" class="triggerfish-progress-marker" src="bot-images/trigger.JPG" alt="Triggerfish"></div>
             </div>
             <div class="triggerfish-progress-row">
-                <div class="triggerfish-progress-track"><div id="players-progress-fill" class="triggerfish-progress-fill players-fill"></div><img id="players-progress-marker" class="triggerfish-progress-marker" src="bot-images/clownshoal.png" alt="Clownfish team"></div>
+                <div class="triggerfish-progress-track"><div id="players-progress-fill" class="triggerfish-progress-fill players-fill"></div><img id="players-progress-marker" class="triggerfish-progress-marker" src="bot-images/clownshoal.JPG" alt="Clownfish team"></div>
             </div>
         </section>
         <div class="point-party-roundline">
@@ -162,10 +162,16 @@
         <p>Share this four-letter code with your friends:</p>
         <div id="convention-code-display" class="convention-code">----</div>
         <p id="convention-lobby-mode"></p>
+        <h2>Players</h2>
+        <ul id="convention-player-list" class="convention-player-list"></ul>
+        <section id="convention-join-requests" class="convention-requests" hidden>
+            <ul id="convention-request-list" class="convention-player-list"></ul>
+        </section>
         <section id="convention-lobby-settings" class="convention-settings">
             <h2>Convention Settings</h2>
             <div id="convention-lobby-settings-details">Loading settings…</div>
         </section>
+        <button type="button" id="toggle-convention-editor-button" class="host-game-control" hidden>Edit Convention</button>
         <section id="convention-settings-editor" class="convention-settings" hidden>
             <h2>Modify Convention Settings</h2>
             <p class="convention-note">The game mode cannot be changed after the Convention is created.</p>
@@ -183,7 +189,7 @@
                 </div>
             </div>
             <div id="lobby-triggerfish-editor" hidden>
-                <p><strong>Triggerfish Chase</strong> — 10 rounds</p>
+                <p><strong>Triggerfish Chase</strong> — first team to reach the target wins; no fixed round limit.</p>
                 <label class="convention-field">Time per round (15–45 seconds)<input id="lobby-triggerfish-round-time" type="number" min="15" max="45"></label>
                 <div class="convention-point-challenges">
                     <p><strong>Optional Challenges</strong></p>
@@ -204,11 +210,6 @@
             </div>
             <p id="convention-settings-save-status" class="convention-status" role="status" aria-live="polite"></p>
             <button type="button" id="save-convention-settings-button" hidden>Save Settings</button>
-        </section>
-        <h2>Players</h2>
-        <ul id="convention-player-list" class="convention-player-list"></ul>
-        <section id="convention-join-requests" class="convention-requests" hidden>
-            <ul id="convention-request-list" class="convention-player-list"></ul>
         </section>
         <p id="convention-lobby-status" class="convention-status" role="status" aria-live="polite">Waiting for players…</p>
         <button type="button" id="start-convention-game-button" hidden>Start Game</button>
