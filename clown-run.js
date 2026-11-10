@@ -40,8 +40,24 @@ let introMusicFadeId = null;
     locked: new Audio(SFX_DIR + 'horrorguesslockedin.mp3'),
     loss: new Audio('duelsmusic/losehealth.mp3'),
     jump: new Audio(SFX_DIR + 'triggerjumpscare.mp3'),
-    awful: new Audio(SFX_DIR + 'triggerjumpscare.mp3')
+    awful: new Audio(SFX_DIR + 'triggerjumpscare.mp3'),
+    horrorguessed: new Audio('horrormusic/horrorguessed.mp3')
   };
+  // Prepare the accepted-guess sound
+sfx.horrorguessed.preload = 'auto';
+sfx.horrorguessed.volume = 0.3;
+sfx.horrorguessed.load();
+
+function playHorrorGuessed() {
+    const sound = sfx.horrorguessed;
+    sound.pause();
+    sound.currentTime = 0;
+    // Play directly in the submit button's user gesture.
+    const attempt = sound.play();
+    if (attempt && typeof attempt.catch === 'function') {
+        attempt.catch(error => console.warn('Accepted-guess audio failed:', error));
+    }
+}
 
 
 function fadeIntroMusic(targetVolume, duration = 1500) {
@@ -157,7 +173,7 @@ fadeIntroMusic(1.5, 1800);
 
     const messages = [
         ['Search the Reef for Clowns', false],
-        ['Survive as many days as possible', false],
+        ['Survive for as many days as possible', false],
         ["Don't let it catch you", true]
     ];
 
@@ -234,17 +250,55 @@ async function fadeFromBlack() {
   }
   function countdown() {
     return new Promise(resolve => {
-      setOverlay('countdown');
-      play(sfx.countdown);
-      let i=3; ui.countdown.textContent=String(i);
-      const id=setInterval(()=>{
-        if (!state.running) {clearInterval(id);resolve(false);return;}
-        i--;
-        ui.countdown.textContent = i>0 ? String(i) : 'DIVE!';
-        if (i<0) {clearInterval(id);setOverlay(null);resolve(true);}
-      },900);
+        setOverlay('countdown');
+        play(sfx.countdown);
+
+        let i = 3;
+
+        // Displays a number or DIVE! with a heavy impact animation
+        function showCountdown(text) {
+            ui.countdown.textContent = text;
+
+            // Red letters for DIVE!
+            ui.countdown.classList.toggle(
+                'cr-countdown-dive',
+                text === 'DIVE!'
+            );
+
+            // Restart animation for each number
+            ui.countdown.classList.remove('cr-countdown-impact');
+            void ui.countdown.offsetWidth;
+            ui.countdown.classList.add('cr-countdown-impact');
+        }
+
+        // Show 3 immediately
+        showCountdown('3');
+
+        const id = setInterval(() => {
+            if (!state.running) {
+                clearInterval(id);
+                resolve(false);
+                return;
+            }
+
+            i--;
+
+            if (i >= 0) {
+                showCountdown(i > 0 ? String(i) : 'DIVE!');
+            }
+
+            if (i < 0) {
+                clearInterval(id);
+                ui.countdown.classList.remove(
+                    'cr-countdown-impact',
+                    'cr-countdown-dive'
+                );
+                setOverlay(null);
+                resolve(true);
+            }
+        }, 900);
     });
-  }
+}
 function configureMusic() {
     ui.music.pause();
     ui.music.src = SFX_DIR + (state.dark ? 'evendarker.mp3' : 'dark.mp3');
@@ -295,7 +349,7 @@ function configureMusic() {
     state.lastTick=now;
     const progress=Math.min(1,state.elapsed/state.catchTime);
     state.distance=Math.max(0,30*(1-Math.pow(progress,1.7)));
-    ui.distance.textContent=`${Math.ceil(state.distance)} m`;
+    ui.distance.textContent=`${Math.ceil(state.distance)} m `;
     while (state.stepIndex<STEP_THRESHOLDS.length && state.distance<=STEP_THRESHOLDS[state.stepIndex]) {
       play(sfx.step); state.stepIndex++;
     }
@@ -364,9 +418,15 @@ state.raf = requestAnimationFrame(tick);
   }
   async function revealDay(guess) {
     if (!state.active) return;
-    state.active=false; cancelAnimationFrame(state.raf);
-    ui.inspect.hidden=true; ui.guessPanel.hidden=true;
-    play(sfx.locked);
+
+    state.active = false;
+    cancelAnimationFrame(state.raf);
+
+    ui.inspect.hidden = true;
+    ui.guessPanel.hidden = true;
+
+    // The accepted-guess sound already plays in submitGuess().
+    // Don't play the locked sound over it.
     const damage=guess===state.species?correctDamage(state.elapsed):similarDamage(state.elapsed,state.inspected.size);
     const before=state.hp;
     state.hp=Math.max(0,state.hp-damage);
@@ -377,8 +437,18 @@ const wasCorrect = guess === state.species;
     ui.music.currentTime = 0;
     ui.music.volume = 0;
     stopEndOfDayMusic();
-    play(endOfDayMusic);
-    fadeEndOfDayMusic(0.6, 1500);
+    // Begin playback, then fade only once the browser has started the track.
+    // Do not block the results-screen transition on audio loading.
+    const endOfDayAttempt = endOfDayMusic.play();
+    if (endOfDayAttempt && typeof endOfDayAttempt.then === 'function') {
+        endOfDayAttempt.then(() => {
+            if (state.running && !state.active && !endOfDayMusic.paused) {
+                fadeEndOfDayMusic(0.5, 1500);
+            }
+        }).catch(error => console.warn('End-of-day audio failed:', error));
+    } else {
+        fadeEndOfDayMusic(0.5, 1500);
+    }
     $('cr-result-answer').textContent=`It was ${state.species}.`;
     $('cr-result-guess').textContent=`Your guess: ${guess}`;
     $('cr-damage').textContent=`−${damage.toLocaleString()} HP`;
@@ -415,19 +485,27 @@ if (!state.running) return;
   }
   function submitGuess() {
     if (!state.active || Date.now()<state.guessLockUntil) return;
+
     const guess=ui.guess.value;
+
     if (!similarEnough(guess,state.species)) {
-      state.guessLockUntil=Date.now()+4000;
-      ui.submit.disabled=true;
-      play(sfx.awful);
-      state.speedBoostUntil = performance.now() + 3000; // 2x speed for 3 seconds
-      feedback('AWFUL GUESS');
-      setTimeout(()=>{ui.submit.disabled=false;},4000);
-      return;
+        state.guessLockUntil=Date.now()+4000;
+        ui.submit.disabled=true;
+        play(sfx.awful);
+        state.speedBoostUntil = performance.now() + 3000;
+        feedback('AWFUL GUESS');
+        setTimeout(()=>{ui.submit.disabled=false;},4000);
+        return;
     }
-    revealDay(guess);
-  }
+
+    // Play the accepted-guess sound from the beginning
+playHorrorGuessed();
+
+revealDay(guess);
+}
 const endOfDayMusic = new Audio('horrormusic/evendarker.mp3');
+endOfDayMusic.preload = 'auto';
+endOfDayMusic.load();
 endOfDayMusic.loop = true;
 endOfDayMusic.volume = 0;
 

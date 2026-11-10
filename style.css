@@ -836,3 +836,61 @@ body.clown-run-active #background-fish-container { display:none; }
     margin-left: 8px;
 }
 
+
+
+
+/* CLOWN SURVIVEAL — HEAVY COUNTDOWN */
+
+@keyframes crCountdownImpact {
+    0% {
+        opacity: 0;
+        transform: scale(2.8);
+        filter: blur(12px);
+    }
+
+    12% {
+        opacity: 1;
+        transform: scale(0.85);
+        filter: blur(0);
+    }
+
+    20% {
+        transform: scale(1.12);
+    }
+
+    28% {
+        transform: scale(1);
+    }
+
+    65% {
+        opacity: 1;
+        transform: scale(1.03);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.65);
+        filter: blur(5px);
+    }
+}
+
+.cr-countdown-impact {
+    animation: crCountdownImpact 0.9s cubic-bezier(.12,.8,.2,1) both !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.08em;
+    text-shadow:
+        0 0 15px #000,
+        0 0 35px rgba(0,0,0,.95),
+        4px 6px 0 rgba(0,0,0,.8);
+}
+
+.cr-countdown-dive {
+    color: #ff152b !important;
+    text-shadow:
+        0 0 15px #ff0000,
+        0 0 45px rgba(255,0,0,.8),
+        4px 6px 0 #350000 !important;
+}
+
+
+
