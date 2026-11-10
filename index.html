@@ -20,6 +20,27 @@
         <button id="guide-button">Metas of Clown</button>
         <button id="cluny-court-button">Cluny Court</button>
         <button id="clown-convention-button">Clown Convention</button>
+        <button id="clown-run-button" type="button" title="A darker dive awaits">Clown Run</button>
+    </section>
+
+
+    <!-- CLOWN RUN: independent singleplayer Halloween mode -->
+    <section id="clown-run-screen" class="game-container" hidden>
+      <header class="cr-hud"><strong id="cr-day">DAY 1</strong><div class="cr-health"><span id="cr-hp">6,000 / 6,000 HP</span><div class="cr-health-track"><div id="cr-health-fill"></div></div></div><div class="cr-enemy">TRIGGERFISH <strong id="cr-distance">30.0 m</strong></div></header>
+      <div id="cr-reef" aria-label="Move your pointer to explore the reef">
+        <div id="cr-world"><div id="cr-markers"></div></div>
+        <p id="cr-notice">Search the reef for faint clues. Move your cursor to explore.</p>
+      </div>
+      <div class="cr-controls"><button id="cr-exit" type="button">Leave Clown Run</button></div>
+      <div id="cr-guess-panel" hidden><label for="cr-guess">Which clownfish is hiding here?</label><select id="cr-guess"></select><button id="cr-submit" type="button">Lock In</button></div>
+      <div id="cr-inspect" hidden><div id="cr-inspect-image"><div id="cr-flashlight"></div></div><button id="cr-inspect-back" type="button">Return to Reef</button></div>
+      <div id="cr-feedback" hidden role="alert"></div>
+      <div id="cr-overlay" hidden><div id="cr-countdown" hidden></div>
+        <div id="cr-result" hidden><h2>DAY COMPLETE</h2><h1 id="cr-result-answer"></h1><p id="cr-result-guess"></p><div class="cr-result-health"><span>YOUR HEALTH</span><div class="cr-health-track"><div id="cr-result-health-note">Health updates above</div></div><strong id="cr-damage"></strong></div><button id="cr-next" type="button">Continue to Next Day</button></div>
+        <div id="cr-death" hidden><h1 id="cr-death-heading">YOU WERE CAUGHT</h1><p>Days survived: <strong id="cr-days-survived">0</strong></p><ol id="cr-history"></ol><h2 id="cr-death-species"></h2><div id="cr-death-gallery"></div><button id="cr-restart" type="button">Try Again</button><button id="cr-death-exit" type="button">Back to Home</button></div>
+      </div>
+      <div id="cr-jumpscare" hidden><img src="horrormusic/triggerfish.png" alt="Triggerfish jumpscare"></div>
+      <audio id="cr-music" preload="none"></audio>
     </section>
 
     <!-- CLOWN CONVENTION: menu and host creation flow -->
@@ -324,6 +345,7 @@
 
     <!-- Your game -->
     <script src="script.js"></script>
+    <script src="clown-run.js"></script>
 
     <!-- If your fish array is defined in a separate file, load that file before script.js. -->
 

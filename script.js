@@ -8150,6 +8150,81 @@ let musicStarted = false;
 let transitionStarted = false;
 
 let partyDuelsMusicFaded = false;
+let clownRunMusicMuted = false;
+let clownRunMusicFade = 0;
+let clownRunCrossfadeInterval = null;
+let clownRunCrossfadeTimeout = null;
+let clownRunFadeGeneration = 0;
+let clownRunSilenceGuard = null;
+
+// Block stray playback from delayed track-loading, crossfades and other music callbacks.
+function enforceClownRunSilence() {
+    if (!clownRunMusicMuted) return;
+    for (const audio of [audio1, audio2]) {
+        audio.pause();
+        audio.volume = 0;
+    }
+}
+for (const audio of [audio1, audio2]) {
+    audio.addEventListener('play', () => {
+        if (clownRunMusicMuted && !clownRunMusicFadeActive) enforceClownRunSilence();
+    });
+}
+let clownRunMusicFadeActive = false;
+
+window.clownRunNormalMusic = {
+    fadeOut() {
+        clownRunMusicMuted = true;
+        clownRunMusicFadeActive = true;
+        clearInterval(clownRunSilenceGuard);
+        const generation = ++clownRunFadeGeneration;
+        cancelAnimationFrame(clownRunMusicFade);
+        clearInterval(clownRunCrossfadeInterval);
+        clearTimeout(clownRunCrossfadeTimeout);
+        transitionStarted = false;
+        // Both evolving-music players must be silenced, including one mid-crossfade.
+        const start1 = audio1.volume, start2 = audio2.volume;
+        const started = performance.now();
+        function fade(now) {
+            if (!clownRunMusicMuted || generation !== clownRunFadeGeneration) return;
+            const t = Math.min(1, (now - started) / 850);
+            audio1.volume = Math.max(0, start1 * (1 - t));
+            audio2.volume = Math.max(0, start2 * (1 - t));
+            if (t < 1) clownRunMusicFade = requestAnimationFrame(fade);
+            else {
+                audio1.pause(); audio2.pause();
+                audio1.volume = 0; audio2.volume = 0;
+                clownRunMusicFadeActive = false;
+                clownRunSilenceGuard = setInterval(enforceClownRunSilence, 150);
+            }
+        }
+        clownRunMusicFade = requestAnimationFrame(fade);
+    },
+    restore() {
+        clownRunMusicMuted = false;
+        clownRunMusicFadeActive = false;
+        clearInterval(clownRunSilenceGuard);
+        ++clownRunFadeGeneration;
+        cancelAnimationFrame(clownRunMusicFade);
+        clearInterval(clownRunCrossfadeInterval);
+        clearTimeout(clownRunCrossfadeTimeout);
+        audio1.pause(); audio2.pause();
+        audio1.volume = 0; audio2.volume = 0;
+        transitionStarted = false;
+        if (!musicStarted) return;
+        const resumeAudio = activeAudio;
+        resumeAudio.play().catch(() => {});
+        const started = performance.now();
+        function fade(now) {
+            if (clownRunMusicMuted) return;
+            const t = Math.min(1, (now - started) / 850);
+            resumeAudio.volume = Math.min(1, musicVolume * t);
+            if (t < 1) clownRunMusicFade = requestAnimationFrame(fade);
+        }
+        clownRunMusicFade = requestAnimationFrame(fade);
+    }
+};
+
 
 
 // ==========================================
@@ -8174,7 +8249,7 @@ const preloadedMusic =
 // ==========================================
 
 function startMusic() {
-    if (musicStarted) return;
+    if (clownRunMusicMuted || musicStarted) return;
 
     musicStarted = true;
 
@@ -8212,6 +8287,7 @@ function startMusic() {
 // ==========================================
 
 function playNextTrack() {
+    if (clownRunMusicMuted) return;
 
     // Don't transition when continuous music is being used
     if (!useEvolvingMusic) return;
@@ -8271,28 +8347,36 @@ function playNextTrack() {
 // ==========================================
 
 function startCrossfade() {
+    if (clownRunMusicMuted) { transitionStarted = false; return; }
     const fadeTime = .5;
     const nextTrackDelay = 0.15;
 
-    nextAudio.play();
+    nextAudio.play().catch(() => {});
 
     // Keep next track silent at first
-    nextAudio.volume = 0.4;
+    nextAudio.volume = 0;
 
     // Start fading in the new track after a delay
-    setTimeout(() => {
+    clownRunCrossfadeTimeout = setTimeout(() => {
+        if (clownRunMusicMuted) { transitionStarted = false; return; }
         const steps = 30;
         const stepTime = (fadeTime * 1000) / steps;
         let step = 0;
 
-        const fadeInterval = setInterval(() => {
+        clownRunCrossfadeInterval = setInterval(() => {
+            if (clownRunMusicMuted) {
+                clearInterval(clownRunCrossfadeInterval);
+                transitionStarted = false;
+                return;
+            }
             step++;
 
             activeAudio.volume = musicVolume * (1 - step / steps);
             nextAudio.volume = musicVolume * (step / steps);
 
             if (step >= steps) {
-                clearInterval(fadeInterval);
+                clearInterval(clownRunCrossfadeInterval);
+                clownRunCrossfadeInterval = null;
 
                 activeAudio.pause();
                 activeAudio.currentTime = 0;
@@ -8326,6 +8410,7 @@ audio2.addEventListener(
 
 
 function checkForTransition() {
+    if (clownRunMusicMuted) return;
     if (!useEvolvingMusic) return;
     if (!musicStarted) return;
     if (currentTrack >= musicTracks.length - 1) return;
@@ -8356,6 +8441,7 @@ document.addEventListener("keydown", startMusic);
 // ==========================================
 
 audio1.addEventListener("ended", function () {
+    if (clownRunMusicMuted) return;
 
     if (!useEvolvingMusic) return;
 
@@ -8366,6 +8452,7 @@ audio1.addEventListener("ended", function () {
 });
 
 audio2.addEventListener("ended", function () {
+    if (clownRunMusicMuted) return;
 
     if (!useEvolvingMusic) return;
 
@@ -9912,7 +9999,13 @@ duelModeButtons.forEach(button=>button.addEventListener("click",()=>{ if(!select
 function fadeAudio(audio, target, duration=700) {
     if (!audio) return Promise.resolve();
     const start=Number.isFinite(audio.volume)?audio.volume:0; const steps=20; const delay=duration/steps;
-    return new Promise(resolve=>{let n=0; const timer=setInterval(()=>{n++; audio.volume=Math.max(0,Math.min(1,start+(target-start)*(n/steps))); if(n>=steps){clearInterval(timer); if(target===0) audio.pause(); resolve();}},delay);});
+    return new Promise(resolve=>{let n=0; const timer=setInterval(()=>{
+        if (clownRunMusicMuted && (audio === audio1 || audio === audio2)) {
+            clearInterval(timer); audio.volume = 0; audio.pause(); resolve(); return;
+        }
+        n++; audio.volume=Math.max(0,Math.min(1,start+(target-start)*(n/steps)));
+        if(n>=steps){clearInterval(timer); if(target===0) audio.pause(); resolve();}
+    },delay);});
 }
 
 async function startDuelMusic() {
@@ -9942,6 +10035,7 @@ async function startDuelMusic() {
 }
 
 async function restoreNormalMusic() {
+    if (clownRunMusicMuted) return;
     if (duelAudio) await fadeAudio(duelAudio,0,550);
     if (typeof activeAudio !== "undefined" && activeAudio) {
         activeAudio.pause(); activeAudio.currentTime=0; activeAudio.src=musicTracks[0]; activeAudio.loop=false; activeAudio.volume=0;
@@ -9981,6 +10075,7 @@ async function startPartyDuelsMusic() {
 
 
 async function stopPartyDuelsMusic() {
+    if (clownRunMusicMuted) return;
     if (!partyDuelsMusicActive) return;
 
     partyDuelsMusicActive = false;
@@ -10024,6 +10119,7 @@ async function fadeOutMusicForPartyDuels() {
 }
 
 async function fadeInMusicAfterPartyDuels() {
+    if (clownRunMusicMuted) return;
     if (!useEvolvingMusic || !partyDuelsMusicFaded) return;
 
     partyDuelsMusicFaded = false;
