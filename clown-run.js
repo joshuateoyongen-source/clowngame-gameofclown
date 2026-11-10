@@ -8,7 +8,11 @@
     reef: $('cr-reef'), world: $('cr-world'), markers: $('cr-markers'), notice: $('cr-notice'),
     inspect: $('cr-inspect'), inspectImage: $('cr-inspect-image'), flashlight: $('cr-flashlight'),
     guessPanel: $('cr-guess-panel'), guess: $('cr-guess'), feedback: $('cr-feedback'),
-    overlay: $('cr-overlay'), countdown: $('cr-countdown'), result: $('cr-result'),
+    overlay: $('cr-overlay'),
+intro: $('cr-intro'),
+curtain: $('cr-curtain'),
+countdown: $('cr-countdown'),
+result: $('cr-result'),
     death: $('cr-death'), jumpscare: $('cr-jumpscare'), music: $('cr-music'),
     next: $('cr-next'), guessButton: $('cr-guess-button'), submit: $('cr-submit'),
     inspectBack: $('cr-inspect-back'), exit: $('cr-exit'), deathExit: $('cr-death-exit'), restart: $('cr-restart')
@@ -23,14 +27,95 @@
 ];
   const STEP_THRESHOLDS = [29,26,23,20,17,14,11,9,7,5,3,2,1,0];
   const SFX_DIR = 'horrormusic/';
+  // Introductory cinematic soundtrack
+const introMusic = new Audio('horrormusic/dark.mp3');
+introMusic.loop = true;
+introMusic.preload = 'auto';
+introMusic.volume = 0;
+
+let introMusicFadeId = null;
   const sfx = {
     step: new Audio(SFX_DIR + 'step.mp3'),
     countdown: new Audio(SFX_DIR + 'horrorcountdown.mp3'),
     locked: new Audio(SFX_DIR + 'horrorguesslockedin.mp3'),
-    loss: new Audio(SFX_DIR + 'healthloss.mp3'),
+    loss: new Audio('duelsmusic/losehealth.mp3'),
     jump: new Audio(SFX_DIR + 'triggerjumpscare.mp3'),
     awful: new Audio(SFX_DIR + 'triggerjumpscare.mp3')
   };
+
+
+function fadeIntroMusic(targetVolume, duration = 1500) {
+    cancelAnimationFrame(introMusicFadeId);
+
+    const startingVolume = introMusic.volume;
+    const startTime = performance.now();
+
+    if (targetVolume > 0) {
+        introMusic.play().catch(error => {
+            console.warn('Intro music could not play:', error);
+        });
+    }
+
+    function animate(now) {
+        const progress = Math.min(1, (now - startTime) / duration);
+
+        introMusic.volume = Math.max(
+            0,
+            Math.min(1,
+                startingVolume + (targetVolume - startingVolume) * progress
+            )
+        );
+
+        if (progress < 1) {
+            introMusicFadeId = requestAnimationFrame(animate);
+        } else if (targetVolume === 0) {
+            introMusic.pause();
+            introMusic.currentTime = 0;
+        }
+    }
+
+    introMusicFadeId = requestAnimationFrame(animate);
+}
+
+function stopIntroMusic() {
+    cancelAnimationFrame(introMusicFadeId);
+
+    introMusic.pause();
+    introMusic.currentTime = 0;
+    introMusic.volume = 0;
+}
+  const musicbox = new Audio('horrormusic/musicbox.mp3');
+musicbox.loop = true;
+musicbox.volume = 0;
+
+let musicboxFadeId = null;
+
+function fadeMusicbox(targetVolume, duration = 1500) {
+    cancelAnimationFrame(musicboxFadeId);
+
+    const startVolume = musicbox.volume;
+    const startTime = performance.now();
+
+    if (targetVolume > 0) {
+        musicbox.play().catch(() => {});
+    }
+
+    function animate(now) {
+        const progress = Math.min(1, (now - startTime) / duration);
+
+        musicbox.volume =
+            startVolume + (targetVolume - startVolume) * progress;
+
+        if (progress < 1) {
+            musicboxFadeId = requestAnimationFrame(animate);
+        } else if (targetVolume === 0) {
+            musicbox.pause();
+            musicbox.currentTime = 0;
+        }
+    }
+
+    musicboxFadeId = requestAnimationFrame(animate);
+}
   Object.values(sfx).forEach(a => { a.preload = 'auto'; });
   const state = {
     running:false, active:false, day:1, hp:MAX_HP, elapsed:0, lastTick:0,
@@ -52,11 +137,72 @@
     document.querySelectorAll('body > section.game-container').forEach(el => { el.hidden = el !== screen; });
   }
   function setOverlay(which) {
+    ui.intro.hidden = which !== 'intro';
     ui.overlay.hidden = !which;
     ui.countdown.hidden = which !== 'countdown';
     ui.result.hidden = which !== 'result';
     ui.death.hidden = which !== 'death';
   }
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+let introGeneration = 0;
+
+async function playSurvivealIntro(generation) {
+  stopIntroMusic();
+fadeIntroMusic(1.0, 1800);
+  introMusic.currentTime = 0;
+introMusic.volume = 0;
+fadeIntroMusic(1.5, 1800);
+    setOverlay('intro');
+
+    const messages = [
+        ['Search the Reef for Clowns', false],
+        ['Survive as many days as possible', false],
+        ["Don't let it catch you", true]
+    ];
+
+    for (const [message, danger] of messages) {
+        if (!state.running || generation !== introGeneration) {
+            return false;
+        }
+
+        ui.intro.textContent = message;
+        ui.intro.classList.toggle('cr-intro-danger', danger);
+
+        ui.intro.classList.remove('cr-intro-visible');
+        void ui.intro.offsetWidth;
+        ui.intro.classList.add('cr-intro-visible');
+
+        await wait(2900);
+
+        if (!state.running || generation !== introGeneration) {
+            return false;
+        }
+
+        ui.intro.classList.remove('cr-intro-visible');
+        await wait(850);
+    }
+
+    if (!state.running || generation !== introGeneration) {
+        return false;
+    }
+
+    fadeIntroMusic(0, 1500);
+
+fadeIntroMusic(0, 1200);
+
+setOverlay(null);
+return true;
+}
+async function fadeToBlack() {
+    ui.curtain.classList.add('cr-black');
+    await wait(850);
+}
+
+async function fadeFromBlack() {
+    ui.curtain.classList.remove('cr-black');
+    await wait(850);
+}
   function setHp(hp) {
     ui.hp.textContent = `${Math.max(0,Math.ceil(hp)).toLocaleString()} / ${MAX_HP.toLocaleString()} HP`;
     ui.fill.style.width = `${Math.max(0,hp)/MAX_HP*100}%`;
@@ -165,12 +311,17 @@ ui.music.volume = desiredVolume * fadeIn;
     state.raf=requestAnimationFrame(tick);
   }
   async function startDay() {
+    ui.curtain.classList.remove('cr-black');
     if (!state.running || !available.length) return;
     fadeEndOfDayMusic(0, 900);
     state.active=false; cancelAnimationFrame(state.raf);
     // Hide the reef before the countdown
 ui.world.classList.remove('cr-reef-visible');
     state.dark=state.day%5===0;
+    ui.screen.classList.toggle(
+    'cr-monochrome',
+    state.day % 7 === 0
+);
     const reefImage = pick(REEF_PANORAMAS);
 ui.world.style.backgroundImage =
     `linear-gradient(180deg, rgba(2,14,25,.38), rgba(0,0,0,.58)), url("${reefImage}")`;
@@ -211,7 +362,7 @@ state.raf = requestAnimationFrame(tick);
     const multiplier=1+Math.min(6,Math.max(0,inspected-1))*.35;
     return Math.round(base*multiplier);
   }
-  function revealDay(guess) {
+  async function revealDay(guess) {
     if (!state.active) return;
     state.active=false; cancelAnimationFrame(state.raf);
     ui.inspect.hidden=true; ui.guessPanel.hidden=true;
@@ -219,7 +370,9 @@ state.raf = requestAnimationFrame(tick);
     const damage=guess===state.species?correctDamage(state.elapsed):similarDamage(state.elapsed,state.inspected.size);
     const before=state.hp;
     state.hp=Math.max(0,state.hp-damage);
-    state.history.push({day:state.day,answer:state.species,guess,clues:[...state.clues]});
+    const actualHealthLost = before - state.hp;
+const wasCorrect = guess === state.species;
+    state.history.push({day:state.day,answer:state.species,guess,correct: wasCorrect,healthLost: actualHealthLost,clues:[...state.clues]});
     ui.music.pause();
     ui.music.currentTime = 0;
     ui.music.volume = 0;
@@ -232,14 +385,24 @@ state.raf = requestAnimationFrame(tick);
     ui.next.hidden = state.hp <= 0;
     ui.next.disabled = state.hp <= 0;
     ui.next.textContent = 'Continue to Next Day';
-    setOverlay('result');
-    setHp(before);
+    await fadeToBlack();
+
+if (!state.running) return;
+
+setOverlay('result');
+setHp(before);
+
+await fadeFromBlack();
+
+if (!state.running) return;
     const resultFill=$('cr-result-health-fill');
     resultFill.style.transition='none'; resultFill.style.width=`${before/MAX_HP*100}%`;
     void resultFill.offsetWidth; resultFill.style.transition='width 1.3s ease';
     setTimeout(()=>{
       if (!state.running) return;
-      play(sfx.loss);
+      if (damage > 0) {
+    play(sfx.loss);
+}
       requestAnimationFrame(()=>{setHp(state.hp);resultFill.style.width=`${state.hp/MAX_HP*100}%`;});
       if (state.hp<=0) setTimeout(()=>{if(state.running)endRun('health');},1800);
     },550);
@@ -330,13 +493,54 @@ function fadeEndOfDayMusic(targetVolume, duration = 1200) {
     state.running=false;
     stopEndOfDayMusic();
     ui.music.pause();
-    $('cr-death-heading').textContent=reason==='caught'?'YOU WERE CAUGHT':'YOU DID NOT SURVIVE';
+    $('cr-death-heading').textContent=reason==='caught'?'YOU WERE CAUGHT':'YOU DIED';
     $('cr-days-survived').textContent=String(state.history.filter(x=>x.guess!=='No guess').length-(reason==='health'?1:0));
+    
+    
+    
+    
     const history=$('cr-history'); history.replaceChildren();
     state.history.forEach(entry=>{
-      const li=document.createElement('li');
-      li.textContent=`Day ${entry.day}: ${entry.answer} — Your guess: ${entry.guess}`;
-      history.appendChild(li);
+          const resultIndicator = entry.guess == null
+    ? ''
+    : entry.correct
+        ? '<span class="cr-summary-correct">✔</span>'
+        : '<span class="cr-summary-wrong">✖</span>';
+
+    const li = document.createElement('li');
+
+li.textContent = `Day ${entry.day}: ${entry.answer}`;
+
+// Only show a result if the player made a guess
+if (entry.guess != null) {
+
+    li.textContent += ` — Your guess: ${entry.guess} `;
+
+    // Green tick or red cross
+    const indicator = document.createElement('span');
+
+    const correct = entry.correct ??
+        (entry.guess === entry.answer);
+
+    indicator.textContent = correct ? ' ✔ ' : ' ✖ ';
+    indicator.className = correct
+        ? 'cr-summary-correct'
+        : 'cr-summary-wrong';
+
+    li.appendChild(indicator);
+
+    // Health lost that day
+    const damage = document.createElement('span');
+    damage.className = 'cr-summary-damage';
+    damage.textContent = ` −${entry.healthLost ?? 0} HP`;
+
+    li.appendChild(damage);
+
+} else {
+    li.textContent += ' — Caught before guessing';
+}
+
+history.appendChild(li);
     });
     deathGallery(state.history.at(-1));
     if (reason === 'caught') {
@@ -347,25 +551,52 @@ function fadeEndOfDayMusic(targetVolume, duration = 1200) {
           ui.jumpscare.hidden = true;
           ui.jumpscare.classList.remove('cr-blackout');
           setOverlay('death');
+          musicbox.currentTime = 0;
+musicbox.volume = 0;
+fadeMusicbox(0.28, 2000);
         }, 3000);
       }, 850);
     } else {
-      setOverlay('death');
-    }
+    fadeToBlack().then(async () => {
+        setOverlay('death');
+        await fadeFromBlack();
+    });
+}
   }
+  
   function startRun() {
+    fadeMusicbox(0, 1200);
+    cancelAnimationFrame(introMusicFadeId);
+introMusic.pause();
+introMusic.currentTime = 0;
+introMusic.volume = 0;
     cancelDeathTransition();
     if (!available.length) { alert('No matching clownfish species were found in the game database.'); return; }
+    window.clownSurvivealAudioOnly = true;
     window.clownRunNormalMusic?.fadeOut();
     stopAudio(); state.running=true; state.active=false; state.day=1; state.hp=MAX_HP; state.history=[];
     setHp(state.hp); showOnly(ui.screen); document.body.classList.add('clown-run-active');
-    startDay();
+    const generation = ++introGeneration;
+
+playSurvivealIntro(generation).then(completed => {
+    if (completed && state.running) {
+        startDay();
+    }
+});
   }
   function exitRun() {
+    stopIntroMusic();
+    cancelAnimationFrame(introMusicFadeId);
+introMusic.pause();
+introMusic.currentTime = 0;
+introMusic.volume = 0;
+    ++introGeneration;
+    fadeMusicbox(0, 800);
     cancelDeathTransition();
     state.running=false; state.active=false; cancelAnimationFrame(state.raf);
     stopAudio(); ui.inspect.hidden=true; setOverlay(null);
     document.body.classList.remove('clown-run-active'); showOnly(ui.home);
+    window.clownSurvivealAudioOnly = false;
     window.clownRunNormalMusic?.restore();
   }
   ui.button.addEventListener('click',startRun);

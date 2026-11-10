@@ -6793,6 +6793,24 @@ const musicTracks = [
     "music/music4.mp3",
     "music/music5.mp3"
 ];  
+// Block normal soundtrack playback during Clown Surviveal.
+window.clownSurvivealAudioOnly = false;
+
+const originalMediaPlay = HTMLMediaElement.prototype.play;
+
+HTMLMediaElement.prototype.play = function (...args) {
+    const source = this.currentSrc || this.src || '';
+
+    if (
+        window.clownSurvivealAudioOnly &&
+        /\/music\/music[1-5]\.mp3(?:[?#]|$)/i.test(source)
+    ) {
+        this.pause();
+        return Promise.resolve();
+    }
+
+    return originalMediaPlay.apply(this, args);
+};
 
 
 
@@ -12864,7 +12882,9 @@ if (editConventionButton) {
                 try {
                     await database.ref(`parties/${candidate}`).set(partyData);
                     createdCode = candidate;
-                    break;
+                    if (!document.body.classList.contains('clown-run-active')) {
+    breakSound.play();
+};
                 } catch (error) {
                     lastError = error;
                     if (error.code !== "PERMISSION_DENIED" && error.code !== "PERMISSION_DENIED: Permission denied") throw error;
