@@ -733,6 +733,7 @@ fadeMusicbox(0.28, 2000);
   }
   
   function startRun() {
+    document.body.classList.add('christmas-surviveal');
     fadeMusicbox(0, 1200);
     cancelAnimationFrame(introMusicFadeId);
 introMusic.pause();
@@ -753,6 +754,7 @@ playSurvivealIntro(generation).then(completed => {
 });
   }
   function exitRun() {
+    document.body.classList.remove('christmas-surviveal');
     stopIntroMusic();
     cancelAnimationFrame(introMusicFadeId);
 introMusic.pause();

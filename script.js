@@ -6793,6 +6793,99 @@ const musicTracks = [
     "music/music4.mp3",
     "music/music5.mp3"
 ];  
+
+// ================================
+// CHRISTMAS SLEIGH BELLS
+// ================================
+
+const sleighBell = new Audio('christmas/sleighbell.mp3');
+sleighBell.preload = 'auto';
+sleighBell.volume = 0.3;
+
+let sleighBellsEnabled = true;
+let lastBellBeat = -1;
+let lastBellTrack = '';
+
+const bellBPM = 116;
+
+// Individual beat offsets for each evolving music track
+const bellFirstBeatOffsets = [
+    -0.2,  // music1.mp3
+    -0.04,  // music2.mp3
+    -0.35,  // music3.mp3
+    -0.2,  // music4.mp3
+    -0.2   // music5.mp3
+];
+
+function stopSleighBells() {
+    sleighBell.pause();
+    sleighBell.currentTime = 0;
+    lastBellBeat = -1;
+    lastBellTrack = '';
+}
+
+function updateSleighBells() {
+    if (
+    !sleighBellsEnabled ||
+    clownRunMusicMuted ||
+    window.clownSurvivealAudioOnly ||
+    duelActive ||
+    partyDuelsMusicActive ||
+    !useEvolvingMusic
+) {
+        stopSleighBells();
+        return;
+    }
+
+    // Follow whichever track is currently the main audio.
+    const music = activeAudio;
+
+    if (!music || music.paused || music.ended) return;
+
+    const track = music.currentSrc || music.src;
+
+    if (track !== lastBellTrack) {
+        lastBellTrack = track;
+        lastBellBeat = -1;
+    }
+
+    // Identify which music track is currently playing.
+const trackIndex = musicTracks.findIndex(path =>
+    new URL(path, document.baseURI).href === music.currentSrc
+);
+
+if (trackIndex === -1) return;
+
+// Apply this track's individual offset.
+const bellFirstBeatOffset = bellFirstBeatOffsets[trackIndex];
+
+const position = music.currentTime - bellFirstBeatOffset;
+if (position < 0) return;
+
+    const beat = Math.floor(position / (60 / bellBPM));
+
+    if (beat === lastBellBeat) return;
+    lastBellBeat = beat;
+
+    // Music 4 and 5: bells on every beat.
+// Music 1, 2 and 3: bells on beats 1 and 3.
+const doubleSpeedBells = trackIndex === 3 || trackIndex === 4;
+
+if (doubleSpeedBells || beat % 4 === 0 || beat % 4 === 2) {
+    sleighBell.pause();
+    sleighBell.currentTime = 0;
+    sleighBell.play().catch(() => {});
+}
+}
+
+// Run the beat checker throughout the game.
+function sleighBellLoop() {
+    updateSleighBells();
+    requestAnimationFrame(sleighBellLoop);
+}
+
+requestAnimationFrame(sleighBellLoop);
+
 // Block normal soundtrack playback during Clown Surviveal.
 window.clownSurvivealAudioOnly = false;
 
@@ -6811,6 +6904,8 @@ HTMLMediaElement.prototype.play = function (...args) {
 
     return originalMediaPlay.apply(this, args);
 };
+
+
 
 
 
@@ -7075,7 +7170,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Akallopisos, Sandarancinos",
+            "Akallopisos, Perideraion, Sandarancinos",
 
         extraNotes:
             "Keoki Stenders prefer Pacificus yay!"
@@ -7416,7 +7511,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Chrysargyrus, Clarkii",
+            "Chrysargyrus, Clarkii, Milii",
 
         extraNotes:
             "What a Nippon Clown this Clown is!"   
@@ -7539,7 +7634,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Clarkii, Sebae",
+            "Clarkii, Japonicus, Sebae",
 
         extraNotes:
             "Clark E. adores the Milii!"  
@@ -7558,12 +7653,12 @@ const clownfishGuide = {
         whitebars: "1 White Bar (Leucokranos)",
 
         identificationTips: [
-            "Leucokranos Clowns have a unique white bar, which is made up of a chinstrap running down to the belly, and near the dorsal fin there is a dash, or what is commonly referred to as the 'crown' or 'bonnet'. Thiellei also has this special white bar.",
+            "Leucokranos Clowns have a unique white bar, which is made up of a white vertical bar, and near the dorsal fin there is a dash, or what is commonly referred to as the 'crown' or 'bonnet'. Thiellei also has this special white bar.",
             
         ],
 
         similarSpecies:
-            "Thiellei",
+            "Akallopisos, Pacificus, Thiellei",
 
         extraNotes:
             "Nobody jokes around like the Circus Crown."  
@@ -8229,9 +8324,28 @@ window.clownRunNormalMusic = {
         audio1.pause(); audio2.pause();
         audio1.volume = 0; audio2.volume = 0;
         transitionStarted = false;
-        if (!musicStarted) return;
-        const resumeAudio = activeAudio;
-        resumeAudio.play().catch(() => {});
+
+if (!musicStarted) {
+    musicStarted = true;
+}
+
+const resumeAudio = activeAudio;
+
+// Restart the evolving soundtrack cleanly.
+resumeAudio.pause();
+resumeAudio.src = useEvolvingMusic
+    ? musicTracks[0]
+    : continuousMusic;
+
+resumeAudio.loop = !useEvolvingMusic;
+resumeAudio.currentTime = 0;
+resumeAudio.volume = 0;
+
+currentTrack = 0;
+
+resumeAudio.play().catch(error => {
+    console.warn('Could not resume normal music:', error);
+});
         const started = performance.now();
         function fade(now) {
             if (clownRunMusicMuted) return;
@@ -8293,10 +8407,14 @@ function startMusic() {
     currentTrack = 0;
 
     activeAudio.src = musicTracks[currentTrack];
-    activeAudio.loop = false;
-    activeAudio.volume = musicVolume;
+activeAudio.loop = false;
+activeAudio.volume = musicVolume;
 
-    activeAudio.play().catch(() => {});
+// Reset the bell beat when music starts.
+lastBellBeat = -1;
+lastBellTrack = '';
+
+activeAudio.play().catch(() => {});
 }
 
 
@@ -8401,7 +8519,10 @@ function startCrossfade() {
 
                 [activeAudio, nextAudio] = [nextAudio, activeAudio];
 
-                transitionStarted = false;
+lastBellBeat = -1;
+lastBellTrack = '';
+
+transitionStarted = false;
             }
         }, stepTime);
     }, nextTrackDelay * 1000); 

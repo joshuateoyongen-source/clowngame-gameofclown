@@ -2,7 +2,7 @@
 // Generated from the project's CSV file list.
 // The first online visit downloads the listed game assets for offline use.
 
-const CACHE_NAME = "clown-game-offline-v5-clownrun";
+const CACHE_NAME = "clown-game-offline-v6";
 const ASSET_MANIFEST_VERSION = "24dfe88658e9";
 const APP_SHELL = [
   "./",
@@ -20,6 +20,8 @@ const ASSETS_TO_CACHE = [
   "manifest.json",
   "script.js",
   "clown-run.js",
+  "clown-beginner.js",
+  "christmas.js",
   "style.css",
   "cheese.png",
   "bot-images/anna.png",
@@ -1358,7 +1360,21 @@ const ASSETS_TO_CACHE = [
   "music/music3.mp3",
   "music/music4.mp3",
   "music/music5.mp3",
-  "music/redund1.mp3"
+  "music/redund1.mp3",
+  "horrormusic/dark.mp3",
+"horrormusic/evendarker.mp3",
+"horrormusic/darkerer.mp3",
+"christmas/sleighbell.mp3",
+"horrormusic/horrorcountdown.mp3",
+"horrormusic/horrorguessednew.mp3",
+"horrormusic/step.mp3",
+"horrormusic/triggerfish.png",
+"horrormusic/triggerjumpscare.mp3",
+"horrormusic/musicbox.mp3",
+"christmas/clown.png",
+"christmas/snowflake.png",
+"christmas/sleighbell.mp3",
+
 ];
 
 self.addEventListener("install", (event) => {

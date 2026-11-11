@@ -878,3 +878,60 @@ body.clown-run-active #background-fish-container { display:none; }
 #cr-trigger-shadow.cr-shadow-visible {
   opacity: 0.65;
 }
+
+/* CHRISTMAS SNOWFALL */
+
+#christmas-snow {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.christmas-flake {
+  position: absolute;
+  top: -70px;
+  left: 0;
+
+  width: var(--flake-size);
+  height: var(--flake-size);
+  object-fit: contain;
+
+  opacity: 0.75;
+
+  animation: christmasFall var(--fall-time) linear forwards;
+  will-change: transform;
+}
+
+@keyframes christmasFall {
+  0% {
+    transform:
+      translate3d(0, -20px, 0)
+      rotate(0deg);
+  }
+
+  25% {
+    transform:
+      translate3d(25px, 25vh, 0)
+      rotate(90deg);
+  }
+
+  50% {
+    transform:
+      translate3d(-20px, 50vh, 0)
+      rotate(180deg);
+  }
+
+  75% {
+    transform:
+      translate3d(30px, 75vh, 0)
+      rotate(270deg);
+  }
+
+  100% {
+    transform:
+      translate3d(0, 115vh, 0)
+      rotate(360deg);
+  }
+}
