@@ -607,12 +607,7 @@ body.clown-run-active #background-fish-container { display:none; }
 #cr-result h2 { color:#9f7c7c; letter-spacing:5px; }
 #cr-result-guess { font-size:16px; color:#a8a6a7; }
 .cr-result-health { max-width:460px; margin:30px auto; }
-#cr-result-health-fill {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #81151c, #d43e41);
-    transition: width 1.3s ease;
-}
+#cr-result-health-fill { width:100%; height:100%; background:linear-gradient(90deg,#81151c,#d43e41); }
 #cr-damage { display:block; font-size:26px; color:#e43848; padding-top:15px; animation:crDamage 1s ease .5s both; }
 @keyframes crFade { from {opacity:0} to {opacity:1} }
 @keyframes crDamage { 0% {opacity:0;transform:translateY(-12px)} 45%{opacity:1;transform:translateY(5px)} 100%{transform:translateY(0)} }
@@ -625,39 +620,24 @@ body.clown-run-active #background-fish-container { display:none; }
 #cr-death-gallery img { width:clamp(100px,18%,170px); height:115px; object-fit:cover; border:1px solid #595e63; }
 #cr-jumpscare { position:fixed; inset:0; z-index:99999; background:#000; display:grid; place-items:center; animation:crJump .16s steps(2) infinite; }
 #cr-jumpscare img {
-    max-width: 98vw;
-    max-height: 98vh;
-    object-fit: contain;
-    animation: crTriggerfishAttack .12s steps(1, end) infinite;
-    transform-origin: center;
+  max-width:92vw; max-height:92vh; object-fit:contain;
+  transform-origin:center;
+  animation:crTriggerFlash .19s steps(1,end) infinite;
+  will-change:transform,opacity,filter;
 }
-
-@keyframes crTriggerfishAttack {
-    0% {
-        transform: translate(-12px, 8px) scale(1.05);
-        opacity: 1;
-    }
-    20% {
-        transform: translate(22px, -15px) scale(1.22) rotate(3deg);
-        opacity: .15;
-    }
-    40% {
-        transform: translate(-25px, 18px) scale(1.12) rotate(-5deg);
-        opacity: 1;
-    }
-    60% {
-        transform: translate(15px, 5px) scale(1.3);
-        opacity: .35;
-    }
-    80% {
-        transform: translate(-8px, -22px) scale(1.18) rotate(4deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(0, 0) scale(1.05);
-        opacity: 1;
-    }
+/* Short, erratic bursts clustered around the screen centre. */
+@keyframes crTriggerFlash {
+  0%   {opacity:1; transform:translate(-6vw,3vh) scale(1.06) rotate(-4deg); filter:brightness(1.4) contrast(1.8);}
+  17%  {opacity:0; transform:translate(2vw,-2vh) scale(.96) rotate(2deg);}
+  34%  {opacity:1; transform:translate(5vw,-4vh) scale(1.14) rotate(4deg); filter:brightness(2) contrast(2);}
+  51%  {opacity:1; transform:translate(-2vw,5vh) scale(1.02) rotate(-3deg); filter:brightness(.8) contrast(2);}
+  68%  {opacity:0; transform:translate(4vw,1vh) scale(1.08);}
+  84%  {opacity:1; transform:translate(-3vw,-3vh) scale(1.18) rotate(2deg); filter:brightness(1.8) contrast(2);}
+  100% {opacity:1; transform:translate(0,0) scale(1.08);}
 }
+/* This class is applied after 850ms; it must override the flashing image. */
+#cr-jumpscare.cr-blackout {background:#000 !important; animation:none !important; filter:none !important;}
+#cr-jumpscare.cr-blackout img {visibility:hidden !important; animation:none !important;}
 @keyframes crJump { 0%{background:#000;filter:contrast(1)} 100%{background:#900;filter:contrast(2)} }
 #clown-run-screen.cr-extra-dark #cr-world { filter:brightness(.42) saturate(.65); }
 #clown-run-screen.cr-extra-dark #cr-inspect-image { filter:brightness(.68); }
@@ -711,186 +691,190 @@ body.clown-run-active #background-fish-container { display:none; }
 #clown-run-screen .cr-controls { justify-content: flex-end; min-height: 36px; }
 #clown-run-screen #cr-guess-panel { margin: 8px auto 0; }
 
-/* Every fifth day is substantially darker than an ordinary day. */
+/* Restore the stronger fifth-day darkness from the previous Surviveal build. */
 #clown-run-screen.cr-extra-dark #cr-world { filter: brightness(.24) saturate(.52); }
 #clown-run-screen.cr-extra-dark #cr-inspect-image { filter: brightness(.48); }
-
 /* Keep the results action reachable even on shorter screens. */
 #clown-run-screen #cr-overlay { overflow-y: auto; justify-content: safe center; }
 #clown-run-screen #cr-result { padding: 12px 10px 26px; box-sizing: border-box; }
 #clown-run-screen #cr-next { display: block; margin: 18px auto 0; min-height: 44px; position: relative; z-index: 1; }
 #clown-run-screen #cr-next[hidden] { display: none !important; }
 
-/* Jumpscare ends in a fully black, silent visual hold before the death screen. */
-#cr-jumpscare.cr-blackout { animation:none !important; background:#000 !important; filter:none !important; }
-#cr-jumpscare.cr-blackout img { visibility:hidden !important; }
+/* Clown Beginner */
+.cb-screen {max-width:1100px; width:min(95vw,1100px); max-height:92vh; overflow-y:auto; box-sizing:border-box;}
+.cb-levels {display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:20px 0;}
+.cb-level {text-align:left;min-height:60px;padding:12px;border-radius:12px;}
+.cb-level:disabled {opacity:.42;cursor:not-allowed;}
+.cb-cards {display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin:18px 0;}
+.cb-card {background:rgba(0,0,0,.18);padding:12px;border-radius:12px;display:flex;flex-direction:column;gap:8px;}
+.cb-card img {width:100%;height:130px;object-fit:cover;border-radius:8px;}
+.cb-card p {font-size:.86rem;margin:0;}
+#cb-photo {display:block;width:min(100%,520px);height:min(48vh,370px);object-fit:contain;margin:16px auto;border-radius:12px;background:#10212c;}
+#cb-answer {display:block;max-width:100%;margin:12px auto;padding:10px;}
+#cb-feedback {min-height:2em;font-weight:bold;}
+#cb-certificate-link {display:inline-block;margin:16px;padding:14px;background:#ffe29a;color:#272014;border-radius:10px;font-weight:bold;}
+
+/* Clown Surviveal: restored cinematic intro, fade curtain and countdown. */
+#clown-run-screen { position:relative; }
+#cr-intro { width:100%; max-width:950px; font:900 clamp(30px,6vw,76px) Georgia,serif; letter-spacing:2px; text-align:center; color:#e8e4df; text-shadow:0 0 24px #a8b7c0; opacity:0; transform:scale(.88); }
+#cr-intro.cr-intro-visible { animation:crIntroAppear 2.7s ease-out forwards; }
+#cr-intro.cr-intro-danger { color:#e22c39; text-shadow:0 0 24px #8d0718; }
+@keyframes crIntroAppear { 0%{opacity:0;transform:scale(.88)} 18%{opacity:1;transform:scale(1)} 78%{opacity:1} 100%{opacity:0;transform:scale(1.04)} }
+#cr-curtain { position:absolute;inset:0;z-index:19;background:#000;opacity:0;pointer-events:none;transition:opacity .85s ease; }
+#cr-curtain.cr-black { opacity:1; }
+#cr-countdown.cr-countdown-impact { animation:crCountdownImpact .9s cubic-bezier(.18,.7,.24,1) both; }
+#cr-countdown.cr-countdown-dive { color:#e21e2b; text-shadow:0 0 28px #b80018; }
+@keyframes crCountdownImpact { 0%{opacity:0;transform:scale(2.8)} 35%{opacity:1;transform:scale(.85)} 60%{transform:scale(1.12)} 80%{transform:scale(1)} 100%{transform:scale(.65)} }
+
+/* Play submenu: make the return action visibly separate and beneath both choices. */
+#play-mode-screen { display:flex; flex-direction:column; align-items:center; }
+#play-mode-screen[hidden] { display:none !important; }
+#play-mode-screen #play-mode-beginner,
+#play-mode-screen #play-mode-free { width:min(85vw,330px); }
+#play-mode-screen #play-mode-back { display:block; margin:20px auto 0; width:min(85vw,240px); }
+
+/* Beginner course: a single horizontally scrolling journey, with the first few lessons visible. */
+#cb-map { width:100%; min-width:0; }
+#cb-levels.cb-levels {
+  display:flex; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;
+  gap:20px; padding:22px 16px 30px; margin:12px 0 20px;
+  scroll-snap-type:x proximity; scrollbar-width:thin;
+  overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch;
+}
+#cb-levels .cb-level {
+  flex:0 0 clamp(165px,22vw,230px); min-height:112px;
+  scroll-snap-align:start; text-align:center; position:relative;
+  font-size:clamp(13px,1.3vw,17px); line-height:1.4;
+}
+#cb-levels .cb-level:not(:last-child)::after {
+  content:'→'; position:absolute; right:-20px; top:38%;
+  font-size:21px; color:#b8d1d9; pointer-events:none;
+}
+
+/* Countdown: restrained, unsettling apparition rather than a bounce. */
+#cr-countdown.cr-countdown-impact {
+  animation:crCountdownGrim 1.05s cubic-bezier(.25,.05,.5,1) both;
+}
+#cr-countdown { letter-spacing:.12em; text-shadow:0 2px 14px #4d0a12, 0 0 42px #25050a; }
+#cr-countdown.cr-countdown-dive { color:#ba2930; text-shadow:0 0 20px #56040a, 0 0 50px #280007; }
+@keyframes crCountdownGrim {
+  0% { opacity:0; filter:blur(13px); transform:scale(1.16); }
+  28% { opacity:.86; filter:blur(2px); transform:scale(1.06); }
+  55% { opacity:1; filter:blur(0); transform:scale(1.02); }
+  100% { opacity:0; filter:blur(5px); transform:scale(.98); }
+}
+
+/* Day results: stagger each line from top to bottom after the results overlay appears. */
+#cr-result { animation:none; }
+#cr-result > h2,
+#cr-result > h1,
+#cr-result > p,
+#cr-result > .cr-result-health,
+#cr-result > button {
+  animation:crResultLine 1.05s ease-out both;
+}
+#cr-result > h2 { animation-delay:.15s; }
+#cr-result > h1 { animation-delay:.85s; }
+#cr-result > p { animation-delay:1.55s; }
+#cr-result > .cr-result-health { animation-delay:2.25s; }
+#cr-result > button { animation-delay:3.05s; }
+@keyframes crResultLine {
+  from {opacity:0; transform:translateY(9px); filter:blur(4px);}
+  to {opacity:1; transform:translateY(0); filter:blur(0);}
+}
+
+/* Triggerfish proximity: progressively darker and visibly redder from 11m to 1m. */
+#cr-reef { position:relative; }
+#cr-danger-tint {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+
+  opacity: var(--cr-danger, 0);
+
+  background: radial-gradient(
+    ellipse at center,
+    rgba(48, 5, 9, .20) 0%,
+    rgba(75, 5, 12, .35) 45%,
+    rgba(15, 0, 3, .80) 100%
+  );
+
+  box-shadow:
+    inset 0 0 140px 35px rgba(45, 0, 7, .55);
+}
+@media (prefers-reduced-motion:reduce) {
+  #cr-countdown.cr-countdown-impact, #cr-result > * { animation-duration:.15s; animation-delay:0s; }
+}
 
 
-
-/* Clown Surviveal cinematic introduction */
-
-#cr-intro {
-    max-width: 90%;
-    text-align: center;
-    font: 600 clamp(25px, 5vw, 54px) Georgia, serif;
-    color: #e6e8e9;
-    letter-spacing: 2px;
+@keyframes crDeathFadeIn {
+  from {
     opacity: 0;
-    transition: opacity 850ms ease;
-}
-
-#cr-intro.cr-intro-visible {
+    filter: blur(7px);
+  }
+  to {
     opacity: 1;
+    filter: blur(0);
+  }
 }
 
-#cr-intro.cr-intro-danger {
-    color: #ec2739;
-    font-weight: 900;
-    text-shadow: 0 0 24px rgba(200, 0, 0, .6);
+#cr-death.cr-death-fade {
+  animation: crDeathFadeIn 2s ease-out both;
 }
 
-#cr-curtain {
-    position: absolute;
-    inset: 0;
-    z-index: 40;
-    background: #000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 850ms ease;
+
+/* Monochrome reef on days 7, 14, 21, etc. */
+#clown-run-screen.cr-monochrome #cr-world {
+  filter: grayscale(1) brightness(.55);
 }
 
-#cr-curtain.cr-black {
-    opacity: 1;
-}
-
-/* Days 7, 14, 21... become monochrome */
-
-#clown-run-screen.cr-monochrome #cr-world,
 #clown-run-screen.cr-monochrome #cr-inspect-image {
-    filter: grayscale(1) brightness(.68);
+  filter: grayscale(1) brightness(.65);
 }
 
-/* Days divisible by both 5 and 7 stay extra dark */
-#clown-run-screen.cr-monochrome.cr-extra-dark #cr-world {
-    filter: grayscale(1) brightness(.24);
-}
-
-#clown-run-screen.cr-monochrome.cr-extra-dark #cr-inspect-image {
-    filter: grayscale(1) brightness(.42);
-}
-
-/* Staggered end-of-day result reveal */
-
-#cr-result > * {
-    animation: crResultTextAppear 1s ease both;
-}
-
-#cr-result > :nth-child(1) { animation-delay: .2s; }
-#cr-result > :nth-child(2) { animation-delay: .6s; }
-#cr-result > :nth-child(3) { animation-delay: 1s; }
-#cr-result > :nth-child(4) { animation-delay: 1.3s; }
-#cr-result > :nth-child(5) { animation-delay: 1.6s; }
-
-@keyframes crResultTextAppear {
-    from {
-        opacity: 0;
-        transform: translateY(16px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-#cr-death:not([hidden]) {
-    animation: crDeathReveal 1.6s ease both;
-}
-
-@keyframes crDeathReveal {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
+/* Green ticks for correct guesses */
 .cr-summary-correct {
-    color: #45e57a;
-    font-size: 24px;
-    font-weight: 900;
+  color: #35e86b !important;
 }
 
+/* Red crosses for incorrect guesses */
 .cr-summary-wrong {
-    color: #ff4858;
-    font-size: 24px;
-    font-weight: 900;
+  color: #ff3434 !important;
 }
 
-.cr-summary-damage {
-    color: #e5e5e5;
-    font-size: 13px;
-    font-weight: 600;
-    margin-left: 8px;
+@keyframes crFirstDayFadeIn {
+  from {
+    opacity: 0;
+    filter: brightness(0);
+  }
+
+  to {
+    opacity: 1;
+    filter: brightness(1);
+  }
 }
 
-
-
-
-/* CLOWN SURVIVEAL — HEAVY COUNTDOWN */
-
-@keyframes crCountdownImpact {
-    0% {
-        opacity: 0;
-        transform: scale(2.8);
-        filter: blur(12px);
-    }
-
-    12% {
-        opacity: 1;
-        transform: scale(0.85);
-        filter: blur(0);
-    }
-
-    20% {
-        transform: scale(1.12);
-    }
-
-    28% {
-        transform: scale(1);
-    }
-
-    65% {
-        opacity: 1;
-        transform: scale(1.03);
-    }
-
-    100% {
-        opacity: 0;
-        transform: scale(0.65);
-        filter: blur(5px);
-    }
-}
-
-.cr-countdown-impact {
-    animation: crCountdownImpact 0.9s cubic-bezier(.12,.8,.2,1) both !important;
-    font-weight: 1000 !important;
-    letter-spacing: 0.08em;
-    text-shadow:
-        0 0 15px #000,
-        0 0 35px rgba(0,0,0,.95),
-        4px 6px 0 rgba(0,0,0,.8);
-}
-
-.cr-countdown-dive {
-    color: #ff152b !important;
-    text-shadow:
-        0 0 15px #ff0000,
-        0 0 45px rgba(255,0,0,.8),
-        4px 6px 0 #350000 !important;
+#cr-world.cr-first-day-fade {
+  animation: crFirstDayFadeIn 2s ease-in-out both;
 }
 
 
+/* Triggerfish silhouette hidden in the reef */
+#cr-trigger-shadow {
+  position: absolute;
+  width: 170px;
+  height: auto;
+  z-index: 6;
+  pointer-events: none;
 
+  opacity: 0;
+  filter: brightness(0) blur(2px);
+
+  transform: translate(-50%, -50%);
+  transition: opacity 0.18s ease;
+}
+
+#cr-trigger-shadow.cr-shadow-visible {
+  opacity: 0.65;
+}

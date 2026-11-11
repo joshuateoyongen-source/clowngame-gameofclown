@@ -17,6 +17,7 @@ result: $('cr-result'),
     next: $('cr-next'), guessButton: $('cr-guess-button'), submit: $('cr-submit'),
     inspectBack: $('cr-inspect-back'), exit: $('cr-exit'), deathExit: $('cr-death-exit'), restart: $('cr-restart')
   };
+
   if (!ui.screen || !ui.button || typeof fish === 'undefined' || typeof clownfishGuide === 'undefined') return;
   const MAX_HP = 6000;
   const REEF_PANORAMAS = [
@@ -33,6 +34,18 @@ introMusic.loop = true;
 introMusic.preload = 'auto';
 introMusic.volume = 0;
 
+// Triggerfish silhouette in the reef
+const triggerShadow = document.createElement('img');
+
+triggerShadow.id = 'cr-trigger-shadow';
+triggerShadow.src = 'horrormusic/triggerfish.png';
+
+ui.world.appendChild(triggerShadow);
+
+let lastShadowTime = 0;
+let shadowHideTimer = null;
+
+
 let introMusicFadeId = null;
   const sfx = {
     step: new Audio(SFX_DIR + 'step.mp3'),
@@ -41,22 +54,34 @@ let introMusicFadeId = null;
     loss: new Audio('duelsmusic/losehealth.mp3'),
     jump: new Audio(SFX_DIR + 'triggerjumpscare.mp3'),
     awful: new Audio(SFX_DIR + 'triggerjumpscare.mp3'),
-    horrorguessed: new Audio('horrormusic/horrorguessed.mp3')
+    horrorguessed: new Audio('horrormusic/horrorguessednew.mp3')
   };
   // Prepare the accepted-guess sound
 sfx.horrorguessed.preload = 'auto';
 sfx.horrorguessed.volume = 0.3;
+sfx.loss.volume = 0.4;
 sfx.horrorguessed.load();
+sfx.horrorguessed.addEventListener('canplaythrough', () => {
+  console.log('Horror guessed sound ready!');
+}, { once: true });
 
 function playHorrorGuessed() {
-    const sound = sfx.horrorguessed;
-    sound.pause();
-    sound.currentTime = 0;
-    // Play directly in the submit button's user gesture.
-    const attempt = sound.play();
-    if (attempt && typeof attempt.catch === 'function') {
-        attempt.catch(error => console.warn('Accepted-guess audio failed:', error));
-    }
+  const sound = sfx.horrorguessed;
+
+  sound.pause();
+  sound.currentTime = 0;
+  sound.volume = 0.3;
+
+  if (sound.readyState >= 3) {
+    sound.play().catch(console.warn);
+  } else {
+    sound.addEventListener('canplay', () => {
+      sound.currentTime = 0;
+      sound.play().catch(console.warn);
+    }, { once: true });
+
+    sound.load();
+  }
 }
 
 
@@ -145,6 +170,7 @@ function fadeMusicbox(targetVolume, duration = 1500) {
     try { if (restart) audio.currentTime=0; const p=audio.play(); if(p && p.catch) p.catch(()=>{}); } catch (_) {}
   };
   function stopAudio() {
+    ui.screen.style.setProperty('--cr-danger', '0');
     ui.music.pause(); ui.music.currentTime=0;
     stopEndOfDayMusic();
     Object.values(sfx).forEach(a => { a.pause(); a.currentTime=0; });
@@ -301,7 +327,8 @@ async function fadeFromBlack() {
 }
 function configureMusic() {
     ui.music.pause();
-    ui.music.src = SFX_DIR + (state.dark ? 'evendarker.mp3' : 'dark.mp3');
+    // Seventh-day soundtrack takes precedence on days divisible by both 5 and 7.
+    ui.music.src = SFX_DIR + (state.day % 7 === 0 ? 'darkerer.mp3' : state.dark ? 'evendarker.mp3' : 'dark.mp3');
     ui.music.loop = true;
     ui.music.volume = 0;
     ui.music.currentTime = 0;
@@ -341,6 +368,36 @@ function configureMusic() {
     ui.inspectImage.style.backgroundPosition=`${clue.cropX}% ${clue.cropY}%`;
     ui.flashlight.style.setProperty('--fx','50%'); ui.flashlight.style.setProperty('--fy','50%');
   }
+
+  function updateTriggerShadow(now) {
+  if (state.distance >= 7) {
+    triggerShadow.classList.remove('cr-shadow-visible');
+    return;
+  }
+
+  // Check every 1.5 seconds
+  if (now - lastShadowTime < 1500) return;
+
+  lastShadowTime = now;
+
+  // 35% chance of appearing
+  if (Math.random() > 0.65) return;
+
+  // Random position inside the panorama
+  triggerShadow.style.left = `${20 + Math.random() * 60}%`;
+  triggerShadow.style.top = `${25 + Math.random() * 45}%`;
+
+  // Random size
+  triggerShadow.style.width = `${110 + Math.random() * 100}px`;
+
+  triggerShadow.classList.add('cr-shadow-visible');
+
+  clearTimeout(shadowHideTimer);
+
+  shadowHideTimer = setTimeout(() => {
+    triggerShadow.classList.remove('cr-shadow-visible');
+  }, 7300);
+}
   function tick(now) {
     if (!state.active) return;
     if (!state.lastTick) state.lastTick=now;
@@ -349,13 +406,18 @@ function configureMusic() {
     state.lastTick=now;
     const progress=Math.min(1,state.elapsed/state.catchTime);
     state.distance=Math.max(0,30*(1-Math.pow(progress,1.7)));
-    ui.distance.textContent=`${Math.ceil(state.distance)} m `;
+    ui.distance.textContent=`${Math.ceil(state.distance)} m away`;
+    updateTriggerShadow(now);
+    // A slow, ominous dark-red vignette builds from 11m to 1m.
+    const danger = Math.max(0, Math.min(1, (11 - state.distance) / 10));
+    ui.screen.style.setProperty('--cr-danger', danger.toFixed(3));
     while (state.stepIndex<STEP_THRESHOLDS.length && state.distance<=STEP_THRESHOLDS[state.stepIndex]) {
       play(sfx.step); state.stepIndex++;
     }
 const desiredVolume = Math.min(
     1,
-    .30 + .70 * Math.pow(progress, 1.45)
+    (state.day % 7 !== 0 && !state.dark ? .38 : .30) +
+    (state.day % 7 !== 0 && !state.dark ? .62 : .70) * Math.pow(progress, 1.45)
 );
 
 const fadeIn = Math.min(1, state.elapsed / 1.5);
@@ -365,6 +427,8 @@ ui.music.volume = desiredVolume * fadeIn;
     state.raf=requestAnimationFrame(tick);
   }
   async function startDay() {
+    document.getElementById('cr-world')
+  .classList.remove('cr-first-day-fade');
     ui.curtain.classList.remove('cr-black');
     if (!state.running || !available.length) return;
     fadeEndOfDayMusic(0, 900);
@@ -372,6 +436,7 @@ ui.music.volume = desiredVolume * fadeIn;
     // Hide the reef before the countdown
 ui.world.classList.remove('cr-reef-visible');
     state.dark=state.day%5===0;
+    ui.screen.style.setProperty('--cr-danger', '0');
     ui.screen.classList.toggle(
     'cr-monochrome',
     state.day % 7 === 0
@@ -382,7 +447,7 @@ ui.world.style.backgroundImage =
     state.catchTime=Math.max(15,40-(state.day-1)*3);
     state.elapsed=0; state.lastTick=0; state.distance=30; state.stepIndex=0;
     state.viewX=.5; state.viewY=.5; state.guessLockUntil=0; state.speedBoostUntil=0;
-    ui.day.textContent=`DAY ${state.day}`; ui.distance.textContent='30 m';
+    ui.day.textContent=`DAY ${state.day}`; ui.distance.textContent='30 m away';
     ui.screen.classList.toggle('cr-extra-dark',state.dark);
     ui.notice.hidden=false;
     ui.inspect.hidden=true; ui.guessPanel.hidden=false; ui.feedback.hidden=true;
@@ -392,6 +457,13 @@ ui.world.style.backgroundImage =
     ui.guess.value=available[0].name;
     configureMusic();
 if (!await countdown()) return;
+if (state.day === 1) {
+  const world = document.getElementById('cr-world');
+
+  world.classList.remove('cr-first-day-fade');
+  void world.offsetWidth;
+  world.classList.add('cr-first-day-fade');
+}
 if (!state.running) return;
 
 // Fade the reef into view after DIVE!
@@ -436,6 +508,7 @@ const wasCorrect = guess === state.species;
     ui.music.pause();
     ui.music.currentTime = 0;
     ui.music.volume = 0;
+    ui.screen.style.setProperty('--cr-danger', '0');
     stopEndOfDayMusic();
     // Begin playback, then fade only once the browser has started the track.
     // Do not block the results-screen transition on audio loading.
@@ -471,11 +544,12 @@ if (!state.running) return;
     setTimeout(()=>{
       if (!state.running) return;
       if (damage > 0) {
+    
     play(sfx.loss);
 }
       requestAnimationFrame(()=>{setHp(state.hp);resultFill.style.width=`${state.hp/MAX_HP*100}%`;});
       if (state.hp<=0) setTimeout(()=>{if(state.running)endRun('health');},1800);
-    },550);
+    },1300);
   }
   function feedback(message) {
     ui.feedback.textContent=message; ui.feedback.hidden=false;
@@ -546,9 +620,19 @@ function fadeEndOfDayMusic(targetVolume, duration = 1200) {
     const gallery=$('cr-death-gallery'); gallery.replaceChildren();
     if (!record) return;
     $('cr-death-species').textContent=`It was ${record.answer}.`;
-    record.clues.forEach(clue=>{
-      const img=document.createElement('img'); img.src=clue.img; img.alt=`Clue for ${record.answer}`; img.loading='lazy'; gallery.appendChild(img);
-    });
+    const seenImages = new Set();
+
+record.clues.forEach(clue => {
+  if (seenImages.has(clue.img)) return;
+
+  seenImages.add(clue.img);
+
+  const img = document.createElement('img');
+  img.src = clue.img;
+  img.alt = `Clue for ${record.answer}`;
+  img.loading = 'lazy';
+  gallery.appendChild(img);
+});
   }
   let deathTransitionTimer = null;
   let deathRevealTimer = null;
@@ -559,6 +643,8 @@ function fadeEndOfDayMusic(targetVolume, duration = 1200) {
     ui.jumpscare.classList.remove('cr-blackout');
   }
   function endRun(reason) {
+    triggerShadow.classList.remove('cr-shadow-visible');
+clearTimeout(shadowHideTimer);
     if (!state.running) return;
     state.active=false; cancelAnimationFrame(state.raf);
     cancelDeathTransition();
@@ -626,9 +712,13 @@ history.appendChild(li);
       deathTransitionTimer = setTimeout(() => {
         ui.jumpscare.classList.add('cr-blackout');
         deathRevealTimer = setTimeout(() => {
-          ui.jumpscare.hidden = true;
-          ui.jumpscare.classList.remove('cr-blackout');
-          setOverlay('death');
+  setOverlay('death');
+  ui.death.classList.remove('cr-death-fade');
+  void ui.death.offsetWidth;
+  ui.death.classList.add('cr-death-fade');
+
+  ui.jumpscare.hidden = true;
+  ui.jumpscare.classList.remove('cr-blackout');
           musicbox.currentTime = 0;
 musicbox.volume = 0;
 fadeMusicbox(0.28, 2000);

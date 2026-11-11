@@ -6923,7 +6923,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Biaculeatus, Percula", 
+            "Percula", 
 
         extraNotes:
             "Ocellaris Clowns are shy and will always be found very close to or within their Anemones."
@@ -6946,7 +6946,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Biaculeatus, Ocellaris",
+            "Ocellaris",
 
         extraNotes:
             "Perculas are less ragebaitable than Ocellarises are hehehe"
@@ -7049,7 +7049,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Pacificus, Perideraion, Sandarancinos",
+            "Pacificus, Sandarancinos",
 
         extraNotes:
             "Keoki Stenders prefer Pacificus hehehe."
@@ -7075,7 +7075,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Akallopisos, Perideraion, Sandarancinos",
+            "Akallopisos, Sandarancinos",
 
         extraNotes:
             "Keoki Stenders prefer Pacificus yay!"
@@ -7148,7 +7148,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Bicinctus, Clarkii",
+            "Bicinctus",
 
         extraNotes:
             "Chagos Clown Chill in Chanemone"
@@ -7269,7 +7269,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Chagosensis, Clarkii",
+            "Chagosensis",
 
         extraNotes:
             "Professional Clown Gamers abbreviate this species as 'Bih'."
@@ -7298,7 +7298,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Allardi, Bicinctus, Chagosensis, Chrysopterus, Latifaciatus, Maohiensis,Tricinctus",
+            "Allardi, Chrysopterus, Latifaciatus, Maohiensis,Tricinctus",
 
         extraNotes:
             "Clarkii Malu"
@@ -7321,7 +7321,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Melanopus",
+            "None",
 
         extraNotes:
             "Ephipp, ephipp, loves to pee with fake."
@@ -7392,7 +7392,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Barberi, Melanopus, Rubrocinctus",
+            "Melanopus, Rubrocinctus",
 
         extraNotes:
             "If you are falling behind in Clown Game, just Ketchup!"
@@ -7517,7 +7517,7 @@ const clownfishGuide = {
         ],
 
         similarSpecies:
-            "Ephippium, Frenatus, Rubrocinctus",
+            "Frenatus, Rubrocinctus",
 
         extraNotes:
             "2nd in line to the Keoki Stender's private Clown Yacht Club."   
