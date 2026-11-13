@@ -25,7 +25,8 @@ result: $('cr-result'),
     'reefpano1.jpg',
     'reefpano2.jpg',
     'reefpano3.jpg',
-    'reefpano4.jpg'
+    'reefpano4.jpg',
+    'reefpano5.jpg'
 ];
   const SFX_DIR = 'horrormusic/';
   // Introductory cinematic soundtrack
@@ -57,6 +58,29 @@ let introMusicFadeId = null;
     awful: new Audio(SFX_DIR + 'triggerjumpscare.mp3'),
     horrorguessed: new Audio('horrormusic/horrorguessednew.mp3')
   };
+
+
+// Amplify the triggerfish's actual catch jumpscare.
+const jumpAudioContext = new (
+    window.AudioContext || window.webkitAudioContext
+)();
+
+const jumpSource = jumpAudioContext.createMediaElementSource(sfx.jump);
+
+const jumpGain = jumpAudioContext.createGain();
+
+// 40% louder than the original audio signal.
+jumpGain.gain.value = 1.4;
+
+jumpSource.connect(jumpGain);
+jumpGain.connect(jumpAudioContext.destination);
+
+sfx.step1.preload = 'auto';
+sfx.step2.preload = 'auto';
+
+sfx.step1.load();
+sfx.step2.load();
+
   // Prepare the accepted-guess sound
 sfx.horrorguessed.preload = 'auto';
 sfx.horrorguessed.volume = 0.3;
@@ -169,21 +193,22 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
   const state = {
     running:false, active:false, day:1, hp:MAX_HP, elapsed:0, lastTick:0,
     catchTime:40, distance:30, stepIndex:0, species:'', clues:[], inspected:new Set(),
-    guessLockUntil:0, speedBoostUntil:0, history:[], viewX:.5, viewY:.5, raf:0, timer:0, dark:false, coins:1, inventory:[], owned:new Set(), nextMerchantDay:2, pendingDistance:0, distanceBonus:0, mungNextDay:false, inventoryPaused:false, shopOpen:false, shopItems:[], hints:new Map(), extraSlots:0, extraSlotsBought:0, pepperUses:0, kazooUsed:false, csGlovesDistance:15, fishBaitActive:false, maxHpPenalty:0, decoyCheckedDay:false, decoyDistractedUntil:0, decoySlowForDay:false, vestUsedToday:false, spearClicks:0, spearLastClick:0, lanternX:50, lanternY:50
+    guessLockUntil:0, speedBoostUntil:0, history:[], viewX:.5, viewY:.5, raf:0, timer:0, dark:false, coins:1, inventory:[], owned:new Set(), nextMerchantDay:2, pendingDistance:0, distanceBonus:0, mungNextDay:false, inventoryPaused:false, shopOpen:false, shopItems:[], hints:new Map(), extraSlots:0, extraSlotsBought:0, pepperUses:0, kazooUsed:false, csGlovesDistance:15, fishBaitActive:false, maxHpPenalty:0, decoyCheckedDay:false, decoyDistractedUntil:0, decoySlowForDay:false, vestUsedToday:false, spearClicks:0, spearLastClick:0, lanternX:50, lanternY:50, anemoneReturnsRemaining:1, anemoneExtraDuration:0,
+anemoneHealAmount:50, anemoneSafeUntil:0, anemonePausedDistance:0
   };
   // Merchant items. Images are optional: put item artwork in horrormusic/items/<id>.png.
   const ITEMS = [
     {id:'gloves',name:'Gloves',cost:3,desc:'While in your inventory, start every day with the triggerfish 10 m farther away.'},
     {id:'basket',name:'Basket of Gloves',cost:7,desc:'While in your inventory, start every day with the triggerfish 25 m farther away.'},
-    {id:'helmet',name:'Diving Helmet',cost:6,desc:'Faint yellow glows reveal hidden clown images.'},
+    {id:'helmet',name:'Diving Helmet',cost:6,desc:'Create a glow around all clues in the reef.'},
     {id:'treasure',name:'Buried Treasure Map',cost:3,desc:'30% chance to earn a coin when inspecting a new clue.'},
     {id:'cookie',name:'Astral Cookie',cost:2,desc:'Immediately gain 0–5 Clown Coins.',immediate:true},
-    {id:'anemone',name:'Anemone Protection',cost:5,desc:'Once, bounce a catching triggerfish back to 20 m.'},
+    {id:'anemone',name:'Anemone Protection',cost:5,desc:'If the triggerfish catches you, sting it back to 20m away. Once per day.'},
     {id:'goggles',name:'Diving Goggles',cost:5,desc:'Brighter reefs; no monochrome effect on seventh days.'},
-    {id:'book',name:'Clown Book - Book of Clown',cost:4,desc:'Mark the correct species and nine decoys in the dropdown.'},
+    {id:'book',name:'Clown Book - Book of Clown',cost:4,desc:'Mark 10 species, one of which is the correct one.'},
     {id:'bandaid',name:'Bandaid',cost:2,desc:'Immediately heal 300 HP.',immediate:true},
     {id:'plaster',name:'Plaster',cost:1,desc:'Immediately heal 150 HP.',immediate:true},
-    {id:'vitamins',name:'Vitamins',cost:3,desc:'Heal 50 HP at the start of each day.'},
+    {id:'vitamins',name:'Vitamins',cost:5,desc:'Heal 50 HP at the start of each day.'},
     {id:'clyde',name:'Hidden Clyde',cost:3,desc:'Mark seven incorrect species with a red cross.'},
     {id:'saddle',name:'Clown Saddle',cost:2,desc:'Highlight Ephippium, Polymnus or Sebae when correct.'},
     {id:'pill',name:'Clown Pill',cost:15,desc:'Immediately restore full health.',immediate:true},
@@ -191,13 +216,13 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
     {id:'batteries',name:'Batteries',cost:3,desc:'Double the flashlight viewing diameter.'},
     {id:'degree',name:'Cape Town University Degree',cost:3,desc:'Highlight the correct African clown species.'},
     {id:'beanie',name:'Black Beanie',cost:2,desc:'While in your inventory, start every day with +4m distance; highlight Barberi if correct.'},
-    {id:'family',name:'Family Tree',cost:12,desc:'Show the correct or a similar species in a bottom-left hint (20% chance of a random species).'},
+    {id:'family',name:'Family Tree',cost:12,desc:'Show the correct or a similar species in the bottom-left corner.'},
     {id:'beans',name:'Mung Beans',cost:1,desc:'For the next day only, start with 20 m extra distance.',immediate:true},
-    {id:'bait',name:'Fish Bait',cost:3,desc:'Double the hidden clown images; the triggerfish moves 10% faster.'},
-    {id:'pepper',name:'Pepper Spray',cost:12,desc:'When caught, finish the day safely and lose 800 HP. Each subsequent use doubles the damage.'},
+    {id:'bait',name:'Fish Bait',cost:3,desc:'Increase the number of clues in the reef; the triggerfish moves 10% faster.'},
+    {id:'pepper',name:'Pepper Spray',cost:12,desc:'When caught, instead finish the day safely and lose 800 HP. Each subsequent use doubles this damage.'},
     {id:'coupon',name:'Coupon',cost:2,desc:'All merchant items cost one fewer coin while this is held.'},
-    {id:'food',name:'Fishy Food',cost:3,desc:'Immediately heal 800 HP or lose 400 HP (50/50).',immediate:true},
-    {id:'slot',name:'Extra Slot',cost:15,desc:'Permanently increase inventory capacity by one (maximum two purchases).',immediate:true},
+    {id:'food',name:'Fishy Food',cost:3,desc:'Immediately heal 800 HP or lose 400 HP.',immediate:true},
+    {id:'slot',name:'Extra Slot',cost:15,desc:'Permanently increase inventory capacity by one.',immediate:true},
     {id:'beets',name:"Bear's Beets",cost:3,desc:'Permanently increase maximum HP by 600.',immediate:true},
     {id:'armour',name:'Jockey Armour',cost:6,desc:'Reduce all damage taken by 20%.'},
     {id:'converter',name:'Clown Converter',cost:5,desc:'Negate the next damage and heal by that amount; then consume this item.'},
@@ -205,7 +230,7 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
     {id:'cursed',name:'Cursed Gloves',cost:9,desc:'Start 30 m farther away, but lose 2,000 maximum HP while held.'},
     {id:'strawberry',name:'Strawberry',cost:14,desc:'Immediately heal 50% of maximum HP.',immediate:true},
     {id:'vest',name:'Triggerproof Vest',cost:5,desc:'Once per day when caught, push the triggerfish back to 35 m. Reduce HP to 100, or to 50 if already below 100; no damage below 50 HP.'},
-    {id:'kazoo',name:'Kazoo',cost:5,desc:'On an Awful Guess, push the triggerfish back 20 m once per day.'},
+    {id:'kazoo',name:'Kazoo',cost:5,desc:'On an Awful Guess, push the triggerfish back 20 m. Once per day.'},
     {id:'razor',name:'Razor',cost:1,desc:'Gain 3 coins if you guess with the triggerfish within 3m.'},
     {id:'shield',name:'Face Shield',cost:2,desc:'Remove Awful Guess jumpscare and guessing lockout.'},
     {id:'farmrelax',name:'Fish Farm Relax',cost:2,desc:'Earn 1 extra {{coin}} each day.'},
@@ -215,17 +240,78 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
     {id:'algae',name:'Algae a la mode',cost:2,desc:'Heal 200 HP.',immediate:true},
     {id:'pellets',name:'Fish Pellets',cost:2,desc:'Heal 200 HP.',immediate:true},
     {id:'reefheal',name:'Reef Heal',cost:6,desc:'Remove the seventh-day monochrome effect while equipped.'},
-    {id:'lantern',name:'Lantern',cost:4,desc:'On every fifth day, your cursor illuminates a region of the reef without affecting inspected images.'},
+    {id:'lantern',name:'Lantern',cost:3,desc:'On every fifth day, your cursor illuminates a region of the reef.'},
     {id:'seasalt',name:'Seasalt',cost:2,desc:'Immediately heal 150 HP.',immediate:true},
-    {id:'pricetag',name:'Price Tag',cost:2,desc:'Discarding an item refunds its original price minus one coin. Discard this for one coin.'},
-    {id:'spear',name:'Sailfish Spear',cost:3,desc:'Click on the triggerfish silhouette to jab at it and push it back slightly.'},
-    {id:'ring',name:"Hypnotist's Ring",cost:7,desc:'Prevent acceleration during the day, including Awful Guess acceleration. Starting speed and equipment speed effects still apply.'},
+    {id:'pricetag',name:'Price Tag',cost:2,desc:'Discarding an item refunds its original price minus one coin.'},
+    {id:'spear',name:'Sailfish Spear',cost:3,desc:'While the triggerfish silhouette is visible, click on it to spear it and knock it back.'},
+    {id:'ring',name:"Hypnotist's Ring",cost:7,desc:'Prevent triggerfish from acceleration during the day, including if after an Awful Guess.'},
     {id:'barrel',name:"Davy Jone's barrel of barrels",cost:4,desc:'Gain a random item and add it to your inventory.',immediate:true},
-    {id:'detector',name:'Metal Detector',cost:1,desc:'50% chance to earn one clown coin at the end of each day.'},
+    {id:'detector',name:'Metal Detector',cost:1,desc:'50% chance to earn one coin at the end of each day.'},
     {id:'mints',name:'Fresh Mints',cost:1,desc:'50% chance to heal 65 HP at the end of each day.'},
-    {id:'ketchup',name:'Ketchup',cost:3,desc:'Highlight the correct tomato Clown.'},
+    {id:'ketchup',name:'Ketchup',cost:3,desc:'Highlight the correct species when it is Barberi, Frenatus, Melanopus, Ephippium or Rubrocinctus.'},
     {id:'hat',name:'Clown Hat',cost:4,desc:'Clown Hats attract Clowns and make them easier to see.'},
-    {id:'orb',name:"Clark E.'s Orb of Remembrance",cost:2,desc:'Chrysopterus and Maohiensis...'}
+    {id:'orb',name:"Clark E.'s Orb of Remembrance",cost:2,desc:'Highlight Chrysopterus or Maohiensis when correct; wrong guesses for these species deal double damage.'},
+    // NEW ITEMS
+
+{
+    id:'clarkiiheat',
+    name:'Clarkii Heat',
+    cost:2,
+    desc:'Clarkii and its four variants become much rarer while held.'
+},
+
+{
+    id:'voil',
+    name:'V Oil',
+    cost:4,
+    desc:'At the start of each day, 92% chance to heal 55 HP and 8% chance to restore Return to Anemone.'
+},
+
+{
+    id:'anemonebud',
+    name:'Anemone Bud',
+    cost:5,
+    desc:'Immediately restore Return to Anemone.',
+    immediate:true
+},
+
+{
+    id:'anemoneplankton',
+    name:'Anemone Plankton',
+    cost:3,
+    desc:'Immediately gain a 50% chance to restore Return to Anemone.',
+    immediate:true
+},
+
+{
+    id:'anemoneenjoyer',
+    name:'Anemone Enjoyer',
+    cost:4,
+    desc:'Permanently increase Return to Anemone duration by 3 seconds.',
+    immediate:true
+},
+
+{
+    id:'anemonesupport',
+    name:'Anemone Support',
+    cost:3,
+    desc:'Permanently increase Return to Anemone healing to 1000 HP.',
+    immediate:true
+},
+
+{
+    id:'phonefren',
+    name:'Phone a Fren',
+    cost:6,
+    desc:'Each day, 13% chance to restore Return to Anemone.'
+},
+
+{
+    id:'mccullockdown',
+    name:'Mccul-lockdown',
+    cost:4,
+    desc:'Disable Return to Anemone while held. Mccullochi and Latezonatus become more common.'
+},
   ];
   const hasItem = id => state.inventory.includes(id);
   const inventoryCapacity=()=>5+state.extraSlots;
@@ -249,42 +335,272 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
     familyHint.hidden = true;
   }
   ui.screen.append(coinHud,invButton,merchant,inventoryModal,familyHint);
+  // Once-per-run emergency refuge; future restoration items can increment anemoneReturnsRemaining.
+  const returnButton=document.createElement('button');
+  returnButton.type='button';returnButton.className='cr-return-anemone';
+  returnButton.textContent='Return to Anemone';returnButton.hidden=true;
+  ui.screen.append(returnButton);
+  const anemoneArtwork=document.createElement('img');
+  anemoneArtwork.className='cr-anemone-art';anemoneArtwork.src='horrormusic/anemone.png';
+  anemoneArtwork.alt='';anemoneArtwork.draggable=false;anemoneArtwork.hidden=true;
+  ui.reef.append(anemoneArtwork);
+  const anemoneMessage=document.createElement('div');
+  anemoneMessage.className='cr-anemone-message';anemoneMessage.hidden=true;
+  anemoneMessage.innerHTML='<strong>Back in the Anemone</strong><span>everything will be okay</span><small>+50HP</small>';
+  ui.screen.append(anemoneMessage);
+  const niceMusic=new Audio('horrormusic/nicemusic.mp3');niceMusic.loop=true;niceMusic.volume=.65;
+  let anemoneTimer = null;
+let anemoneFadeTimer = null;
+  function anemoneActive(){return state.anemoneSafeUntil>0;}
+  const anemoneRestoreSound = new Audio('christmas/sleighbell.mp3');
+anemoneRestoreSound.volume = 0.8;
+
+function restoreAnemone() {
+
+    // Already available: do absolutely nothing.
+    if (state.anemoneReturnsRemaining > 0) {
+        return false;
+    }
+
+    // Restore exactly one use.
+    state.anemoneReturnsRemaining = 1;
+
+    updateReturnButton();
+
+    // Play restoration sound.
+    anemoneRestoreSound.pause();
+    anemoneRestoreSound.currentTime = 0;
+
+    anemoneRestoreSound.play().catch(() => {});
+
+    // Create floating image.
+    const image = document.createElement('img');
+
+    image.src = 'horrormusic/items/anemone.png';
+    image.className = 'cr-anemone-restore-animation';
+
+    ui.screen.append(image);
+
+    // Position it below the inventory button.
+    const buttonRect = invButton.getBoundingClientRect();
+    const screenRect = ui.screen.getBoundingClientRect();
+
+    image.style.left =
+        (buttonRect.left - screenRect.left + buttonRect.width / 2) + 'px';
+
+    image.style.top =
+        (buttonRect.bottom - screenRect.top + 95) + 'px';
+
+    // Remove it after the animation.
+    image.addEventListener('animationend', () => {
+        image.remove();
+    }, {once:true});
+
+    setTimeout(() => image.remove(), 1600);
+
+    return true;
+}
+  function updateReturnButton() {
+
+    returnButton.hidden = !(
+        state.running &&
+        state.active &&
+        !state.shopOpen &&
+        state.anemoneReturnsRemaining > 0 &&
+        !hasItem('mccullockdown') &&
+        !anemoneActive() &&
+        ui.overlay.hidden &&
+        !ui.curtain.classList.contains('cr-black')
+    );
+}
+  function stopAnemoneRefuge(resume=false){
+    if(!anemoneActive())return;
+    clearTimeout(anemoneTimer);anemoneTimer=null;
+    state.anemoneSafeUntil=0;
+    niceMusic.pause();niceMusic.currentTime=0;
+    ui.screen.classList.remove('cr-anemone-refuge');
+    anemoneMessage.hidden = true;
+
+clearTimeout(anemoneFadeTimer);
+anemoneFadeTimer = null;
+
+if (resume && state.running && state.active) {
+    // Fade out the anemone over 1.2 seconds.
+    anemoneArtwork.classList.add('cr-anemone-leaving');
+
+    anemoneFadeTimer = setTimeout(() => {
+        anemoneArtwork.hidden = true;
+        anemoneArtwork.classList.remove('cr-anemone-leaving');
+        anemoneFadeTimer = null;
+    }, 1200);
+} else {
+    // Hide immediately if the game is ending.
+    anemoneArtwork.hidden = true;
+    anemoneArtwork.classList.remove('cr-anemone-leaving');
+}
+    // Resume at the original starting speed; in-day speed boosts are cleared.
+    state.speedBoostUntil=0;state.lastTick=performance.now();
+    if (resume && state.running && state.active) {
+
+    // Push the triggerfish back by 4 metres.
+    state.distanceBonus += 4;
+    state.distance = state.anemonePausedDistance + 4;
+
+    ui.distance.textContent =
+        `${Math.ceil(state.distance)} m away`;
+
+    // Resume normal horror music.
+    ui.music.volume = 0;
+    play(ui.music, false);
+
+    // 70% chance of a jumpscare sound if the
+    // triggerfish is 12 metres away or closer.
+    if (state.distance <= 12 && Math.random() < 0.7) {
+
+        sfx.jump.pause();
+        sfx.jump.currentTime = 0;
+
+        sfx.jump.play().catch(error => {
+            console.warn('Jumpscare sound failed:', error);
+        });
+    }
+}
+    updateReturnButton();updateLantern();
+  }
+  returnButton.addEventListener('click',()=>{
+    if (
+    returnButton.hidden ||
+    !state.running ||
+    !state.active ||
+    anemoneActive() ||
+    state.anemoneReturnsRemaining < 1 ||
+    hasItem('mccullockdown')
+) return;
+    state.anemoneReturnsRemaining--;
+    state.anemonePausedDistance=state.distance;
+    const refugeDuration = 9000 + state.anemoneExtraDuration;
+
+state.anemoneSafeUntil =
+    performance.now() + refugeDuration;
+    state.speedBoostUntil=0;
+    ui.music.pause();
+    for(const sound of [sfx.step1,sfx.step2,sfx.awful,sfx.jump]){sound.pause();sound.currentTime=0;}
+    triggerShadow.classList.remove('cr-shadow-visible');
+    ui.screen.style.setProperty('--cr-danger','0');
+    ui.world.style.translate='0 0';
+    ui.screen.classList.add('cr-anemone-refuge');
+    clearTimeout(anemoneFadeTimer);
+anemoneFadeTimer = null;
+anemoneArtwork.classList.remove('cr-anemone-leaving');
+anemoneMessage.querySelector('small').textContent =
+    `+${state.anemoneHealAmount}HP`;
+    anemoneArtwork.hidden = false;
+anemoneMessage.hidden = false;
+
+// Restart the green text animation.
+anemoneMessage.style.animation = 'none';
+void anemoneMessage.offsetWidth;
+anemoneMessage.style.animation = '';
+    heal(50);
+    play(niceMusic,false);
+    updateReturnButton();updateLantern();
+    anemoneTimer = setTimeout(
+    () => stopAnemoneRefuge(true),
+    refugeDuration
+);
+  });
   const merchantStyles=document.createElement('style'); merchantStyles.textContent=`
-
-
 .cr-shop-card.cr-sold-out {
-    background: #000 !important;
-    border-color: #333 !important;
+    position: relative;
+    background: #050505;
+    border: 2px solid #292929;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 260px;
+    min-height: 125px;
+    pointer-events: none;
 }
 
 .cr-sold-out-text {
-    color: #ff2525;
-    font-size: clamp(22px, 3vw, 34px);
+    color: #ff2929;
+    font-size: 25px;
     font-weight: 900;
-    text-transform: uppercase;
-    text-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
-    transform: rotate(-5deg);
-    animation: cr-sold-out-appear 0.6s ease-out both;
+    transform: rotate(-12deg);
+    text-shadow: 0 0 9px rgba(255, 0, 0, 0.5);
 }
 
-@keyframes cr-sold-out-appear {
-    from {
+
+/* Return to Anemone restoration animation */
+.cr-anemone-restore-animation {
+    position: absolute;
+
+    width: 65px;
+    height: 65px;
+
+    object-fit: contain;
+
+    transform: translateX(-50%);
+
+    pointer-events: none;
+
+    z-index: 300;
+
+    animation: cr-anemone-restored 1.5s ease-out forwards;
+}
+
+@keyframes cr-anemone-restored {
+    0% {
         opacity: 0;
-        transform: rotate(-5deg) scale(0.6);
+        transform: translate(-50%, 15px) scale(0.65);
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    75% {
+        opacity: 0.9;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -95px) scale(0.4);
+    }
+}
+
+
+.cr-anemone-art.cr-anemone-leaving {
+    animation: cr-anemone-depart 1.2s ease-in forwards !important;
+}
+
+@keyframes cr-anemone-depart {
+    from {
+        opacity: 1;
     }
 
     to {
-        opacity: 1;
-        transform: rotate(-5deg) scale(1);
+        opacity: 0;
     }
 }
 
+@keyframes cr-anemone-message-animation {
+    0% {
+        opacity: 0;
+    }
 
-  
+    17% {
+        opacity: 1;
+    }
+
+    75% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
   /* Special death screen for running out of HP */
 #clown-run-screen.cr-health-death #cr-death {
     background: #000;
@@ -378,6 +694,40 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
     .cr-inventory-card button{width:100%;margin-top:auto}
     .cr-inventory-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
     .cr-inventory-grid button{min-height:55px}.cr-family-hint{position:absolute;bottom:18px;left:12px;z-index:78;background:#211b2bdf;color:#ffe4a2;padding:10px;border:1px solid #9a7e4d;border-radius:10px;max-width:250px}
+    #clown-run-screen .cr-anemone-feedback{color:#aaffad!important;text-shadow:0 0 12px #4cf26d!important}
+    .cr-return-anemone{position:absolute;left:12px;bottom:12px;z-index:80;background:#17465edc;color:#d7f5ff;border:1px solid #5aacc8;border-radius:9px;padding:10px 13px;font-weight:800;cursor:pointer;box-shadow:0 0 12px #2679a544}
+    .cr-return-anemone[hidden],.cr-anemone-art[hidden],.cr-anemone-message[hidden]{display:none!important}
+    /* Keep Family Tree above the button, with space between both controls. */
+    #clown-run-screen:has(.cr-return-anemone:not([hidden])) .cr-family-hint{bottom:65px}
+    .cr-anemone-art {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 50%;
+
+    object-fit: fill;
+    object-position: center bottom;
+
+    z-index: 11;
+    pointer-events: none;
+
+    opacity: 0;
+    animation: cr-anemone-message-animation 3.5s ease both;
+}
+    @keyframes cr-anemone-arrive{to{opacity:1}}
+    .cr-anemone-message{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:95;pointer-events:none;text-align:center;color:#8dff91;text-shadow:0 2px 9px #003f17,0 0 15px #001d0c;display:flex;flex-direction:column;gap:7px;animation:cr-anemone-arrive .6s ease both}
+    .cr-anemone-message strong{font-size:clamp(25px,5vw,52px);font-weight:900}
+    .cr-anemone-message span{font-size:clamp(17px,3vw,27px)}
+    .cr-anemone-message small{font-size:clamp(15px,2vw,20px)}
+    #clown-run-screen.cr-anemone-refuge .cr-enemy{visibility:hidden!important}
+    #clown-run-screen.cr-anemone-refuge #cr-world{filter:brightness(1.65) saturate(1.2)!important}
+    #clown-run-screen.cr-anemone-refuge #cr-flashlight{display:none!important}
+    #clown-run-screen.cr-anemone-refuge .cr-lantern-light{display:none!important}
+    #clown-run-screen.cr-anemone-refuge .cr-clue{filter:brightness(1.35)!important}
+    #clown-run-screen.cr-anemone-refuge #cr-trigger-shadow{visibility:hidden!important}
+    #clown-run-screen.cr-anemone-refuge.cr-monochrome #cr-world{filter:brightness(1.65) saturate(1.2)!important}
     .cr-clue.cr-clue-glow{box-shadow:0 0 12px 8px #f8df5b66,0 0 28px 15px #f8df5b33!important}
     /* Cursor glow only over the reef during dark fifth days. */
     .cr-lantern-light{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;transition:opacity .15s;background:radial-gradient(circle 150px at var(--cr-lantern-x,50%) var(--cr-lantern-y,50%),rgba(255,236,163,.28) 0%,rgba(255,221,126,.12) 40%,transparent 100%);mix-blend-mode:screen}
@@ -461,16 +811,46 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
       ui.distance.textContent=`${Math.ceil(state.distance)} m away`;
     }
   }
-  function itemArtwork(item){const img=document.createElement('img');img.className='cr-shop-art';img.src=`horrormusic/items/${item.id}.png`;img.alt=`${item.name} artwork`;img.onerror=()=>{img.removeAttribute('src');img.alt='Item image coming soon';};return img;}
-  function itemDescription(item){
-    const description=document.createElement('div');description.className='cr-shop-description';
-    const chunks=item.desc.split('{{coin}}');
-    chunks.forEach((chunk,index)=>{
-      if(index){const icon=document.createElement('img');icon.src='horrormusic/coin.png';icon.className='cr-inline-coin';icon.alt='coin';description.append(icon);}
-      description.append(document.createTextNode(chunk));
-    });
-    return description;
-  }
+  function itemDescription(item) {
+    const desc = document.createElement('p');
+    desc.className = 'cr-shop-desc';
+    desc.textContent = item.desc || '';
+    return desc;
+}
+  function itemArtwork(item) {
+    const img = document.createElement('img');
+
+    img.className = 'cr-shop-art';
+    img.alt = `${item.name} artwork`;
+
+    const extensions = ['png', 'jpg', 'jpeg'];
+    const basePath = `horrormusic/items/${item.id}`;
+
+    let index = 0;
+
+    img.onerror = () => {
+        console.warn('Image not found:', img.src);
+
+        index++;
+
+        if (index < extensions.length) {
+            img.src = `${basePath}.${extensions[index]}`;
+        } else {
+            console.error('No image found for item:', item.id);
+            img.onerror = null;
+            img.removeAttribute('src');
+            img.alt = 'Item image coming soon';
+        }
+    };
+
+    img.onload = () => {
+        console.log('Item image loaded:', img.src);
+    };
+
+    img.src = `${basePath}.${extensions[0]}`;
+
+    return img;
+}
   async function animatePurchasedItem(card,art){
     // The real card fades; a separate copy of the image stays opaque and flies away.
     const from=art.getBoundingClientRect();
@@ -511,7 +891,7 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
     lanternLight.style.setProperty('--cr-lantern-y',`${(event.clientY-rect.top)/rect.height*100}%`);
   });
   function updateLantern(){
-    ui.screen.classList.toggle('cr-lantern-on',state.active&&state.dark&&hasItem('lantern')&&ui.inspect.hidden&&inventoryModal.hidden);
+    ui.screen.classList.toggle('cr-lantern-on',!anemoneActive()&&state.active&&state.dark&&hasItem('lantern')&&ui.inspect.hidden&&inventoryModal.hidden);
   }
   // Silhouette clicks are counted only while it is genuinely visible.
   triggerShadow.addEventListener('pointerdown',event=>{
@@ -530,6 +910,25 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
   });
   function applyItem(item){
     switch(item.id){
+
+case 'anemonebud':
+    restoreAnemone();
+    break;
+
+case 'anemoneplankton':
+    if (Math.random() < 0.5) {
+        restoreAnemone();
+    }
+    break;
+
+case 'anemoneenjoyer':
+    state.anemoneExtraDuration += 3000;
+    break;
+
+case 'anemonesupport':
+    state.anemoneHealAmount = 1000;
+    break;
+
       // Gloves, Basket of Gloves and Black Beanie work while held,
       // including at the start of every subsequent day.
       case 'bandaid':heal(300);break;
@@ -556,6 +955,7 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
     refreshItemEffects();
   }
   function refreshItemEffects(){
+    updateReturnButton();
     // Cursed Gloves' maximum-HP penalty lasts only while equipped.
     const penalty=hasItem('cursed')?2000:0;
     if(state.maxHpPenalty!==penalty){
@@ -624,7 +1024,18 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
       const card=document.createElement('div');card.className='cr-shop-card cr-inventory-card';
       const name=document.createElement('strong');name.textContent=item.name;
       const discard=document.createElement('button');discard.type='button';discard.textContent='Discard Item';
+      // Items cannot be discarded during active gameplay.
+const canDiscard = !state.active;
+
+discard.disabled = !canDiscard;
+
+if (!canDiscard) {
+    discard.textContent = 'Cannot Discard During Day';
+    discard.style.opacity = '0.45';
+    discard.style.cursor = 'not-allowed';
+}
       discard.onclick=()=>{
+    if (state.active) return;
         const refund=hasItem('pricetag')?Math.max(0,item.cost-1):0;
         state.inventory=state.inventory.filter(x=>x!==id);
         if(refund)changeCoins(refund);
@@ -652,34 +1063,37 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
     if(state.active && !state.inventoryPaused){state.inventoryPaused=true;cancelAnimationFrame(state.raf);}
     renderInventory();inventoryModal.hidden=false;
   });
+
+
+
   function renderShop(){
     merchant.replaceChildren();const panel=document.createElement('div');panel.className='cr-shop-panel';
     const heading=document.createElement('h2');heading.textContent='THE MERCHANT';
     const wallet=document.createElement('p');wallet.textContent=`You have ${state.coins} Clown Coins · Inventory ${state.inventory.length}/${inventoryCapacity()}`;
     const grid=document.createElement('div');grid.className='cr-shop-grid';
-    for (const item of state.shopItems) {
-    const card = document.createElement('div');
-    card.className = 'cr-shop-card';
+    for(const item of state.shopItems){
+      const card=document.createElement('div');card.className='cr-shop-card';
+      if(item.sold){
+  card.classList.add('cr-sold-out');
 
-    if (item.sold) {
-        card.classList.add('cr-sold-out');
+  const soldText=document.createElement('span');
+  soldText.className='cr-sold-out-text';
+  soldText.textContent='Sold Out!';
 
-        const soldText = document.createElement('strong');
-        soldText.className = 'cr-sold-out-text';
-        soldText.textContent = 'Sold Out!';
-
-        card.append(soldText);
-        grid.append(card);
-        continue;
-    }
+  card.append(soldText);
+  grid.append(card);
+  continue;
+}
       const name=document.createElement('strong');name.textContent=item.name;
-      const desc=itemDescription(item);
+      const desc = document.createElement('p');
+desc.className = 'cr-shop-desc';
+desc.textContent = item.desc || '';
       const cost=document.createElement('div');cost.className='cr-shop-cost';cost.textContent=`🪙 ${itemPrice(item)} Clown Coins`;
       const buy=document.createElement('button');buy.textContent='Buy';
       buy.disabled=state.coins<itemPrice(item)||((!item.immediate||item.id==='barrel')&&state.inventory.length>=inventoryCapacity())||(item.id==='slot'&&state.extraSlotsBought>=2);
       const art=itemArtwork(item);
       buy.onclick=async()=>{
-        if(shopPurchaseAnimating||!state.shopOpen||state.coins<itemPrice(item)||((!item.immediate||item.id==='barrel')&&state.inventory.length>=inventoryCapacity())||(item.id==='slot'&&state.extraSlotsBought>=2))return;
+        if(item.sold||shopPurchaseAnimating||!state.shopOpen||state.coins<itemPrice(item)||((!item.immediate||item.id==='barrel')&&state.inventory.length>=inventoryCapacity())||(item.id==='slot'&&state.extraSlotsBought>=2))return;
         shopPurchaseAnimating=true;
         buy.disabled=true;
         const price=itemPrice(item);
@@ -687,12 +1101,13 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
         playCoinSpend();
         if(!item.immediate){state.inventory.push(item.id);state.owned.add(item.id);}
         applyItem(item);
-        item.sold = true;
+        item.sold=true;
         try{await animatePurchasedItem(card,art);}
         finally{shopPurchaseAnimating=false;if(state.shopOpen)renderShop();}
       };
       card.append(name,art,desc,cost,buy);grid.append(card);
     }
+    if(!state.shopItems.length){const p=document.createElement('p');p.textContent='Sold out!';grid.append(p);}
     const leave=document.createElement('button');leave.className='cr-shop-close';leave.textContent='Leave Merchant / Next Day';leave.onclick=()=>{
       if(shopPurchaseAnimating||merchant.classList.contains('cr-shop-exit'))return;
       leave.disabled=true;
@@ -704,7 +1119,7 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
         ui.screen.classList.remove('cr-shop-hud');
         state.shopOpen=false;
         state.day++;
-        startDay();
+        startDay();2
       },290);
     };
     panel.append(heading,wallet,grid,leave);merchant.append(panel);
@@ -716,7 +1131,35 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
     ui.screen.classList.add('cr-shop-hud');
     playCoinSpend();
     fadeEndOfDayMusic(0.035,900);
-    const eligible=ITEMS.filter(x=>!state.owned.has(x.id) && (x.id!=='slot'||state.extraSlotsBought<2) && (x.id!=='barrel'||ITEMS.some(y=>!y.immediate&&!state.owned.has(y.id))));
+    const eligible = ITEMS.filter(item => {
+
+    
+
+    if (item.id === 'slot' && state.extraSlotsBought >= 2)
+        return false;
+
+    if (
+        item.id === 'barrel' &&
+        !ITEMS.some(other =>
+            !other.immediate &&
+            !state.owned.has(other.id)
+        )
+    ) return false;
+
+    // Anemone Bud only appears when restoration is needed.
+    if (
+        item.id === 'anemonebud' &&
+        state.anemoneReturnsRemaining > 0
+    ) return false;
+
+    // Mccul-lockdown only appears when Return to Anemone exists.
+    if (
+        item.id === 'mccullockdown' &&
+        state.anemoneReturnsRemaining < 1
+    ) return false;
+
+    return true;
+});
     for(let i=eligible.length-1;i>0;i--){const j=randomInt(0,i);[eligible[i],eligible[j]]=[eligible[j],eligible[i]];}
     state.shopItems=eligible.slice(0,3);renderShop();
     merchant.classList.remove('cr-shop-enter','cr-shop-exit');
@@ -743,6 +1186,7 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
   function stopAudio() {
     ui.screen.style.setProperty('--cr-danger', '0');
     ui.music.pause(); ui.music.currentTime=0;
+    niceMusic.pause();niceMusic.currentTime=0;
     stopEndOfDayMusic();
     Object.values(sfx).forEach(a => { a.pause(); a.currentTime=0; });
   }
@@ -751,6 +1195,7 @@ $('cr-death-heading').insertAdjacentElement('afterend', deathReason);
   }
   function setOverlay(which) {
     if(which) hideFamilyHint();
+    if(typeof updateReturnButton==='function')setTimeout(updateReturnButton,0);
     ui.intro.hidden = which !== 'intro';
     ui.overlay.hidden = !which;
     ui.countdown.hidden = which !== 'countdown';
@@ -832,6 +1277,80 @@ async function fadeFromBlack() {
     return [...groups].filter(([,imgs]) => imgs.length).map(([name,imgs])=>({name,imgs}));
   }
   const available = allSpecies();
+  function pickWeightedSpecies() {
+
+    const clarkiiGroup = [
+        'clarkii',
+        'chrysargyrus',
+        'japonicus',
+        'milii',
+        'snyderi'
+    ];
+
+    const lockdownGroup = [
+        'mccullochi',
+        'latezonatus'
+    ];
+
+    const clarkiiHeat = hasItem('clarkiiheat');
+    const lockdown = hasItem('mccullockdown');
+
+    // Probability weights.
+    const clarkiiCount = available.filter(species =>
+    clarkiiGroup.some(x =>
+        species.name.toLowerCase().includes(x)
+    )
+).length;
+
+const lockdownCount = available.filter(species =>
+    lockdownGroup.some(x =>
+        species.name.toLowerCase().includes(x)
+    )
+).length;
+
+const remainingCount = available.length -
+    (lockdown ? lockdownCount : clarkiiHeat ? clarkiiCount : 0);
+
+const weights = available.map(species => {
+
+    const name = species.name.toLowerCase();
+
+    if (lockdown) {
+
+        const isSpecial = lockdownGroup.some(x => name.includes(x));
+
+        return isSpecial
+            ? 0.07
+            : (1 - 0.07 * lockdownCount) / remainingCount;
+    }
+
+    if (clarkiiHeat) {
+
+        const isSpecial = clarkiiGroup.some(x => name.includes(x));
+
+        return isSpecial
+            ? 0.01
+            : (1 - 0.01 * clarkiiCount) / remainingCount;
+    }
+
+    return 1 / available.length;
+});
+
+    const total = weights.reduce((sum, weight) => sum + weight, 0);
+
+    let roll = Math.random() * total;
+
+    for (let i = 0; i < available.length; i++) {
+
+        roll -= weights[i];
+
+        if (roll < 0) {
+            return available[i];
+        }
+    }
+
+    return available[available.length - 1];
+}
   available.sort((a,b)=>a.name.localeCompare(b.name));
   available.forEach(({name}) => {
     const option=document.createElement('option'); option.value=name; option.textContent=name; ui.guess.appendChild(option);
@@ -946,11 +1465,7 @@ function configureMusic() {
     ui.inspectImage.style.backgroundPosition=clue.fullView?'center':`${clue.cropX}% ${clue.cropY}%`;
     ui.inspectImage.style.backgroundSize=clue.fullView?'contain':'';
     ui.inspectImage.style.backgroundRepeat=clue.fullView?'no-repeat':'';
-    ui.inspectImage.style.scale = '';
-
-ui.inspectImage.style.backgroundPosition = clue.fullView
-    ? 'center'
-    : `${clue.flipped ? 100 - clue.cropX : clue.cropX}% ${clue.cropY}%`;
+    ui.inspectImage.style.scale=clue.flipped?'-1 1':'';
     updateLantern();
     ui.flashlight.style.setProperty('--fx','50%'); ui.flashlight.style.setProperty('--fy','50%');
   }
@@ -986,6 +1501,12 @@ ui.inspectImage.style.backgroundPosition = clue.fullView
 }
   function tick(now) {
     if (!state.active) return;
+    if(anemoneActive()){
+      // Freeze movement, footsteps, jumpscares, danger and acceleration for 7 seconds.
+      state.lastTick=now;
+      state.raf=requestAnimationFrame(tick);
+      return;
+    }
     if (!state.lastTick) state.lastTick=now;
     const deltaSeconds = Math.min((now-state.lastTick)/1000, 0.1);
     // Decoy distraction temporarily slows the triggerfish, then leaves it slower
@@ -1027,16 +1548,38 @@ ui.inspectImage.style.backgroundPosition = clue.fullView
     // Step.mp3 first plays after moving 1m from today's starting distance,
     // then after each additional 3m (works with equipment bonuses above 30m).
     // Play at most one footstep in a frame, even if the fish moves several metres.
-    const metresTravelled=Math.max(0,state.startDistance-state.distance);
-    const stepsDue=metresTravelled>=1 ? 1+Math.floor((metresTravelled-1)/3) : 0;
+    const metresTravelled = Math.max(
+      0,
+      state.startDistance - state.distance
+    );
+
+    const stepsDue = metresTravelled >= 1
+      ? 1 + Math.floor((metresTravelled - 1) / 3)
+      : 0;
+
     if (stepsDue > state.stepIndex) {
-    // Randomly choose between the two footstep sounds
-    const randomStep = Math.random() < 0.5 ? sfx.step1 : sfx.step2;
+        state.stepIndex = stepsDue;
 
-    play(randomStep);
+        const sound = Math.random() < 0.5 
+          ? sfx.step1
+          : sfx.step2;
 
-    state.stepIndex = stepsDue;
-}
+          sound.pause();
+          sound.currentTime = 0;
+          sound.volume = 1;
+
+          console.log(
+              'Playing footsteps:',
+              sound.src,
+              'Distance',
+              state.distance
+          );
+
+          sound.play().catch(error => {
+              console.error('Footstep playback failed:', error);
+              
+          })
+    }
 const desiredVolume = Math.min(
     1,
     (state.day % 7 !== 0 && !state.dark ? .38 : .30) +
@@ -1070,9 +1613,11 @@ ui.music.volume = desiredVolume * fadeIn;
     state.raf=requestAnimationFrame(tick);
   }
   async function startDay() {
+    stopAnemoneRefuge(false);returnButton.hidden=true;
     ui.overlay.style.background='';
     document.getElementById('cr-world')
-    .classList.remove('cr-first-day-fade');
+  .classList.remove('cr-first-day-fade');
+    ui.curtain.classList.remove('cr-black');
     if (!state.running || !available.length) return;
     hideFamilyHint();
     fadeEndOfDayMusic(0, 900);
@@ -1085,7 +1630,26 @@ ui.world.classList.remove('cr-reef-visible');
     state.vestUsedToday=false;
     state.decoyCheckedDay=false;state.decoyDistractedUntil=0;state.decoySlowForDay=false;
     if(hasItem('csgloves') && state.coins>0){changeCoins(-1);state.csGlovesDistance++;}
-    if(hasItem('vitamins'))heal(50);
+    if(hasItem('vitamins'))heal(state.anemoneHealAmount);
+    // V Oil: 92% heal, 8% restore.
+if (hasItem('voil')) {
+
+    if (Math.random() < 0.08) {
+
+        // If restoration is unnecessary, heal instead.
+        if (!restoreAnemone()) {
+            heal(55);
+        }
+
+    } else {
+        heal(55);
+    }
+}
+
+// Phone a Fren: 13% daily restoration chance.
+if (hasItem('phonefren') && Math.random() < 0.13) {
+    restoreAnemone();
+}
     state.dark=state.day%5===0;
     ui.screen.style.setProperty('--cr-danger', '0');
     ui.screen.classList.toggle(
@@ -1107,7 +1671,8 @@ ui.world.style.backgroundImage =
     ui.notice.hidden=false;
     ui.inspect.hidden=true; ui.guessPanel.hidden=false; ui.feedback.hidden=true;
     ui.submit.disabled=false;
-    const selected=pick(available); state.species=selected.name;
+    const selected = pickWeightedSpecies();
+state.species = selected.name;
     createClues(selected.imgs);
     ui.guess.value=available[0].name;
     refreshItemEffects();
@@ -1129,7 +1694,7 @@ requestAnimationFrame(() => {
 });
 
 state.active = true;
-updateLantern();
+updateReturnButton();updateLantern();
 // Reveal Family Tree only once the reef is fully in view.
 familyHintTimer=setTimeout(()=>{
   familyHintReady=true;
@@ -1152,6 +1717,7 @@ state.raf = requestAnimationFrame(tick);
     return Math.round(base*multiplier);
   }
   async function revealDay(guess, forcedDamage=null) {
+    stopAnemoneRefuge(false);returnButton.hidden=true;
     if (!state.active) return;
 
     state.active = false;
@@ -1239,16 +1805,18 @@ if (!state.running) return;
     const guess=ui.guess.value;
 
     if (!similarEnough(guess,state.species)) {
-        const lockout=hasItem('shield')?0:6000;
+        const safe=anemoneActive();
+        const lockout=safe?2000:(hasItem('shield')?0:6000);
         state.guessLockUntil=Date.now()+lockout;
         if(lockout)ui.submit.disabled=true;
-        if(!hasItem('shield'))play(sfx.awful);
+        if(!safe&&!hasItem('shield'))play(sfx.awful);
         if(hasItem('kazoo')&&!state.kazooUsed){
           state.kazooUsed=true;state.distanceBonus+=20;state.distance+=20;
           ui.distance.textContent=`${Math.ceil(state.distance)} m away`;
         }
-        if(!hasItem('ring'))state.speedBoostUntil = performance.now() + 3000;
-        feedback('AWFUL GUESS');
+        if(!safe&&!hasItem('ring'))state.speedBoostUntil = performance.now() + 3000;
+        feedback(safe?'Try Again':'AWFUL GUESS');
+        ui.feedback.classList.toggle('cr-anemone-feedback',safe);
         if(lockout)setTimeout(()=>{ui.submit.disabled=false;},lockout);
         return;
     }
@@ -1325,6 +1893,7 @@ record.clues.forEach(clue => {
     ui.jumpscare.classList.remove('cr-blackout');
   }
   function endRun(reason) {
+    stopAnemoneRefuge(false);returnButton.hidden=true;
     hideFamilyHint();
     triggerShadow.classList.remove('cr-shadow-visible');
 clearTimeout(shadowHideTimer);
@@ -1350,20 +1919,54 @@ if (diedFromHealth) {
     ui.guessPanel.hidden = true;
 
     inventoryModal.hidden = true;
-    ui.inspect.hidden = true;
+    merchant.hidden = true;
 }
-    if (reason==='caught') {
-      state.history.push({day:state.day,answer:state.species,guess:'No guess',clues:[...state.clues]});
-      setOverlay(null);
-      ui.jumpscare.hidden=false;
-      play(sfx.jump);
-    }
-    state.running=false;
-    setGameHudVisible(false);
-    ui.screen.classList.remove('cr-shop-hud');
-    inventoryModal.hidden=true;
-    stopEndOfDayMusic();
+    if (reason === 'caught') {
+    state.history.push({
+        day: state.day,
+        answer: state.species,
+        guess: 'No guess',
+        clues: [...state.clues]
+    });
+
+    setOverlay(null);
+    ui.jumpscare.hidden = false;
+
+    // Stop competing sounds BEFORE starting the jumpscare.
     ui.music.pause();
+    niceMusic.pause();
+    sfx.step1.pause();
+    sfx.step2.pause();
+
+    // Play the catch jumpscare.
+    console.log('TRIGGERFISH CAUGHT PLAYER — starting jumpscare');
+
+const catchSound = new Audio('horrormusic/triggerjumpscare.mp3');
+catchSound.volume = 1;
+
+catchSound.play()
+    .then(() => {
+        console.log('Catch jumpscare playback started');
+    })
+    .catch(error => {
+        console.error('Catch jumpscare playback failed:', error);
+    });
+
+    // Resume the amplifier if you added one previously.
+    if (typeof jumpAudioContext !== 'undefined') {
+        jumpAudioContext.resume().catch(console.warn);
+    }
+
+    sfx.jump.play().catch(error => {
+        console.error('Triggerfish catch jumpscare failed:', error);
+    });
+}
+    state.running=false;
+setGameHudVisible(false);
+ui.screen.classList.remove('cr-shop-hud');
+inventoryModal.hidden=true;
+stopEndOfDayMusic();
+ui.music.pause();
     $('cr-death-heading').textContent=reason==='caught'?'YOU WERE CAUGHT':'YOU DIED';
     $('cr-days-survived').textContent=String(state.history.filter(x=>x.guess!=='No guess').length-(reason==='health'?1:0));
     
@@ -1439,27 +2042,30 @@ fadeMusicbox(0.28, 2000);
         }, 3000);
       }, 850);
     } else {
-    // HP death: fade to black, then reveal the death screen.
-    ui.curtain.classList.add('cr-black');
+    // Health death: stop the game and fade into darkness.
+    fadeToBlack().then(async () => {
+        if (state.running) return;
 
-    setTimeout(() => {
-        // Show the death screen behind the black curtain.
         setOverlay('death');
 
+        // Restart the text animations.
         ui.death.classList.remove('cr-death-fade');
         void ui.death.offsetWidth;
-        ui.death.classList.add('cr-death-fade');
 
-        // Reveal the death screen.
-        ui.curtain.classList.remove('cr-black');
-    }, 850);
+        await fadeFromBlack();
+    });
 }
   }
   
   function startRun() {
+    if (typeof jumpAudioContext !== 'undefined') {
+    jumpAudioContext.resume().catch(console.warn);
+}
+    jumpAudioContext.resume().catch(console.warn);
+    stopAnemoneRefuge(false);state.anemoneReturnsRemaining=1;state.anemoneExtraDuration = 0;
+state.anemoneHealAmount = 50;returnButton.hidden=true;
     ui.screen.classList.remove('cr-health-death');
 deathReason.hidden = true;
-ui.curtain.classList.remove('cr-black');
     hideFamilyHint();
     document.body.classList.add('christmas-surviveal');
     fadeMusicbox(0, 1200);
@@ -1486,6 +2092,7 @@ playSurvivealIntro(generation).then(completed => {
 });
   }
   function exitRun() {
+    stopAnemoneRefuge(false);returnButton.hidden=true;
     hideFamilyHint();
     document.body.classList.remove('christmas-surviveal');
     stopIntroMusic();
@@ -1536,9 +2143,9 @@ introMusic.volume = 0;
     const r = ui.inspectImage.getBoundingClientRect();
 
     let x = (event.clientX - r.left) / r.width * 100;
-    const y = (event.clientY - r.top) / r.height * 100;
+    let y = (event.clientY - r.top) / r.height * 100;
 
-    // Compensate for horizontally flipped inspection images.
+    // Compensate for the horizontally flipped inspection image.
     if (ui.inspectImage.style.scale === '-1 1') {
         x = 100 - x;
     }

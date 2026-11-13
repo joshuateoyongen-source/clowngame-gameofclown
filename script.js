@@ -8094,6 +8094,10 @@ requestAnimationFrame(() => {
 
 
 function checkAnswer() {
+    if (!currentFish) {
+    console.warn('checkAnswer called without an active fish');
+    return;
+}
     // Ignore repeated guesses after answering
     if (answered) return;
 
@@ -8300,9 +8304,15 @@ window.clownRunNormalMusic = {
         const started = performance.now();
         function fade(now) {
             if (!clownRunMusicMuted || generation !== clownRunFadeGeneration) return;
-            const t = Math.min(1, (now - started) / 850);
-            audio1.volume = Math.max(0, start1 * (1 - t));
-            audio2.volume = Math.max(0, start2 * (1 - t));
+            const t = Math.max(0, Math.min(1, (now - started) / 850));
+
+const safeVolume = value =>
+    Number.isFinite(value)
+        ? Math.max(0, Math.min(1, value))
+        : 0;
+
+audio1.volume = safeVolume(start1 * (1 - t));
+audio2.volume = safeVolume(start2 * (1 - t));
             if (t < 1) clownRunMusicFade = requestAnimationFrame(fade);
             else {
                 audio1.pause(); audio2.pause();
